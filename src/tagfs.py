@@ -121,6 +121,9 @@ class ItemAccess(object):
         return self.__tags
     
     tags = property(__getTags)
+    
+    def getItemDirectory(self, item):
+        return self.dataDirectory + '/' + item
         
 class MyStat(fuse.Stat):
     
@@ -136,11 +139,53 @@ class MyStat(fuse.Stat):
         self.st_mtime = 0
         self.st_ctime = 0
 
+class ItemNode(object):
+    
+    def __init__(self, parentNode, itemName, itemAccess):
+        self.parentNode = parentNode
+        self.name = itemName
+        self.itemAccess = itemAccess
+    
+    def __getSubNodes(self):
+        # TODO
+        pass
+    
+    subNodes = property(__getSubNodes)
+
+    def getSubNode(self, pathElement):
+        """Returns always None as item nodes don't have sub nodes.
+        """
+        return None
+    
+    def __getAttr(self):
+        # TODO modify to match softlink
+        st = MyStat()
+        st.st_mode = stat.S_IFLNK | 0444
+        st.st_nlink = 2
+            
+        return st
+    
+    attr = property(__getAttr)
+    
+    def __getDirentry(self):
+        e = fuse.Direntry(self.name)
+        e.type = stat.S_IFLNK
+        
+        return e
+    
+    direntry = property(__getDirentry)
+    
+    def __getLink(self):
+        return self.itemAccess.getItemDirectory(self.name)
+    
+    link = property(__getLink)
+    
 class TagNode(object):
     
-    def __init__(self, parentNode, tagName):
+    def __init__(self, parentNode, tagName, itemAccess):
         self.parentNode = parentNode
         self.name = tagName
+        self.itemAccess = itemAccess
         
     def __getSubNodes(self):
         # TODO
@@ -154,7 +199,7 @@ class TagNode(object):
     
     def __getAttr(self):
         st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0755
+        st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
             
         return st
@@ -177,11 +222,22 @@ class RootNode(object):
     def __getSubNodesDict(self):
         subNodes = {}
         
+        for item in self.itemAccess.items:
+            if(item in subNodes):
+                logging.debug('Item ' + item + ' is shadowed by ' + subNodes[item])
+                
+                continue
+            
+            subNodes[item] = ItemNode(self, item, self.itemAccess)
+        
         for tag in self.itemAccess.tags:
-            subNodes[tag] = TagNode(self, tag)
-        
-        # TODO add item sub nodes
-        
+            if(tag in subNodes):
+                logging.debug('Tag ' + tag + ' is shadowed by ' + subNodes[tag])
+                
+                continue
+            
+            subNodes[tag] = TagNode(self, tag, self.itemAccess)
+            
         return subNodes
         
     def __getSubNodes(self):
@@ -201,7 +257,7 @@ class RootNode(object):
     
     def __getAttr(self):
         st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0755
+        st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
             
         return st
@@ -210,41 +266,6 @@ class RootNode(object):
     
     def __getDirentry(self):
         return None
-    
-    direntry = property(__getDirentry)
-    
-class ItemNode(object):
-    
-    def __init__(self, parentNode, itemName):
-        self.parentNode = parentNode
-        self.name = itemName
-    
-    def __getSubNodes(self):
-        # TODO
-        pass
-    
-    subNodes = property(__getSubNodes)
-
-    def getSubNode(self, pathElement):
-        """Returns always None as item nodes don't have sub nodes.
-        """
-        return None
-    
-    def __getAttr(self):
-        # TODO modify to match softlink
-        st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0755
-        st.st_nlink = 2
-            
-        return st
-    
-    attr = property(__getAttr)
-    
-    def __getDirentry(self):
-        e = fuse.Direntry(self.name)
-        e.type = stat.S_IFLNK
-        
-        return e
     
     direntry = property(__getDirentry)
     
@@ -292,6 +313,16 @@ class TagFS(fuse.Fuse):
         
         for subNode in node.subNodes:
             yield subNode.direntry
+            
+    def readlink(self, path):
+        node = self.__getNode(path)
+        
+        if(node == None):
+            logging.debug('Unknown node for path ' + path)
+            
+            return -errno.ENOENT
+        
+        return node.link
 
     def open(self, path, flags):
         return -errno.ENOENT
@@ -308,7 +339,7 @@ def main():
     server = TagFS(version = "%prog " + fuse.__version__,
                      usage = usage,
                      dash_s_do = 'setsingle')
-    server.itemAccess = ItemAccess('/home/marook/work/environment/events/', '.tag')
+    server.itemAccess = ItemAccess('/home/marook/work/environment/events', '.tag')
 
     server.parse(errex = 1)
     server.main()
