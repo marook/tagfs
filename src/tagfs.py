@@ -38,9 +38,6 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-hello_path = '/hello'
-hello_str = 'Hello World!\n'
-
 def setUpLogging():
     def exceptionCallback(eType, eValue, eTraceBack):
         import cgitb
@@ -124,6 +121,24 @@ class ItemAccess(object):
     
     def getItemDirectory(self, item):
         return self.dataDirectory + '/' + item
+    
+    def filter(self, tagFilters):
+        tagFiltersSet = set(tagFilters)
+        resultItems = []
+        resultTags = set()
+        
+        for itemName, itemTags in self.items.iteritems():
+            if(len(tagFiltersSet & itemTags) < len(tagFilters)):
+                continue
+            
+            resultItems.append(itemName)
+            
+            for itemTag in itemTags:
+                resultTags.add(itemTag)
+                
+        resultTags = resultTags - tagFiltersSet
+        
+        return (resultItems, resultTags)
         
 class MyStat(fuse.Stat):
     
@@ -139,7 +154,41 @@ class MyStat(fuse.Stat):
         self.st_mtime = 0
         self.st_ctime = 0
 
-class ItemNode(object):
+class Node(object):
+    
+    def _addSubNodes(self, subNodes, items, tags):
+        for item in items:
+            if(item in subNodes):
+                logging.debug('Item ' + item + ' is shadowed by ' + subNodes[item])
+                
+                continue
+            
+            subNodes[item] = ItemNode(self, item, self.itemAccess)
+        
+        for tag in tags:
+            if(tag in subNodes):
+                logging.debug('Tag ' + tag + ' is shadowed by ' + subNodes[tag])
+                
+                continue
+            
+            subNodes[tag] = TagNode(self, tag, self.itemAccess)
+
+    def __getSubNodes(self):
+        return [node for name, node in self._getSubNodesDict().iteritems()]
+    
+    subNodes = property(__getSubNodes)
+    
+    def getSubNode(self, pathElement):
+        subNodesDict = self._getSubNodesDict()
+        
+        if(not pathElement in subNodesDict):
+            logging.warning('Unknown path element requested ' + pathElement)
+            
+            return None
+        
+        return subNodesDict[pathElement]
+
+class ItemNode(Node):
     
     def __init__(self, parentNode, itemName, itemAccess):
         self.parentNode = parentNode
@@ -147,8 +196,10 @@ class ItemNode(object):
         self.itemAccess = itemAccess
     
     def __getSubNodes(self):
-        # TODO
-        pass
+        """Returns always [] because we don't have sub nodes.
+        """
+
+        return []
     
     subNodes = property(__getSubNodes)
 
@@ -180,22 +231,29 @@ class ItemNode(object):
     
     link = property(__getLink)
     
-class TagNode(object):
+class TagNode(Node):
     
     def __init__(self, parentNode, tagName, itemAccess):
         self.parentNode = parentNode
         self.name = tagName
         self.itemAccess = itemAccess
         
-    def __getSubNodes(self):
-        # TODO
-        return []
+    def __getFilterTags(self):
+        filterTags = [tag for tag in self.parentNode.filterTags]
+        filterTags.append(self.name)
+        
+        return filterTags
     
-    subNodes = property(__getSubNodes)
-
-    def getSubNode(self, pathElement):
-        # TODO
-        pass
+    filterTags = property(__getFilterTags)
+    
+    def _getSubNodesDict(self):
+        items, tags = self.itemAccess.filter(self.filterTags)
+        
+        subNodes = {}
+        
+        self._addSubNodes(subNodes, items, tags)
+        
+        return subNodes
     
     def __getAttr(self):
         st = MyStat()
@@ -214,47 +272,19 @@ class TagNode(object):
     
     direntry = property(__getDirentry)
     
-class RootNode(object):
+class RootNode(Node):
     
     def __init__(self, itemAccess):
         self.itemAccess = itemAccess
+        self.filterTags = []
         
-    def __getSubNodesDict(self):
+    def _getSubNodesDict(self):
         subNodes = {}
         
-        for item in self.itemAccess.items:
-            if(item in subNodes):
-                logging.debug('Item ' + item + ' is shadowed by ' + subNodes[item])
-                
-                continue
-            
-            subNodes[item] = ItemNode(self, item, self.itemAccess)
+        self._addSubNodes(subNodes, self.itemAccess.items, self.itemAccess.tags)
         
-        for tag in self.itemAccess.tags:
-            if(tag in subNodes):
-                logging.debug('Tag ' + tag + ' is shadowed by ' + subNodes[tag])
-                
-                continue
-            
-            subNodes[tag] = TagNode(self, tag, self.itemAccess)
-            
         return subNodes
         
-    def __getSubNodes(self):
-        return [node for name, node in self.__getSubNodesDict().iteritems()]
-    
-    subNodes = property(__getSubNodes)
-    
-    def getSubNode(self, pathElement):
-        subNodesDict = self.__getSubNodesDict()
-        
-        if(not pathElement in subNodesDict):
-            logging.warning('Unknown path element requested ' + pathElement)
-            
-            return None
-        
-        return subNodesDict[pathElement]
-    
     def __getAttr(self):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
@@ -299,8 +329,6 @@ class TagFS(fuse.Fuse):
         return node.attr
 
     def readdir(self, path, offset):
-        logging.debug('Fetching directory content for path ' + path)
-        
         yield fuse.Direntry('.')
         yield fuse.Direntry('..')
         
@@ -331,13 +359,10 @@ class TagFS(fuse.Fuse):
         return -errno.ENOENT
 
 def main():
-    usage = """TODO
-""" + fuse.Fuse.fusage
-
-    setUpLogging()
+    #setUpLogging()
     
     server = TagFS(version = "%prog " + fuse.__version__,
-                     usage = usage,
+                     usage = fuse.Fuse.fusage,
                      dash_s_do = 'setsingle')
     server.itemAccess = ItemAccess('/home/marook/work/environment/events', '.tag')
 
