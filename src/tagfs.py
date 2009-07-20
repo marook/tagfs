@@ -49,7 +49,9 @@ def setUpLogging():
         # sys.exit(1)
 
     # configure file logger
-    logging.basicConfig(level=logging.DEBUG, format = '%(asctime)s %(levelname)s %(message)s', filename = '/tmp/tagfs.log', filemode='a')
+    logging.basicConfig(level=logging.DEBUG, format = '%(asctime)s %(levelname)s %(message)s',
+                        filename = '/tmp/tagfs.log',
+                        filemode='a')
     
     # configure console logger
     consoleHandler = logging.StreamHandler(sys.stdout)
@@ -84,7 +86,12 @@ class ItemAccess(object):
                 if(not os.path.isdir(directory)):
                     continue
                 
-                tagFile = open(directory + '/' + self.tagFileName, 'r')
+                tagFileName = directory + '/' + self.tagFileName
+                
+                if(not os.path.exists(tagFileName)):
+                    continue
+                
+                tagFile = open(tagFileName, 'r')
                 try:
                     for rawTag in tagFile.readlines():
                         tag = rawTag.strip()
@@ -301,9 +308,34 @@ class RootNode(Node):
     
 class TagFS(fuse.Fuse):
     
+    def __init__(self, *args, **kw):
+        fuse.Fuse.__init__(self, *args, **kw)
+        
+        self.__itemAccess = None
+        
+        self.parser.add_option('-i',
+                               '--items-dir',
+                               dest = 'itemsDir',
+                               help = 'items directory',
+                               metavar = 'dir')
+        self.parser.add_option('-t',
+                               '--tag-file',
+                               dest = 'tagFile',
+                               help = 'tag file name',
+                               metavar = 'file',
+                               default = '.tag')
+        
+    def getItemAccess(self):
+        if(self.__itemAccess == None):
+            opts, args = self.cmdline
+            
+            self.__itemAccess = ItemAccess(opts.itemsDir, opts.tagFile)
+            
+        return self.__itemAccess
+    
     def __getNode(self, path):
         # TODO implement some caching
-        rootNode = RootNode(self.itemAccess)
+        rootNode = RootNode(self.getItemAccess())
         
         parentNode = rootNode
         # TODO implement escaping path splitting
@@ -359,14 +391,19 @@ class TagFS(fuse.Fuse):
         return -errno.ENOENT
 
 def main():
+    # TODO implement cmd line configurable logging
     #setUpLogging()
     
     server = TagFS(version = "%prog " + fuse.__version__,
-                     usage = fuse.Fuse.fusage,
-                     dash_s_do = 'setsingle')
-    server.itemAccess = ItemAccess('/home/marook/work/environment/events', '.tag')
+                   usage = fuse.Fuse.fusage,
+                   dash_s_do = 'setsingle')
 
     server.parse(errex = 1)
+    opts, args = server.cmdline
+    
+    if(opts.itemsDir == None):
+        server.parser.error('Missing items directory option')
+            
     server.main()
 
 if __name__ == '__main__':
