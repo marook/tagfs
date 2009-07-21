@@ -1,0 +1,145 @@
+The demo subdirectory contains the file structure for a little example. It shows
+what tagfs is doing and how you can use it.
+
+---------------------------------------------------------------------
+tagfs is used to organize your documents using tags. tagfs requires you to
+keep your files in a simple directory structure.
+
+In our example we are organizing some holiday pictues from india and south korea.
+So we create two item directories below the events directory:
+* 2008-03-29 - holiday south korea
+* 2008-12-25 - holiday india
+
+The names of the item directories can be anything you want but it's recommended
+to add date timestamps. These timestamps allow you to have a look at your
+documents in a chronological order and prevent you from specifying duplicate
+names. For tagfs the timestamp is irrelevant.
+
+Now that we have created the item directories below the event directory we can
+tag them. To do so we add .tag files within them. And to make it more exciting
+we add some images which represent our documents. Then we have a directory
+structure like this:
+
+events/
+|-- 2008-03-29 - holiday south korea
+|   |-- .tag
+|   `-- 00_IMG008.jpg
+`-- 2008-12-25 - holiday india
+    |-- .tag
+    `-- cimg1029.jpg
+
+In this example the directory structure below the item directories is flat. In
+the real world the content and directory structure below the item directories
+is not limited. Except that the tag file must be named .tag.
+
+As already mentioned the .tag files contain the tags. The .tag file for the
+south korea holiday looks like this:
+
+holiday
+airport
+korea
+
+As you can imagine we have applied three tags: holiday, airport and korea. The
+tags are newline separated and can contain spaces too. Empty lines are ignored.
+For the india holiday we use the following .tag file:
+
+holiday
+airport
+india
+
+Now that we have organized our documents and applied tags on them we can start
+to search for our data. To do so we first mount the tagfs. Open your bash, enter
+the demo directory and execute the following:
+
+$ tagfs.py -i events tags
+
+This will mount the tagfs below the tags directory. The event directory contains
+the item directories which will be parsed for tags. As a result you will get the
+following directory tree below the tags directory:
+
+tags/
+|-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|-- airport
+|   |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |-- holiday
+|   |   |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|   |   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   |-- india
+|   |   |   `-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   `-- korea
+|   |       `-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|   |-- india
+|   |   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   `-- holiday
+|   |       `-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   `-- korea
+|       |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|       `-- holiday
+|           `-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|-- holiday
+|   |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |-- airport
+|   |   |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|   |   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   |-- india
+|   |   |   `-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   `-- korea
+|   |       `-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|   |-- india
+|   |   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   `-- airport
+|   |       `-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   `-- korea
+|       |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|       `-- airport
+|           `-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+|-- india
+|   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |-- airport
+|   |   |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   |   `-- holiday
+|   |       `-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|   `-- holiday
+|       |-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+|       `-- airport
+|           `-- 2008-12-25 - holiday india -> /demo/events/2008-12-25 - holiday india
+`-- korea
+    |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+    |-- airport
+    |   |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+    |   `-- holiday
+    |       `-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+    `-- holiday
+        |-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+        `-- airport
+            `-- 2008-03-29 - holiday south korea -> /demo/events/2008-03-29 - holiday south korea
+
+OK... that's a lot! The idea behind the tagfs is a simple directory based filter
+system. If you want to see anything relevant for the tags india you type:
+
+$ ls -1 tags/india
+
+The output will be:
+
+2008-12-25 - holiday india
+airport
+holiday
+
+The output will show you all item directories as links which are tagged with
+india. Additionally you will see all tags which can be further combined with
+india and show you further results. The tag korea is not shown as there would
+be no results if you filter by india and korea.
+
+Filtering for multiple tags at once can be done like this:
+
+$ ls -1 tags/india/holiday
+
+You will get the output:
+
+2008-12-25 - holiday india
+airport
+
+I hope this explains the concept. Now it's your turn :-) Try tagfs yourself!
