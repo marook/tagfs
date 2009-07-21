@@ -1,0 +1,36 @@
+tagfs - tag file system
+
+1) Introduction
+2) Requirements
+3) Installation
+4) Usage
+5) Contact
+
+---------------------------------------------------------------------
+Introduction
+
+TODO
+
+---------------------------------------------------------------------
+Requirements
+
+* Linux kernel with fuse enabled
+* python-fuse installed
+
+---------------------------------------------------------------------
+Installation
+
+* Copy the tagfs.py file into your bin directory
+* Make sure that the tagfs.py file is executable
+
+---------------------------------------------------------------------
+Usage
+
+* Mount a tagged directory: tagfs.py -i /path/to/my/items/directory /path/to/my/mount/point
+* Unmount a tagged directory: fusermount -u /path/to/my/mount/point
+
+---------------------------------------------------------------------
+Contact
+
+* http://wiki.github.com/marook/tagfs
+* Markus Pielmeier <markus.pielmeier@gmx.de>
