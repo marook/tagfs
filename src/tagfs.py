@@ -329,7 +329,8 @@ class TagFS(fuse.Fuse):
         if(self.__itemAccess == None):
             opts, args = self.cmdline
             
-            self.__itemAccess = ItemAccess(opts.itemsDir, opts.tagFile)
+            self.__itemAccess = ItemAccess(os.path.abspath(opts.itemsDir),
+                                           opts.tagFile)
             
         return self.__itemAccess
     
