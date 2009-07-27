@@ -25,18 +25,12 @@
 # * tag: A tag is a text string which can be assigned to an item. Tags can
 # consist of any character except newlines.
 
-import sys
-import os
-import stat
-import errno
-import fuse
+
+#====================================================================
+# first set up exception handling and logging
+
 import logging
-
-if not hasattr(fuse, '__version__'):
-    raise RuntimeError, \
-        "your fuse-py doesn't know of fuse.__version__, probably it's too old."
-
-fuse.fuse_python_api = (0, 2)
+import sys
 
 def setUpLogging():
     def exceptionCallback(eType, eValue, eTraceBack):
@@ -63,6 +57,29 @@ def setUpLogging():
 
     # replace default exception handler
     sys.excepthook = exceptionCallback
+    
+    logging.debug('Logging and exception handling has been set up')
+
+if __name__ == '__main__':
+    # TODO implement cmd line configurable logging
+    #setUpLogging()
+    
+    pass
+
+#====================================================================
+# here the application begins
+
+import os
+import stat
+import errno
+import fuse
+import exceptions
+
+if not hasattr(fuse, '__version__'):
+    raise RuntimeError, \
+        "your fuse-py doesn't know of fuse.__version__, probably it's too old."
+
+fuse.fuse_python_api = (0, 2)
 
 class ItemAccess(object):
     
@@ -308,6 +325,11 @@ class RootNode(Node):
     
 class TagFS(fuse.Fuse):
     
+    def determineItemsDirectory(self):
+        opts, args = self.cmdline
+        
+        self.itemsDirectory = os.path.abspath(opts.itemsDir)
+    
     def __init__(self, *args, **kw):
         fuse.Fuse.__init__(self, *args, **kw)
         
@@ -327,14 +349,25 @@ class TagFS(fuse.Fuse):
         
     def getItemAccess(self):
         if(self.__itemAccess == None):
-            opts, args = self.cmdline
+            try:
+                opts, args = self.cmdline
+                
+                itemsDir = self.itemsDirectory
+                tagFile = opts.tagFile
             
-            self.__itemAccess = ItemAccess(os.path.abspath(opts.itemsDir),
-                                           opts.tagFile)
+                self.__itemAccess = ItemAccess(itemsDir, tagFile)
+            except exceptions.OSError, e:
+                logging.error('Can \'t create item access from items directory '
+                              + self.itemsDirectory + '. Reason: '
+                              + str(e.strerror))
+                
+                raise e
             
         return self.__itemAccess
     
     def __getNode(self, path):
+        logging.debug('Requesting node for path ' + path)
+        
         # TODO implement some caching
         rootNode = RootNode(self.getItemAccess())
         
@@ -347,6 +380,8 @@ class TagFS(fuse.Fuse):
             parentNode = parentNode.getSubNode(pathElement)
             
             if(parentNode == None):
+                logging.info('No node can be resolved for path ' + path)
+                
                 return None
             
         return parentNode
@@ -392,20 +427,19 @@ class TagFS(fuse.Fuse):
         return -errno.ENOENT
 
 def main():
-    # TODO implement cmd line configurable logging
-    #setUpLogging()
-    
-    server = TagFS(version = "%prog " + fuse.__version__,
-                   usage = fuse.Fuse.fusage,
-                   dash_s_do = 'setsingle')
+    fs = TagFS(version = "%prog " + fuse.__version__,
+               usage = fuse.Fuse.fusage,
+               dash_s_do = 'setsingle')
 
-    server.parse(errex = 1)
-    opts, args = server.cmdline
+    fs.parse(errex = 1)
+    opts, args = fs.cmdline
     
     if(opts.itemsDir == None):
-        server.parser.error('Missing items directory option')
+        fs.parser.error('Missing items directory option')
+        
+    fs.determineItemsDirectory()
             
-    server.main()
+    fs.main()
 
 if __name__ == '__main__':
     main()
