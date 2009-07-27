@@ -74,6 +74,7 @@ import stat
 import errno
 import fuse
 import exceptions
+import datetime
 
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
@@ -83,12 +84,25 @@ fuse.fuse_python_api = (0, 2)
 
 class ItemAccess(object):
     
+    # When the time delta between now and the last time the item directories
+    # have been parsed is bigger than self.refreshTimeDelta then the item
+    # directories have to be parsed again.
+    refreshTimeDelta = datetime.timedelta(0, 10 * 60)
+    
     def __init__(self, dataDirectory, tagFileName):
         self.dataDirectory = dataDirectory
         self.tagFileName = tagFileName
         
         self.__parseItems()
         
+    def __now(self):
+        return datetime.datetime.utcnow()
+    
+    def __isItemsDirectoryOutOfDate(self):
+        now = self.__now()
+        
+        return (now - self.__itemsParseDateTime > self.refreshTimeDelta)
+    
     def __parseItems(self):
         items = {}
         tags = set()
@@ -130,14 +144,25 @@ class ItemAccess(object):
         
         self.__items = items
         self.__tags = tags
+        self.__itemsParseDateTime = self.__now()
+        
+    def __validateItemsData(self):
+        if(not self.__isItemsDirectoryOutOfDate()):
+            return
+        
+        logging.debug('Reparsing item directories because the cache is out of date.')
+        
+        self.__parseItems()
         
     def __getItems(self):
+        self.__validateItemsData()
         
         return self.__items
     
     items = property(__getItems)
     
     def __getTags(self):
+        self.__validateItemsData()
         
         return self.__tags
     
