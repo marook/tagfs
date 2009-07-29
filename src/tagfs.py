@@ -62,7 +62,7 @@ def setUpLogging():
 
 if __name__ == '__main__':
     # TODO implement cmd line configurable logging
-    #setUpLogging()
+    setUpLogging()
     
     pass
 
@@ -205,22 +205,31 @@ class MyStat(fuse.Stat):
 
 class Node(object):
     
+    def _addSubNodes2(self, subNodes, nodesDict):
+        for nodeNames, nodes in nodesDict.iteritems():
+            for node in nodes:
+                if(node.name in subNodes):
+                    logging.debug('%s is shadowed by %s',
+                                  nodeNames,
+                                  subNodes[node.name])
+                    
+                    continue
+                
+                subNodes[node.name] = node
+    
     def _addSubNodes(self, subNodes, items, tags):
-        for item in items:
-            if(item in subNodes):
-                logging.debug('Item ' + item + ' is shadowed by ' + subNodes[item])
-                
-                continue
-            
-            subNodes[item] = ItemNode(self, item, self.itemAccess)
+        """Adds items and tags to the subNodes list.
         
-        for tag in tags:
-            if(tag in subNodes):
-                logging.debug('Tag ' + tag + ' is shadowed by ' + subNodes[tag])
-                
-                continue
-            
-            subNodes[tag] = TagNode(self, tag, self.itemAccess)
+        @deprecated: This method should not be used anymore. Instead call the
+        _addSubNodes(self, subNodes, nodesDict) method.
+        """
+        
+        nodesDict = {
+            'items': [ItemNode(self, item, self.itemAccess) for item in items],
+            'tags': [TagNode(self, tag, self.itemAccess) for tag in tags]
+        }
+        
+        self._addSubNodes2(subNodes, nodesDict)
 
     def __getSubNodes(self):
         return [node for name, node in self._getSubNodesDict().iteritems()]
