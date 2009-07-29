@@ -106,12 +106,10 @@ class ItemAccess(object):
     def __parseItems(self):
         items = {}
         tags = set()
+        untaggedItems = []
         
         for directoryName in os.listdir(self.dataDirectory):
             try:
-                itemTags = set()
-                items[directoryName] = itemTags
-                
                 directory = self.dataDirectory + '/' + directoryName
                 
                 if(not os.path.isdir(directory)):
@@ -120,7 +118,12 @@ class ItemAccess(object):
                 tagFileName = directory + '/' + self.tagFileName
                 
                 if(not os.path.exists(tagFileName)):
+                    untaggedItems.append(directoryName)
+                    
                     continue
+                
+                itemTags = set()
+                items[directoryName] = itemTags
                 
                 tagFile = open(tagFileName, 'r')
                 try:
@@ -144,6 +147,7 @@ class ItemAccess(object):
         
         self.__items = items
         self.__tags = tags
+        self.untaggedItems = untaggedItems
         self.__itemsParseDateTime = self.__now()
         
     def __validateItemsData(self):
@@ -205,32 +209,17 @@ class MyStat(fuse.Stat):
 
 class Node(object):
     
-    def _addSubNodes2(self, subNodes, nodesDict):
-        for nodeNames, nodes in nodesDict.iteritems():
-            for node in nodes:
-                if(node.name in subNodes):
-                    logging.debug('%s is shadowed by %s',
-                                  nodeNames,
-                                  subNodes[node.name])
+    def _addSubNodes(self, subNodes, nodeNames, nodes):
+        for node in nodes:
+            if(node.name in subNodes):
+                logging.debug('%s is shadowed by %s',
+                              nodeNames,
+                              subNodes[node.name])
                     
-                    continue
+                continue
                 
-                subNodes[node.name] = node
+            subNodes[node.name] = node
     
-    def _addSubNodes(self, subNodes, items, tags):
-        """Adds items and tags to the subNodes list.
-        
-        @deprecated: This method should not be used anymore. Instead call the
-        _addSubNodes(self, subNodes, nodesDict) method.
-        """
-        
-        nodesDict = {
-            'items': [ItemNode(self, item, self.itemAccess) for item in items],
-            'tags': [TagNode(self, tag, self.itemAccess) for tag in tags]
-        }
-        
-        self._addSubNodes2(subNodes, nodesDict)
-
     def __getSubNodes(self):
         return [node for name, node in self._getSubNodesDict().iteritems()]
     
@@ -289,6 +278,40 @@ class ItemNode(Node):
     
     link = property(__getLink)
     
+class UntaggedItemsNode(Node):
+    """Represents a node which contains not tagged items.
+    """
+    
+    def __init__(self, name, itemAccess):
+        self.name = name
+        self.itemAccess = itemAccess
+    
+    def _getSubNodesDict(self):
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(self, item, self.itemAccess) for item in self.itemAccess.untaggedItems])
+        
+        return subNodes
+    
+    def __getAttr(self):
+        st = MyStat()
+        st.st_mode = stat.S_IFDIR | 0555
+        st.st_nlink = 2
+            
+        return st
+    
+    attr = property(__getAttr)
+
+    def __getDirentry(self):
+        e = fuse.Direntry(self.name)
+        e.type = stat.S_IFDIR
+        
+        return e
+    
+    direntry = property(__getDirentry)
+
 class TagNode(Node):
     
     def __init__(self, parentNode, tagName, itemAccess):
@@ -309,7 +332,12 @@ class TagNode(Node):
         
         subNodes = {}
         
-        self._addSubNodes(subNodes, items, tags)
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(self, item, self.itemAccess) for item in items])
+        self._addSubNodes(subNodes,
+                          'tags',
+                          [TagNode(self, tag, self.itemAccess) for tag in tags])
         
         return subNodes
     
@@ -339,7 +367,15 @@ class RootNode(Node):
     def _getSubNodesDict(self):
         subNodes = {}
         
-        self._addSubNodes(subNodes, self.itemAccess.items, self.itemAccess.tags)
+        self._addSubNodes(subNodes,
+                          'untagged items',
+                          [UntaggedItemsNode('.untagged', self.itemAccess), ])
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(self, item, self.itemAccess) for item in self.itemAccess.items])
+        self._addSubNodes(subNodes,
+                          'tags',
+                          [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
         
         return subNodes
         
