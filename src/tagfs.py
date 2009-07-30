@@ -62,7 +62,7 @@ def setUpLogging():
 
 if __name__ == '__main__':
     # TODO implement cmd line configurable logging
-    setUpLogging()
+    #setUpLogging()
     
     pass
 
