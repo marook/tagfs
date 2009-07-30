@@ -327,6 +327,13 @@ class TagNode(Node):
     
     filterTags = property(__getFilterTags)
     
+    def __getItems(self):
+        items, tags = self.itemAccess.filter(self.filterTags)
+        
+        return items
+    
+    items = property(__getItems)
+    
     def _getSubNodesDict(self):
         items, tags = self.itemAccess.filter(self.filterTags)
         
@@ -337,7 +344,7 @@ class TagNode(Node):
                           [ItemNode(self, item, self.itemAccess) for item in items])
         self._addSubNodes(subNodes,
                           'tags',
-                          [TagNode(self, tag, self.itemAccess) for tag in tags])
+                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in tags] if (len(items) > len(tagNode.items))])
         
         return subNodes
     
