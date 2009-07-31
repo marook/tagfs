@@ -503,14 +503,16 @@ class TagFS(fuse.Fuse):
 
 def main():
     fs = TagFS(version = "%prog " + fuse.__version__,
-               usage = fuse.Fuse.fusage,
                dash_s_do = 'setsingle')
 
     fs.parse(errex = 1)
     opts, args = fs.cmdline
-    
+
     if opts.itemsDir == None:
-        fs.parser.error('Missing items directory option')
+        fs.parser.print_help()
+        # items dir should probably be an arg, not an option.
+        print "Error: Missing items directory option."
+        sys.exit()
         
     fs.determineItemsDirectory()
             
