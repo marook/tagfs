@@ -110,14 +110,14 @@ class ItemAccess(object):
         
         for directoryName in os.listdir(self.dataDirectory):
             try:
-                directory = self.dataDirectory + '/' + directoryName
+                directory = os.path.join(self.dataDirectory, directoryName)
                 
-                if(not os.path.isdir(directory)):
+                if not os.path.isdir(directory):
                     continue
                 
-                tagFileName = directory + '/' + self.tagFileName
+                tagFileName = os.path.join(directory, self.tagFileName)
                 
-                if(not os.path.exists(tagFileName)):
+                if not os.path.exists(tagFileName):
                     untaggedItems.append(directoryName)
                     
                     continue
@@ -130,7 +130,7 @@ class ItemAccess(object):
                     for rawTag in tagFile.readlines():
                         tag = rawTag.strip()
                         
-                        if(len(tag) == 0):
+                        if len(tag) == 0:
                             continue
                         
                         tags.add(tag)
@@ -151,7 +151,7 @@ class ItemAccess(object):
         self.__itemsParseDateTime = self.__now()
         
     def __validateItemsData(self):
-        if(not self.__isItemsDirectoryOutOfDate()):
+        if not self.__isItemsDirectoryOutOfDate():
             return
         
         logging.debug('Reparsing item directories because the cache is out of date.')
@@ -173,7 +173,7 @@ class ItemAccess(object):
     tags = property(__getTags)
     
     def getItemDirectory(self, item):
-        return self.dataDirectory + '/' + item
+        return os.path.join(self.dataDirectory, item)
     
     def filter(self, tagFilters):
         tagFiltersSet = set(tagFilters)
@@ -181,7 +181,7 @@ class ItemAccess(object):
         resultTags = set()
         
         for itemName, itemTags in self.items.iteritems():
-            if(len(tagFiltersSet & itemTags) < len(tagFilters)):
+            if len(tagFiltersSet & itemTags) < len(tagFilters):
                 continue
             
             resultItems.append(itemName)
@@ -211,7 +211,7 @@ class Node(object):
     
     def _addSubNodes(self, subNodes, nodeNames, nodes):
         for node in nodes:
-            if(node.name in subNodes):
+            if node.name in subNodes:
                 logging.debug('%s is shadowed by %s',
                               nodeNames,
                               subNodes[node.name])
@@ -228,7 +228,7 @@ class Node(object):
     def getSubNode(self, pathElement):
         subNodesDict = self._getSubNodesDict()
         
-        if(not pathElement in subNodesDict):
+        if not pathElement in subNodesDict:
             logging.warning('Unknown path element requested ' + pathElement)
             
             return None
@@ -425,7 +425,7 @@ class TagFS(fuse.Fuse):
                                default = '.tag')
         
     def getItemAccess(self):
-        if(self.__itemAccess == None):
+        if self.__itemAccess == None:
             try:
                 opts, args = self.cmdline
                 
@@ -450,13 +450,11 @@ class TagFS(fuse.Fuse):
         
         parentNode = rootNode
         # TODO implement escaping path splitting
-        for pathElement in path.split('/'):
-            if(len(pathElement) == 0):
-                continue
-            
+        for pathElement in (x for x in
+                os.path.normpath(path).split(os.sep) if x != ''):
             parentNode = parentNode.getSubNode(pathElement)
             
-            if(parentNode == None):
+            if parentNode == None:
                 logging.info('No node can be resolved for path ' + path)
                 
                 return None
@@ -466,7 +464,7 @@ class TagFS(fuse.Fuse):
     def getattr(self, path):
         node = self.__getNode(path)
         
-        if(node == None):
+        if node == None:
             logging.debug('Unknown node for path ' + path)
             
             return -errno.ENOENT
@@ -478,7 +476,7 @@ class TagFS(fuse.Fuse):
         yield fuse.Direntry('..')
         
         node = self.__getNode(path)
-        if(node == None):
+        if node == None:
             logging.debug('Unknown node for path ' + path)
             
             # TODO maybe we should fail here?
@@ -490,7 +488,7 @@ class TagFS(fuse.Fuse):
     def readlink(self, path):
         node = self.__getNode(path)
         
-        if(node == None):
+        if node == None:
             logging.debug('Unknown node for path ' + path)
             
             return -errno.ENOENT
@@ -511,7 +509,7 @@ def main():
     fs.parse(errex = 1)
     opts, args = fs.cmdline
     
-    if(opts.itemsDir == None):
+    if opts.itemsDir == None:
         fs.parser.error('Missing items directory option')
         
     fs.determineItemsDirectory()
