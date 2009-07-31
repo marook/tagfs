@@ -402,14 +402,11 @@ class RootNode(Node):
     
 class TagFS(fuse.Fuse):
     
-    def determineItemsDirectory(self):
-        opts, args = self.cmdline
-        
-        self.itemsDirectory = os.path.abspath(opts.itemsDir)
-    
-    def __init__(self, *args, **kw):
+    def __init__(self, initwd, *args, **kw):
         fuse.Fuse.__init__(self, *args, **kw)
         
+        self._initwd = initwd
+        self._itemsRoot = None
         self.__itemAccess = None
         
         self.parser.add_option('-i',
@@ -423,22 +420,27 @@ class TagFS(fuse.Fuse):
                                help = 'tag file name',
                                metavar = 'file',
                                default = '.tag')
-        
+
     def getItemAccess(self):
         if self.__itemAccess == None:
-            try:
-                opts, args = self.cmdline
-                
-                itemsDir = self.itemsDirectory
-                tagFile = opts.tagFile
+            # Maybe we should move the parser run from main here.
+            # Or we should at least check if it was run once...
+            opts, args = self.cmdline
+
+            # Maybe we should add expand user? Maybe even vars???
+            assert opts.itemsDir != None and opts.itemsDir != ''
+            self._itemsRoot = os.path.normpath(
+                    os.path.join(self._initwd, opts.itemsDir))
             
-                self.__itemAccess = ItemAccess(itemsDir, tagFile)
-            except exceptions.OSError, e:
-                logging.error('Can \'t create item access from items directory '
-                              + self.itemsDirectory + '. Reason: '
-                              + str(e.strerror))
-                
-                raise e
+            self.tagFileName = opts.tagFile
+        
+            # try/except here?
+            try:
+                self.__itemAccess = ItemAccess(self._itemsRoot, self.tagFileName)
+            except OSError, e:
+                logging.error("Can't create item access from items directory %s. Reason: %s",
+                        self._itemsRoot, str(e.strerror))
+                raise
             
         return self.__itemAccess
     
@@ -502,8 +504,9 @@ class TagFS(fuse.Fuse):
         return -errno.ENOENT
 
 def main():
-    fs = TagFS(version = "%prog " + fuse.__version__,
-               dash_s_do = 'setsingle')
+    fs = TagFS(os.getcwd(),
+            version = "%prog " + fuse.__version__,
+            dash_s_do = 'setsingle')
 
     fs.parse(errex = 1)
     opts, args = fs.cmdline
@@ -514,8 +517,6 @@ def main():
         print "Error: Missing items directory option."
         sys.exit()
         
-    fs.determineItemsDirectory()
-            
     fs.main()
 
 if __name__ == '__main__':
