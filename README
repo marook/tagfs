@@ -4,7 +4,8 @@ tagfs - tag file system
 2) Requirements
 3) Installation
 4) Usage
-5) Contact
+5) Tests
+6) Contact
 
 ---------------------------------------------------------------------
 Introduction
@@ -28,6 +29,12 @@ Usage
 
 * Mount a tagged directory: tagfs.py -i /path/to/my/items/directory /path/to/my/mount/point
 * Unmount a tagged directory: fusermount -u /path/to/my/mount/point
+
+---------------------------------------------------------------------
+Tests
+
+To run the tests you have to make sure that the 'src' and the 'test' directory
+are in python's 'sys.path'.
 
 ---------------------------------------------------------------------
 Contact
