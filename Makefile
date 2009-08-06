@@ -22,6 +22,10 @@ DOC = /usr/local/share/doc/tagfs
 
 all:
 
+clean:
+	find src -name '*.pyc' -type f -exec rm {} \;
+	find test -name '*.pyc' -type f -exec rm {} \;
+
 install:
 	install -d $(BIN) $(DOC)
 	install src/tagfs $(BIN)
