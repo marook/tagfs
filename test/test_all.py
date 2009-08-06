@@ -40,11 +40,44 @@ class TestItemAccess(unittest.TestCase):
     """
 
     def setUp(self):
-        itemAccess = tagfs.ItemAccess('etc/test/events', '.tag') 
+        self.itemAccess = tagfs.ItemAccess('etc/test/events', '.tag') 
 
-    def testName(self):
-        pass
+    def testItems(self):
+        """Test the items property of ItemAccess.
+        """
+        items = self.itemAccess.items
+        
+        self.assertEqual(set(['2008-03-29 - holiday south korea', '2008-12-25 - holiday india']), set(items))
 
+    def testTags(self):
+        """Test the tag property of ItemAccess
+        """
+        
+        tags = self.itemAccess.tags
+        
+        self.assertEqual(set(['airport', 'holiday', 'india', 'korea']), set(tags))
+        
+    def __testFilter(self, filters, expectedResultItems, expectedResultTags):
+        resultItems, resultTags = self.itemAccess.filter(filters)
+        
+        self.assertEqual(set(expectedResultItems), set(resultItems))
+        self.assertEqual(set(expectedResultTags), set(resultTags))
+    
+    def testFilterSingle(self):
+        """Tests a single filter argument.
+        """
+        
+        self.__testFilter(['korea'],
+                          ['2008-03-29 - holiday south korea'],
+                          ['airport', 'holiday'])
+
+    def testFilterMultiple(self):
+        """Tests multiple filter arguments at once.
+        """
+        
+        self.__testFilter(['korea', 'airport'],
+                          ['2008-03-29 - holiday south korea'],
+                          ['holiday'])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
