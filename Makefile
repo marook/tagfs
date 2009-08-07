@@ -28,7 +28,7 @@ clean:
 
 install:
 	install -d $(BIN) $(DOC)
-	install src/tagfs $(BIN)
+	install -T src/tagfs.py $(BIN)/tagfs
 	cp -a AUTHORS COPYING README $(DOC)
 
 uninstall:
