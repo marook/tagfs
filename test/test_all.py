@@ -21,8 +21,6 @@
 import logging
 import unittest
 
-import tagfs
-
 class TestTestCaseEnvironment(unittest.TestCase):
     """Makes sure the environment for the test case is set up right.
     """
@@ -81,4 +79,17 @@ class TestItemAccess(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
+    import sys, os.path
+
+    testdir = os.path.dirname(os.path.abspath(__file__))
+    srcdir = os.path.join(os.path.split(testdir)[0], 'src')
+    eventsdir = os.path.join(os.path.split(testdir)[0], 'etc', 'test', 'events')
+
+    for x in (testdir, srcdir, eventsdir):
+        assert os.path.exists(x), "Directory not found: %s" % x
+
+    sys.path.extend((testdir, srcdir))
+
+    import tagfs
+
     unittest.main()
