@@ -25,6 +25,9 @@ all:
 clean:
 	find src -name '*.pyc' -type f -exec rm {} \;
 	find test -name '*.pyc' -type f -exec rm {} \;
+	
+test:
+	python test/test_all.py
 
 install:
 	install -d $(BIN) $(DOC)
