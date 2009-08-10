@@ -17,23 +17,61 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-BIN = /usr/local/bin
-DOC = /usr/local/share/doc/tagfs
+prefix = /usr/local
+bindir = $(prefix)/bin
+docdir = $(prefix)/share/doc/tagfs
+installdirs = $(bindir) $(docdir)
 
+srcdir = .
+
+testdatadir = etc/test/events
+testmntdir = mnt
+
+PYTHON = python
+INSTALL = install
+INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_PROGRAM = $(INSTALL)
+
+DOCS = AUTHORS COPYING README
+
+.PHONY: all
 all:
+	@echo "42. That's all."
+	@echo "Try 'make mounttest' for something more interesting."
 
+.PHONY: clean
 clean:
-	find src -name '*.pyc' -type f -exec rm {} \;
-	find test -name '*.pyc' -type f -exec rm {} \;
-	
+	find $(srcdir) -name '*.pyc' -type f -exec rm {} \;
+	mount | grep -q tagfs && if test $$?; \
+		then echo "tagfs mounted on '$(testmntdir)' -- keeping it."; \
+		elif test -d '$(testmntdir)'; then rmdir '$(testmntdir)'; fi
+
+.PHONY: test
 test:
-	python test/test_all.py
+	$(PYTHON) $(srcdir)/test/test_all.py
 
-install:
-	install -d $(BIN) $(DOC)
-	install -T src/tagfs.py $(BIN)/tagfs
-	cp -a AUTHORS COPYING README $(DOC)
+$(installdirs):
+	$(INSTALL) -d $(installdirs)
 
+.PHONY: install
+install: $(installdirs)
+	$(INSTALL_PROGRAM) $(srcdir)/src/tagfs.py $(bindir)/tagfs
+	$(INSTALL_DATA) $(DOCS) $(docdir)
+
+.PHONY: uninstall
 uninstall:
-	rm -- $(BIN)/tagfs
-	rm -r -- $(DOC)
+	rm -- $(bindir)/tagfs
+	rm -r -- $(docdir)
+
+$(testmntdir):
+	mkdir -p $@
+
+.PHONY: mounttest
+mounttest: $(testmntdir)
+	$(PYTHON) $(srcdir)/src/tagfs.py -i $(testdatadir) $(testmntdir)
+
+.PHONY: unmounttest
+unmounttest:
+	fusermount -u $(testmntdir)
+	rmdir -- $(testmntdir)
+
