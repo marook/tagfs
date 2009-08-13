@@ -55,6 +55,14 @@ class TestItemAccess(unittest.TestCase):
         
         self.assertEqual(set(['airport', 'holiday', 'india', 'korea']), set(tags))
         
+    def testUntagged(self):
+        """Test the untaggedItems property of ItemAccess
+        """
+        
+        untaggedItems = self.itemAccess.untaggedItems
+        
+        self.assertEqual(set(['2009-07-29 - no tags']), set(untaggedItems))
+        
     def __testFilter(self, filters, expectedResultItems, expectedResultTags):
         resultItems, resultTags = self.itemAccess.filter(filters)
         
