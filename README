@@ -27,14 +27,18 @@ Installation
 ---------------------------------------------------------------------
 Usage
 
-* Mount a tagged directory: tagfs.py -i /path/to/my/items/directory /path/to/my/mount/point
-* Unmount a tagged directory: fusermount -u /path/to/my/mount/point
+* Mount a tagged directory:
+$ tagfs.py -i /path/to/my/items/directory /path/to/my/mount/point
+
+* Unmount a tagged directory: 
+$ fusermount -u /path/to/my/mount/point
 
 ---------------------------------------------------------------------
 Tests
 
-To run the tests you have to make sure that the 'src' and the 'test' directory
-are in python's 'sys.path'.
+You can execute the tests via make in the project's root directory.
+
+$ make test
 
 ---------------------------------------------------------------------
 Contact
