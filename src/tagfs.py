@@ -256,7 +256,6 @@ class ItemNode(Node):
         return None
     
     def __getAttr(self):
-        # TODO modify to match softlink
         st = MyStat()
         st.st_mode = stat.S_IFLNK | 0444
         st.st_nlink = 2
@@ -451,7 +450,6 @@ class TagFS(fuse.Fuse):
         rootNode = RootNode(self.getItemAccess())
         
         parentNode = rootNode
-        # TODO implement escaping path splitting
         for pathElement in (x for x in
                 os.path.normpath(path).split(os.sep) if x != ''):
             parentNode = parentNode.getSubNode(pathElement)
