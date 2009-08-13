@@ -38,7 +38,7 @@ class TestItemAccess(unittest.TestCase):
     """
 
     def setUp(self):
-        self.itemAccess = tagfs.ItemAccess('etc/test/events', '.tag') 
+        self.itemAccess = tagfs.ItemAccess('etc/test/events', '.tag')
 
     def testItems(self):
         """Test the items property of ItemAccess.
