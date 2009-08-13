@@ -136,14 +136,14 @@ class ItemAccess(object):
     def __parseItems(self):
         items = {}
         tags = set()
-        untaggedItems = []
+        untaggedItems = set()
         
         for itemName in os.listdir(self.dataDirectory):
             try:
                 itemTags = self.__parseTagsForItem(itemName)
                 
                 if(itemTags == None):
-                    untaggedItems.append(itemName)
+                    untaggedItems.add(itemName)
                     
                     continue
                 
