@@ -82,23 +82,6 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-def parseTags(tagFileName):
-    tags = set()
-    
-    tagFile = open(tagFileName, 'r')
-    try:
-        for rawTag in tagFile.readlines():
-            tag = rawTag.strip()
-                        
-            if len(tag) == 0:
-                continue
-                        
-            tags.add(tag)
-    finally:
-        tagFile.close()
-        
-    return tags
-
 class ItemAccess(object):
     
     # When the time delta between now and the last time the item directories
@@ -112,6 +95,36 @@ class ItemAccess(object):
         
         self.__parseItems()
         
+    def __parseTagsFromFile(self, tagFileName):
+        tags = set()
+        
+        tagFile = open(tagFileName, 'r')
+        try:
+            for rawTag in tagFile.readlines():
+                tag = rawTag.strip()
+                            
+                if len(tag) == 0:
+                    continue
+                            
+                tags.add(tag)
+        finally:
+            tagFile.close()
+            
+        return tags
+    
+    def __parseTagsForItem(self, itemName):
+        itemDirectory = os.path.join(self.dataDirectory, itemName)
+
+        if not os.path.isdir(itemDirectory):
+            return None
+        
+        tagFileName = os.path.join(itemDirectory, self.tagFileName)
+        
+        if not os.path.exists(tagFileName):
+            return None
+
+        return self.__parseTagsFromFile(tagFileName)
+
     def __now(self):
         return datetime.datetime.utcnow()
     
@@ -125,27 +138,21 @@ class ItemAccess(object):
         tags = set()
         untaggedItems = []
         
-        for directoryName in os.listdir(self.dataDirectory):
+        for itemName in os.listdir(self.dataDirectory):
             try:
-                directory = os.path.join(self.dataDirectory, directoryName)
+                itemTags = self.__parseTagsForItem(itemName)
                 
-                if not os.path.isdir(directory):
-                    continue
-                
-                tagFileName = os.path.join(directory, self.tagFileName)
-                
-                if not os.path.exists(tagFileName):
-                    untaggedItems.append(directoryName)
+                if(itemTags == None):
+                    untaggedItems.append(itemName)
                     
                     continue
                 
-                itemTags = parseTags(tagFileName)
                 tags = tags | itemTags
                 
-                items[directoryName] = itemTags
+                items[itemName] = itemTags
                 
             except IOError, (error, strerror):
-                logging.error('Can \'t read tags for item ' + directoryName 
+                logging.error('Can \'t read tags for item ' + itemName 
                               + ': ' + str(strerror))
                 
         logging.debug('Found ' + str(len(items)) + ' items')
