@@ -82,6 +82,23 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
+def parseTags(tagFileName):
+    tags = set()
+    
+    tagFile = open(tagFileName, 'r')
+    try:
+        for rawTag in tagFile.readlines():
+            tag = rawTag.strip()
+                        
+            if len(tag) == 0:
+                continue
+                        
+            tags.add(tag)
+    finally:
+        tagFile.close()
+        
+    return tags
+
 class ItemAccess(object):
     
     # When the time delta between now and the last time the item directories
@@ -122,25 +139,14 @@ class ItemAccess(object):
                     
                     continue
                 
-                itemTags = set()
+                itemTags = parseTags(tagFileName)
+                tags = tags | itemTags
+                
                 items[directoryName] = itemTags
                 
-                tagFile = open(tagFileName, 'r')
-                try:
-                    for rawTag in tagFile.readlines():
-                        tag = rawTag.strip()
-                        
-                        if len(tag) == 0:
-                            continue
-                        
-                        tags.add(tag)
-                        itemTags.add(tag)
-                finally:
-                    tagFile.close()
-            
-            except:
+            except IOError, (error, strerror):
                 logging.error('Can \'t read tags for item ' + directoryName 
-                              + ': ' + str(sys.exc_info()[0]))
+                              + ': ' + str(strerror))
                 
         logging.debug('Found ' + str(len(items)) + ' items')
         logging.debug('Found ' + str(len(tags)) + ' tags')
