@@ -160,7 +160,7 @@ class ItemAccess(object):
         
         self.__items = items
         self.__tags = tags
-        self.untaggedItems = untaggedItems
+        self.__untaggedItems = untaggedItems
         self.__itemsParseDateTime = self.__now()
         
     def __validateItemsData(self):
@@ -184,6 +184,13 @@ class ItemAccess(object):
         return self.__tags
     
     tags = property(__getTags)
+    
+    def __getUntaggedItems(self):
+        self.__validateItemsData()
+        
+        return self.__untaggedItems
+
+    untaggedItems = property(__getUntaggedItems)
     
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
