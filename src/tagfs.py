@@ -74,7 +74,7 @@ import stat
 import errno
 import fuse
 import exceptions
-import datetime
+import time
 
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
@@ -86,8 +86,8 @@ class ItemAccess(object):
     
     # When the time delta between now and the last time the item directories
     # have been parsed is bigger than self.refreshTimeDelta then the item
-    # directories have to be parsed again.
-    refreshTimeDelta = datetime.timedelta(0, 10 * 60)
+    # directories have to be parsed again. The valid is specified in seconds.
+    refreshTimeDelta = 10 * 60
     
     def __init__(self, dataDirectory, tagFileName):
         self.dataDirectory = dataDirectory
@@ -126,7 +126,7 @@ class ItemAccess(object):
         return self.__parseTagsFromFile(tagFileName)
 
     def __now(self):
-        return datetime.datetime.utcnow()
+        return time.time()
     
     def __isItemsDirectoryOutOfDate(self):
         now = self.__now()
@@ -191,6 +191,13 @@ class ItemAccess(object):
         return self.__untaggedItems
 
     untaggedItems = property(__getUntaggedItems)
+    
+    def __getItemsParseDateTime(self):
+        self.__validateItemsData()
+        
+        return self.__itemsParseDateTime
+    
+    itemsParseDateTime = property(__getItemsParseDateTime)
     
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
@@ -315,9 +322,14 @@ class UntaggedItemsNode(Node):
         return subNodes
     
     def __getAttr(self):
+        import time
+        
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
+        st.st_ctime = self.itemAccess.itemsParseDateTime
+        st.st_atime = st.st_ctime
+        st.st_mtime = st.st_ctime
             
         return st
     
@@ -371,6 +383,9 @@ class TagNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
+        st.st_ctime = self.itemAccess.itemsParseDateTime
+        st.st_atime = st.st_ctime
+        st.st_mtime = st.st_ctime
             
         return st
     
@@ -409,7 +424,10 @@ class RootNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
-            
+        st.st_ctime = self.itemAccess.itemsParseDateTime
+        st.st_atime = st.st_ctime
+        st.st_mtime = st.st_ctime
+
         return st
     
     attr = property(__getAttr)
