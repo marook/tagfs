@@ -38,6 +38,7 @@ class TestItemAccess(unittest.TestCase):
     """
 
     def setUp(self):
+        import tagfs
         self.itemAccess = tagfs.ItemAccess('etc/test/events', '.tag')
 
     def testItems(self):
@@ -97,7 +98,5 @@ if __name__ == "__main__":
         assert os.path.exists(x), "Directory not found: %s" % x
 
     sys.path.extend((testdir, srcdir))
-
-    import tagfs
 
     unittest.main()
