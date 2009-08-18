@@ -115,5 +115,5 @@ setup(
     data_files = [
         ('share/doc/tagfs', ['AUTHORS', 'COPYING', 'README'])
     ],
-    scripts = ['tagfs'],
+    scripts = ['src/tagfs.py'],
 )
