@@ -82,6 +82,79 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
+def parseTagsFromFile(self, tagFileName):
+    tags = set()
+    
+    tagFile = open(tagFileName, 'r')
+    try:
+        for rawTag in tagFile.readlines():
+            tag = rawTag.strip()
+                        
+            if len(tag) == 0:
+                continue
+                        
+            tags.add(tag)
+    finally:
+        tagFile.close()
+        
+    return tags
+    
+class Item(object):
+    
+    def parseTags(self):
+        tagFileName = self.__tagFileName
+        
+        if not os.path.exists(tagFileName):
+            return None
+
+        tags = self.parseTagsFromFile(tagFileName)
+        modificationTime = os.path.getmtime(tagFileName)
+        
+        return modificationTime, tags
+
+    def __init__(self, name, itemAccess):
+        self.name = name
+        self.itemAccess = itemAccess
+        
+    def __getItemDirectory(self):
+        return os.path.join(self.itemAccess.dataDirectory, self.name)
+    
+    itemDirectory = property(__getItemDirectory)
+    
+    def __getTagFileName(self):
+        """Returns the name of the tag file for this item.
+        
+        This method is published via the property __tagFileName.
+        """
+        
+        itemDirectory = self.itemDirectory
+
+        return os.path.join(itemDirectory, self.tagFileName)
+        
+    __tagFileName = property(__getTagFileName)
+        
+    def __getTagsModificationTime(self):
+        """Returns the last time when the tags have been modified.
+        
+        This method is published via the property tagsModificationDate.
+        """
+        
+        return os.path.getmtime()
+    
+    tagsModificationTime = property(__getTagsModificationTime)
+        
+    def __getTags(self):
+        """Returns the tags as a list for this item.
+        
+        This method is published via the property tags.
+        """
+        
+        # TODO implement some caching
+        
+        return self.parseTagsForItem(itemName)
+    
+    tags = property(__getTags)
+
 class ItemAccess(object):
     
     # When the time delta between now and the last time the item directories
@@ -95,36 +168,6 @@ class ItemAccess(object):
         
         self.__parseItems()
         
-    def __parseTagsFromFile(self, tagFileName):
-        tags = set()
-        
-        tagFile = open(tagFileName, 'r')
-        try:
-            for rawTag in tagFile.readlines():
-                tag = rawTag.strip()
-                            
-                if len(tag) == 0:
-                    continue
-                            
-                tags.add(tag)
-        finally:
-            tagFile.close()
-            
-        return tags
-    
-    def __parseTagsForItem(self, itemName):
-        itemDirectory = os.path.join(self.dataDirectory, itemName)
-
-        if not os.path.isdir(itemDirectory):
-            return None
-        
-        tagFileName = os.path.join(itemDirectory, self.tagFileName)
-        
-        if not os.path.exists(tagFileName):
-            return None
-
-        return self.__parseTagsFromFile(tagFileName)
-
     def __now(self):
         return time.time()
     
