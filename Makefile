@@ -24,8 +24,8 @@ installdirs = $(bindir) $(docdir)
 
 srcdir = .
 
-testdatadir = etc/test/events
-testmntdir = mnt
+testdatadir = $(srcdir)/etc/test/events
+testmntdir = $(shell pwd)/mnt
 
 PYTHON = python
 INSTALL = install
@@ -42,9 +42,12 @@ all:
 .PHONY: clean
 clean:
 	find $(srcdir) -name '*.pyc' -type f -exec rm {} \;
-	mount | grep -q tagfs && if test $$?; \
-		then echo "tagfs mounted on '$(testmntdir)' -- keeping it."; \
-		elif test -d '$(testmntdir)'; then rmdir '$(testmntdir)'; fi
+	@if test "`mount | grep -e 'tagfs.*on.*$(testmntdir)'`"; then \
+		echo "tagfs mounted on '$(testmntdir)' -- keeping it."; \
+	elif test -d '$(testmntdir)'; then \
+		echo 'removing $(testmntdir)'; \
+		rmdir '$(testmntdir)'; \
+	fi
 
 .PHONY: test
 test:
