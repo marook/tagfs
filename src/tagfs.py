@@ -43,9 +43,10 @@ def setUpLogging():
         # sys.exit(1)
 
     # configure file logger
-    logging.basicConfig(level=logging.DEBUG, format = '%(asctime)s %(levelname)s %(message)s',
+    logging.basicConfig(level = logging.DEBUG,
+                        format = '%(asctime)s %(levelname)s %(message)s',
                         filename = '/tmp/tagfs.log',
-                        filemode='a')
+                        filemode = 'a')
     
     # configure console logger
     consoleHandler = logging.StreamHandler(sys.stdout)
