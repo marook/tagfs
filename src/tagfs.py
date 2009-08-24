@@ -178,6 +178,15 @@ class Item(object):
         return self.__parseTags()
     
     tags = property(__getTags)
+    
+    def __isTagged(self):
+        
+        # TODO implement some caching
+        
+        return os.path.exists(self.__tagFileName)
+    
+    tagged = property(__isTagged)
+        
 
 class ItemAccess(object):
     """This is the access point to the Items.
@@ -187,20 +196,6 @@ class ItemAccess(object):
     # have been parsed is bigger than self.refreshTimeDelta then the item
     # directories have to be parsed again. The valid is specified in seconds.
     refreshTimeDelta = 10 * 60
-    
-    def __init__(self, dataDirectory, tagFileName):
-        self.dataDirectory = dataDirectory
-        self.tagFileName = tagFileName
-        
-        self.__parseItems()
-        
-    def __now(self):
-        return time.time()
-    
-    def __isItemsDirectoryOutOfDate(self):
-        now = self.__now()
-        
-        return (now - self.__itemsParseDateTime > self.refreshTimeDelta)
     
     def __parseItems(self):
         items = {}
@@ -231,6 +226,20 @@ class ItemAccess(object):
         self.__tags = tags
         self.__untaggedItems = untaggedItems
         self.__itemsParseDateTime = self.__now()
+
+    def __init__(self, dataDirectory, tagFileName):
+        self.dataDirectory = dataDirectory
+        self.tagFileName = tagFileName
+        
+        self.__parseItems()
+        
+    def __now(self):
+        return time.time()
+    
+    def __isItemsDirectoryOutOfDate(self):
+        now = self.__now()
+        
+        return (now - self.__itemsParseDateTime > self.refreshTimeDelta)
         
     def __validateItemsData(self):
         if not self.__isItemsDirectoryOutOfDate():
