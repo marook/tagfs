@@ -33,6 +33,54 @@ class TestTestCaseEnvironment(unittest.TestCase):
         
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'etc/test/events')))
 
+class TestItem(unittest.TestCase):
+    """This is a test case for the Item class.
+    """
+    
+    class MyItemAccess(object):
+        """This is a mock object for the ItemAccess class.
+        """
+        
+        def __init__(self):
+            self.dataDirectory = 'etc/test/events'
+            self.tagFileName = '.tag'
+    
+    def setUp(self):
+        self.itemAccess = TestItem.MyItemAccess()
+    
+    def testItemNotExists(self):
+        """Tests the results for items which don't exist.
+        """
+        
+        item = tagfs.Item('no such item', self.itemAccess)
+        
+        self.assertFalse(os.path.isdir(item.itemDirectory))
+        
+        self.assertEqual(None, item.tags)
+        self.assertEqual(None, item.tagsModificationTime)
+        
+    def testItemNoTagsItem(self):
+        """Tests the results for items which got no tags assigned.
+        """
+        
+        item = tagfs.Item('2009-07-29 - no tags', self.itemAccess)
+        
+        self.assertTrue(os.path.isdir(item.itemDirectory))
+        
+        self.assertEqual(None, item.tags)
+        self.assertEqual(None, item.tagsModificationTime)
+        
+    def testItem(self):
+        """Tests an item with tags assigned to.
+        """
+        
+        item = tagfs.Item('2008-12-25 - holiday india', self.itemAccess)
+        
+        self.assertTrue(os.path.isdir(item.itemDirectory))
+        
+        self.assertEqual(set(['holiday', 'airport', 'india']), item.tags)
+        self.assertAlmostEqual(1250195650.7, item.tagsModificationTime, 1)
+
 class TestItemAccess(unittest.TestCase):
     """Test the tagfs.ItemAccess class.
     """

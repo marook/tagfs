@@ -82,7 +82,7 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-def parseTagsFromFile(self, tagFileName):
+def parseTagsFromFile(tagFileName):
     tags = set()
     
     tagFile = open(tagFileName, 'r')
@@ -102,12 +102,13 @@ def parseTagsFromFile(self, tagFileName):
 class Item(object):
     
     def parseTags(self):
-        tagFileName = self.__tagFileName
+        tagFileName = os.path.join(self.itemDirectory,
+                                   self.itemAccess.tagFileName)
         
         if not os.path.exists(tagFileName):
-            return None
+            return None, None
 
-        tags = self.parseTagsFromFile(tagFileName)
+        tags = parseTagsFromFile(tagFileName)
         modificationTime = os.path.getmtime(tagFileName)
         
         return modificationTime, tags
@@ -115,6 +116,8 @@ class Item(object):
     def __init__(self, name, itemAccess):
         self.name = name
         self.itemAccess = itemAccess
+        
+        # TODO register at file system to receive tag file change events.
         
     def __getItemDirectory(self):
         return os.path.join(self.itemAccess.dataDirectory, self.name)
@@ -139,7 +142,11 @@ class Item(object):
         This method is published via the property tagsModificationDate.
         """
         
-        return os.path.getmtime()
+        # TODO implement some caching
+        
+        modificationTime, tags = self.parseTags()
+        
+        return modificationTime
     
     tagsModificationTime = property(__getTagsModificationTime)
         
@@ -151,11 +158,15 @@ class Item(object):
         
         # TODO implement some caching
         
-        return self.parseTagsForItem(itemName)
+        modificationTime, tags = self.parseTags()
+        
+        return tags
     
     tags = property(__getTags)
 
 class ItemAccess(object):
+    """This is the access point to the Items.
+    """
     
     # When the time delta between now and the last time the item directories
     # have been parsed is bigger than self.refreshTimeDelta then the item
