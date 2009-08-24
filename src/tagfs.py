@@ -106,18 +106,6 @@ def parseTagsFromFile(tagFileName):
     
 class Item(object):
     
-    def __parseTags(self):
-        tagFileName = os.path.join(self.itemDirectory,
-                                   self.itemAccess.tagFileName)
-        
-        if not os.path.exists(tagFileName):
-            return None, None
-
-        tags = parseTagsFromFile(tagFileName)
-        modificationTime = os.path.getmtime(tagFileName)
-        
-        return modificationTime, tags
-
     def __init__(self, name, itemAccess):
         self.name = name
         self.itemAccess = itemAccess
@@ -137,9 +125,30 @@ class Item(object):
         
         itemDirectory = self.itemDirectory
 
-        return os.path.join(itemDirectory, self.tagFileName)
+        return os.path.join(itemDirectory, self.itemAccess.tagFileName)
         
     __tagFileName = property(__getTagFileName)
+    
+    def __parseTags(self):
+        tagFileName = self.__tagFileName
+        
+        if not os.path.exists(tagFileName):
+            return None
+
+        return parseTagsFromFile(tagFileName)
+
+    def __getTagsCreationTime(self):
+        
+        # TODO implement some caching
+        
+        tagFileName = self.__tagFileName
+        
+        if not os.path.exists(tagFileName):
+            return None
+
+        return os.path.getctime(self.__tagFileName)
+    
+    tagsCreationTime = property(__getTagsCreationTime)
         
     def __getTagsModificationTime(self):
         """Returns the last time when the tags have been modified.
@@ -149,9 +158,12 @@ class Item(object):
         
         # TODO implement some caching
         
-        modificationTime, tags = self.__parseTags()
+        tagFileName = self.__tagFileName
         
-        return modificationTime
+        if not os.path.exists(tagFileName):
+            return None
+
+        return os.path.getmtime(self.__tagFileName)
     
     tagsModificationTime = property(__getTagsModificationTime)
         
@@ -163,9 +175,7 @@ class Item(object):
         
         # TODO implement some caching
         
-        modificationTime, tags = self.__parseTags()
-        
-        return tags
+        return self.__parseTags()
     
     tags = property(__getTags)
 

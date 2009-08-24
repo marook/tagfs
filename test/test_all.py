@@ -58,6 +58,7 @@ class TestItem(unittest.TestCase):
         
         self.assertEqual(None, item.tags)
         self.assertEqual(None, item.tagsModificationTime)
+        self.assertEqual(None, item.tagsCreationTime)
         
     def testItemNoTagsItem(self):
         """Tests the results for items which got no tags assigned.
@@ -69,6 +70,7 @@ class TestItem(unittest.TestCase):
         
         self.assertEqual(None, item.tags)
         self.assertEqual(None, item.tagsModificationTime)
+        self.assertEqual(None, item.tagsCreationTime)
         
     def testItem(self):
         """Tests an item with tags assigned to.
@@ -80,6 +82,7 @@ class TestItem(unittest.TestCase):
         
         self.assertEqual(set(['holiday', 'airport', 'india']), item.tags)
         self.assertAlmostEqual(1250195650.7, item.tagsModificationTime, 1)
+        self.assertAlmostEqual(1250195650.7, item.tagsCreationTime, 1)
 
 class TestItemAccess(unittest.TestCase):
     """Test the tagfs.ItemAccess class.
