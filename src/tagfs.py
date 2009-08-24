@@ -106,7 +106,7 @@ def parseTagsFromFile(tagFileName):
     
 class Item(object):
     
-    def parseTags(self):
+    def __parseTags(self):
         tagFileName = os.path.join(self.itemDirectory,
                                    self.itemAccess.tagFileName)
         
@@ -149,7 +149,7 @@ class Item(object):
         
         # TODO implement some caching
         
-        modificationTime, tags = self.parseTags()
+        modificationTime, tags = self.__parseTags()
         
         return modificationTime
     
@@ -163,7 +163,7 @@ class Item(object):
         
         # TODO implement some caching
         
-        modificationTime, tags = self.parseTags()
+        modificationTime, tags = self.__parseTags()
         
         return tags
     
