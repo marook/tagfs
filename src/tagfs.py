@@ -192,90 +192,74 @@ class ItemAccess(object):
     """This is the access point to the Items.
     """
     
-    # When the time delta between now and the last time the item directories
-    # have been parsed is bigger than self.refreshTimeDelta then the item
-    # directories have to be parsed again. The valid is specified in seconds.
-    refreshTimeDelta = 10 * 60
-    
-    def __parseItems(self):
-        items = {}
-        tags = set()
-        untaggedItems = set()
-        
-        for itemName in os.listdir(self.dataDirectory):
-            try:
-                itemTags = self.__parseTagsForItem(itemName)
-                
-                if(itemTags == None):
-                    untaggedItems.add(itemName)
-                    
-                    continue
-                
-                tags = tags | itemTags
-                
-                items[itemName] = itemTags
-                
-            except IOError, (error, strerror):
-                logging.error('Can \'t read tags for item ' + itemName 
-                              + ': ' + str(strerror))
-                
-        logging.debug('Found ' + str(len(items)) + ' items')
-        logging.debug('Found ' + str(len(tags)) + ' tags')
-        
-        self.__items = items
-        self.__tags = tags
-        self.__untaggedItems = untaggedItems
-        self.__itemsParseDateTime = self.__now()
-
     def __init__(self, dataDirectory, tagFileName):
         self.dataDirectory = dataDirectory
         self.tagFileName = tagFileName
         
-        self.__parseItems()
+        self.__items = None
+        self.__tags = None
+        self.__taggedItems = None
+        self.__untaggedItems = None
         
-    def __now(self):
-        return time.time()
+    def __parseItems(self):
+        items = {}
+        
+        logging.debug('Start parsing items from dir: %s', self.dataDirectory)
+        
+        for itemName in os.listdir(self.dataDirectory):
+            try:
+                item = Item(itemName, self)
+                
+                items[itemName] = item
+                
+            except IOError, (error, strerror):
+                logging.error('Can \'t read tags for item %s: %s',
+                              itemName,
+                              strerror)
+                
+        logging.debug('Found %s items', len(items))
+        
+        return items
     
-    def __isItemsDirectoryOutOfDate(self):
-        now = self.__now()
-        
-        return (now - self.__itemsParseDateTime > self.refreshTimeDelta)
-        
-    def __validateItemsData(self):
-        if not self.__isItemsDirectoryOutOfDate():
-            return
-        
-        logging.debug('Reparsing item directories because the cache is out of date.')
-        
-        self.__parseItems()
-        
     def __getItems(self):
-        self.__validateItemsData()
+        if(self.__items is None):
+            self.__items = self.__parseItems()
         
         return self.__items
     
     items = property(__getItems)
     
     def __getTags(self):
-        self.__validateItemsData()
+        if(self.__tags is None):
+            tags = set()
+            
+            for item in self.items.itervalues():
+                if not item.tagged:
+                    continue
+                
+                tags = tags | item.tags
+                
+            self.__tags = tags
         
         return self.__tags
     
     tags = property(__getTags)
     
+    def __getTaggedItems(self):
+        if self.__taggedItems is None:
+            self.__taggedItems = set([item for item in self.items.itervalues() if item.tagged])
+            
+        return self.__taggedItems
+    
+    taggedItems = property(__getTaggedItems)
+    
     def __getUntaggedItems(self):
-        self.__validateItemsData()
+        if self.__untaggedItems is None:
+            self.__untaggedItems = set([item for item in self.items.itervalues() if not item.tagged])
         
         return self.__untaggedItems
 
     untaggedItems = property(__getUntaggedItems)
-    
-    def __getItemsParseDateTime(self):
-        self.__validateItemsData()
-        
-        return self.__itemsParseDateTime
-    
-    itemsParseDateTime = property(__getItemsParseDateTime)
     
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
@@ -285,13 +269,13 @@ class ItemAccess(object):
         resultItems = []
         resultTags = set()
         
-        for itemName, itemTags in self.items.iteritems():
-            if len(tagFiltersSet & itemTags) < len(tagFilters):
+        for item in self.taggedItems:
+            if len(tagFiltersSet & item.tags) < len(tagFilters):
                 continue
             
-            resultItems.append(itemName)
+            resultItems.append(item)
             
-            for itemTag in itemTags:
+            for itemTag in item.tags:
                 resultTags.add(itemTag)
                 
         resultTags = resultTags - tagFiltersSet

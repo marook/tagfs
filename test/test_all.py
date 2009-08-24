@@ -99,7 +99,8 @@ class TestItemAccess(unittest.TestCase):
         """
         items = self.itemAccess.items
         
-        self.assertEqual(set(['2008-03-29 - holiday south korea', '2008-12-25 - holiday india']), set(items))
+        self.assertEqual(set(['2008-03-29 - holiday south korea', '2008-12-25 - holiday india', '2009-07-29 - no tags']),
+                         set(items))
 
     def testTags(self):
         """Test the tag property of ItemAccess
@@ -107,20 +108,31 @@ class TestItemAccess(unittest.TestCase):
         
         tags = self.itemAccess.tags
         
-        self.assertEqual(set(['airport', 'holiday', 'india', 'korea']), set(tags))
+        self.assertEqual(set(['airport', 'holiday', 'india', 'korea']),
+                         set(tags))
         
-    def testUntagged(self):
+    def testTaggedItems(self):
+        """Test the items property of ItemAccess.
+        """
+        items = self.itemAccess.taggedItems
+        
+        self.assertEqual(set(['2008-03-29 - holiday south korea', '2008-12-25 - holiday india']),
+                         set([item.name for item in items]))
+
+    def testUntaggedItems(self):
         """Test the untaggedItems property of ItemAccess
         """
         
         untaggedItems = self.itemAccess.untaggedItems
         
-        self.assertEqual(set(['2009-07-29 - no tags']), set(untaggedItems))
+        self.assertEqual(set(['2009-07-29 - no tags']),
+                         set([item.name for item in untaggedItems]))
         
     def __testFilter(self, filters, expectedResultItems, expectedResultTags):
         resultItems, resultTags = self.itemAccess.filter(filters)
         
-        self.assertEqual(set(expectedResultItems), set(resultItems))
+        self.assertEqual(set(expectedResultItems),
+                         set([item.name for item in resultItems]))
         self.assertEqual(set(expectedResultTags), set(resultTags))
     
     def testFilterSingle(self):
