@@ -83,6 +83,11 @@ if not hasattr(fuse, '__version__'):
 fuse.fuse_python_api = (0, 2)
 
 def parseTagsFromFile(tagFileName):
+    """Parses the tags from the specified file.
+    
+    @return: The parsed values are returned as a set containing the tag strings.
+    """
+    
     tags = set()
     
     tagFile = open(tagFileName, 'r')
