@@ -215,8 +215,19 @@ class TestUntaggedItemsNode(AbstractNodeTest):
         direntry = node.direntry
         self.assertEqual('.untagged', direntry.name)
         
+class TestTagNode(AbstractNodeTest):
+    """This test case tests the TagNode class.
+    """
+    
+    def testTagNode(self):
+        parentNode = tagfs.RootNode(self.itemAccess)
+        
+        node = tagfs.TagNode(parentNode, 'holiday', self.itemAccess)
+        
+        self._testNodeInterface(node)
+
 class TestRootNode(AbstractNodeTest):
-    """This test case tests the RootNode.
+    """This test case tests the RootNode class.
     """
     
     def testRootNode(self):
