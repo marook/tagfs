@@ -326,8 +326,7 @@ class Node(object):
 
 class ItemNode(Node):
     
-    def __init__(self, parentNode, itemName, itemAccess):
-        self.parentNode = parentNode
+    def __init__(self, itemName, itemAccess):
         self.name = itemName
         self.itemAccess = itemAccess
     
@@ -379,7 +378,7 @@ class UntaggedItemsNode(Node):
         
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(self, item, self.itemAccess) for item in self.itemAccess.untaggedItems])
+                          [ItemNode(item, self.itemAccess) for item in self.itemAccess.untaggedItems])
         
         return subNodes
     
@@ -431,7 +430,7 @@ class TagNode(Node):
         
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(self, item, self.itemAccess) for item in items])
+                          [ItemNode(item, self.itemAccess) for item in items])
         self._addSubNodes(subNodes,
                           'tags',
                           [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in tags] if (len(items) > len(tagNode.items))])
@@ -469,7 +468,7 @@ class RootNode(Node):
                           [UntaggedItemsNode('.untagged', self.itemAccess), ])
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(self, item, self.itemAccess) for item in self.itemAccess.items])
+                          [ItemNode(item, self.itemAccess) for item in self.itemAccess.items])
         self._addSubNodes(subNodes,
                           'tags',
                           [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
