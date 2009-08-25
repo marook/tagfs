@@ -75,12 +75,31 @@ import errno
 import fuse
 import exceptions
 import time
+import functools
 
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
         "your fuse-py doesn't know of fuse.__version__, probably it's too old."
 
 fuse.fuse_python_api = (0, 2)
+
+def cache(f):
+    
+    @functools.wraps(f)
+    def cacher(*args, **kwargs):
+        obj = args[0]
+        
+        cacheMemberName = '__' + f.__name__ + 'Cache'
+        
+        if cacheMemberName not in obj.__dict__:
+            value = f(*args, **kwargs)
+            
+            obj.__dict__[cacheMemberName] = value
+            
+        return obj.__dict__[cacheMemberName]
+    
+    return cacher
+    
 
 def parseTagsFromFile(tagFileName):
     """Parses the tags from the specified file.
@@ -112,11 +131,13 @@ class Item(object):
         
         # TODO register at file system to receive tag file change events.
         
+    @cache
     def __getItemDirectory(self):
         return os.path.join(self.itemAccess.dataDirectory, self.name)
     
     itemDirectory = property(__getItemDirectory)
     
+    @cache
     def __getTagFileName(self):
         """Returns the name of the tag file for this item.
         
@@ -137,6 +158,7 @@ class Item(object):
 
         return parseTagsFromFile(tagFileName)
 
+    @cache
     def __getTagsCreationTime(self):
         
         # TODO implement some caching
@@ -150,6 +172,7 @@ class Item(object):
     
     tagsCreationTime = property(__getTagsCreationTime)
         
+    @cache
     def __getTagsModificationTime(self):
         """Returns the last time when the tags have been modified.
         
@@ -167,6 +190,7 @@ class Item(object):
     
     tagsModificationTime = property(__getTagsModificationTime)
         
+    @cache
     def __getTags(self):
         """Returns the tags as a list for this item.
         
@@ -179,6 +203,7 @@ class Item(object):
     
     tags = property(__getTags)
     
+    @cache
     def __isTagged(self):
         
         # TODO implement some caching
@@ -221,43 +246,37 @@ class ItemAccess(object):
         
         return items
     
+    @cache
     def __getItems(self):
-        if(self.__items is None):
-            self.__items = self.__parseItems()
+        # TODO improve cache handling. especially reload the cache sometimes.
         
-        return self.__items
+        return self.__parseItems()
     
     items = property(__getItems)
     
+    @cache
     def __getTags(self):
-        if(self.__tags is None):
-            tags = set()
-            
-            for item in self.items.itervalues():
-                if not item.tagged:
-                    continue
-                
-                tags = tags | item.tags
-                
-            self.__tags = tags
+        tags = set()
         
-        return self.__tags
+        for item in self.items.itervalues():
+            if not item.tagged:
+                continue
+            
+            tags = tags | item.tags
+            
+        return tags
     
     tags = property(__getTags)
     
+    @cache
     def __getTaggedItems(self):
-        if self.__taggedItems is None:
-            self.__taggedItems = set([item for item in self.items.itervalues() if item.tagged])
-            
-        return self.__taggedItems
+        return set([item for item in self.items.itervalues() if item.tagged])
     
     taggedItems = property(__getTaggedItems)
     
+    @cache
     def __getUntaggedItems(self):
-        if self.__untaggedItems is None:
-            self.__untaggedItems = set([item for item in self.items.itervalues() if not item.tagged])
-        
-        return self.__untaggedItems
+        return set([item for item in self.items.itervalues() if not item.tagged])
 
     untaggedItems = property(__getUntaggedItems)
     
@@ -309,6 +328,7 @@ class Node(object):
                 
             subNodes[node.name] = node
     
+    @cache
     def __getSubNodes(self):
         return [node for name, node in self._getSubNodesDict().iteritems()]
     
@@ -343,6 +363,7 @@ class ItemNode(Node):
         """
         return None
     
+    @cache
     def __getAttr(self):
         st = MyStat()
         st.st_mode = stat.S_IFLNK | 0444
@@ -352,6 +373,7 @@ class ItemNode(Node):
     
     attr = property(__getAttr)
     
+    @cache
     def __getDirentry(self):
         e = fuse.Direntry(self.name)
         e.type = stat.S_IFLNK
@@ -360,6 +382,7 @@ class ItemNode(Node):
     
     direntry = property(__getDirentry)
     
+    @cache
     def __getLink(self):
         return self.itemAccess.getItemDirectory(self.name)
     
@@ -373,6 +396,7 @@ class UntaggedItemsNode(Node):
         self.name = name
         self.itemAccess = itemAccess
     
+    @cache
     def _getSubNodesDict(self):
         subNodes = {}
         
@@ -382,9 +406,8 @@ class UntaggedItemsNode(Node):
         
         return subNodes
     
+    @cache
     def __getAttr(self):
-        import time
-        
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
@@ -393,6 +416,7 @@ class UntaggedItemsNode(Node):
     
     attr = property(__getAttr)
 
+    @cache
     def __getDirentry(self):
         e = fuse.Direntry(self.name)
         e.type = stat.S_IFDIR
@@ -408,6 +432,7 @@ class TagNode(Node):
         self.name = tagName
         self.itemAccess = itemAccess
         
+    @cache
     def __getFilterTags(self):
         filterTags = [tag for tag in self.parentNode.filterTags]
         filterTags.append(self.name)
@@ -416,6 +441,7 @@ class TagNode(Node):
     
     filterTags = property(__getFilterTags)
     
+    @cache
     def __getItems(self):
         items, tags = self.itemAccess.filter(self.filterTags)
         
@@ -423,6 +449,7 @@ class TagNode(Node):
     
     items = property(__getItems)
     
+    @cache
     def _getSubNodesDict(self):
         items, tags = self.itemAccess.filter(self.filterTags)
         
@@ -437,6 +464,7 @@ class TagNode(Node):
         
         return subNodes
     
+    @cache
     def __getAttr(self):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
@@ -446,6 +474,7 @@ class TagNode(Node):
     
     attr = property(__getAttr)
 
+    @cache
     def __getDirentry(self):
         e = fuse.Direntry(self.name)
         e.type = stat.S_IFDIR
@@ -460,6 +489,7 @@ class RootNode(Node):
         self.itemAccess = itemAccess
         self.filterTags = []
         
+    @cache
     def _getSubNodesDict(self):
         subNodes = {}
         
@@ -475,6 +505,7 @@ class RootNode(Node):
         
         return subNodes
         
+    @cache
     def __getAttr(self):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
@@ -510,34 +541,36 @@ class TagFS(fuse.Fuse):
                                metavar = 'file',
                                default = '.tag')
 
+    @cache
     def getItemAccess(self):
-        if self.__itemAccess == None:
-            # Maybe we should move the parser run from main here.
-            # Or we should at least check if it was run once...
-            opts, args = self.cmdline
+        # Maybe we should move the parser run from main here.
+        # Or we should at least check if it was run once...
+        opts, args = self.cmdline
 
-            # Maybe we should add expand user? Maybe even vars???
-            assert opts.itemsDir != None and opts.itemsDir != ''
-            self._itemsRoot = os.path.normpath(
-                    os.path.join(self._initwd, opts.itemsDir))
-            
-            self.tagFileName = opts.tagFile
+        # Maybe we should add expand user? Maybe even vars???
+        assert opts.itemsDir != None and opts.itemsDir != ''
+        self._itemsRoot = os.path.normpath(
+                os.path.join(self._initwd, opts.itemsDir))
         
-            # try/except here?
-            try:
-                self.__itemAccess = ItemAccess(self._itemsRoot, self.tagFileName)
-            except OSError, e:
-                logging.error("Can't create item access from items directory %s. Reason: %s",
-                        self._itemsRoot, str(e.strerror))
-                raise
-            
-        return self.__itemAccess
+        self.tagFileName = opts.tagFile
+    
+        # try/except here?
+        try:
+            return ItemAccess(self._itemsRoot, self.tagFileName)
+        except OSError, e:
+            logging.error("Can't create item access from items directory %s. Reason: %s",
+                    self._itemsRoot, str(e.strerror))
+            raise
+    
+    @cache
+    def __getRootNode(self):
+        return RootNode(self.getItemAccess())
     
     def __getNode(self, path):
         logging.debug('Requesting node for path ' + path)
         
         # TODO implement some caching
-        rootNode = RootNode(self.getItemAccess())
+        rootNode = self.__getRootNode()
         
         parentNode = rootNode
         for pathElement in (x for x in
