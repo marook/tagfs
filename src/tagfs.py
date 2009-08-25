@@ -389,9 +389,6 @@ class UntaggedItemsNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
-        st.st_ctime = self.itemAccess.itemsParseDateTime
-        st.st_atime = st.st_ctime
-        st.st_mtime = st.st_ctime
             
         return st
     
@@ -445,9 +442,6 @@ class TagNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
-        st.st_ctime = self.itemAccess.itemsParseDateTime
-        st.st_atime = st.st_ctime
-        st.st_mtime = st.st_ctime
             
         return st
     
@@ -486,9 +480,6 @@ class RootNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
-        st.st_ctime = self.itemAccess.itemsParseDateTime
-        st.st_atime = st.st_ctime
-        st.st_mtime = st.st_ctime
 
         return st
     
