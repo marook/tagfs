@@ -182,8 +182,9 @@ class AbstractNodeTest(unittest.TestCase):
         self.assertNotEqual(None, attr.st_mode)
 
         direntry = node.direntry
-        self.assertNotEqual(None, direntry.name)
-        self.assertNotEqual(None, direntry.type)
+        if direntry is not None:
+            self.assertNotEqual(None, direntry.name)
+            self.assertNotEqual(None, direntry.type)
 
 class TestItemNode(AbstractNodeTest):
     """This test case tests the ItemNode class.
@@ -213,6 +214,15 @@ class TestUntaggedItemsNode(AbstractNodeTest):
 
         direntry = node.direntry
         self.assertEqual('.untagged', direntry.name)
+        
+class TestRootNode(AbstractNodeTest):
+    """This test case tests the RootNode.
+    """
+    
+    def testRootNode(self):
+        node = tagfs.RootNode(self.itemAccess)
+        
+        self._testNodeInterface(node)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
