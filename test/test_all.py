@@ -49,6 +49,8 @@ class TestItem(unittest.TestCase):
             self.tagFileName = '.tag'
     
     def setUp(self):
+        unittest.TestCase.setUp(self)
+        
         self.itemAccess = TestItem.MyItemAccess()
     
     def testItemNotExists(self):
@@ -95,6 +97,8 @@ class TestItemAccess(unittest.TestCase):
     """
 
     def setUp(self):
+        unittest.TestCase.setUp(self)
+        
         self.itemAccess = createTestItemAccess()
 
     def testItems(self):
@@ -158,7 +162,15 @@ class AbstractNodeTest(unittest.TestCase):
     """This abstract TestCase checks the Node interface definitions.
     """
     
+    def setUp(self):
+        unittest.TestCase.setUp(self)
+        
+        self.itemAccess = createTestItemAccess()
+    
     def _testNodeInterface(self, node):
+        """This method tests wether the node implements the node interface contract.
+        """
+        
         self.assertNotEqual(None, node)
         
         for subNode in node.subNodes:
@@ -166,16 +178,14 @@ class AbstractNodeTest(unittest.TestCase):
 
         self.assertTrue('getSubNode' in set(dir(node)))
         
-        self.assertNotEqual(None, node.attr)
+        attr = node.attr
+        self.assertNotEqual(None, attr.st_mode)
 
 class TestItemNode(AbstractNodeTest):
     """This test case tests the ItemNode class.
     """
     
-    def setUp(self):
-        self.itemAccess = createTestItemAccess()
-    
-    def testNodeInterface(self):
+    def testItemNodeInterface(self):
         import stat
         
         node = tagfs.ItemNode('test', self.itemAccess)
@@ -187,6 +197,13 @@ class TestItemNode(AbstractNodeTest):
         self.assertEqual(stat.S_IFLNK, direntry.type)
         
         self.assertNotEqual(None, node.link)
+        
+class TestUntaggedItemsNode(AbstractNodeTest):
+    
+    def testUntaggedItemsNodeInterface(self):
+        node = tagfs.UntaggedItemsNode('.untagged', self.itemAccess)
+        
+        self._testNodeInterface(node)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
