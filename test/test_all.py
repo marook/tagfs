@@ -151,6 +151,32 @@ class TestItemAccess(unittest.TestCase):
                           ['2008-03-29 - holiday south korea'],
                           ['holiday'])
 
+class AbstractNodeTest(unittest.TestCase):
+    """This abstract TestCase checks the Node interface definitions.
+    """
+    
+    def _testNodeInterface(self, node):
+        self.assertNotEqual(None, node)
+        
+        for subNode in node.subNodes:
+            self._testNodeInterface(subNode)
+
+        self.assertTrue('getSubNode' in set(dir(node)))
+        
+        self.assertNotEqual(None, node.attr)
+
+class TestItemNode(AbstractNodeTest):
+    """This test case tests the ItemNode class.
+    """
+    
+    def setUp(self):
+        self.itemAccess = None
+    
+    def testNodeInterface(self):
+        node = tagfs.ItemNode('test', self.itemAccess)
+        
+        self._testNodeInterface(node)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     import sys, os.path
