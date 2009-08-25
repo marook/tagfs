@@ -21,6 +21,9 @@
 import logging
 import unittest
 
+def createTestItemAccess():
+    return tagfs.ItemAccess('etc/test/events', '.tag')
+
 class TestTestCaseEnvironment(unittest.TestCase):
     """Makes sure the environment for the test case is set up right.
     """
@@ -92,7 +95,7 @@ class TestItemAccess(unittest.TestCase):
     """
 
     def setUp(self):
-        self.itemAccess = tagfs.ItemAccess('etc/test/events', '.tag')
+        self.itemAccess = createTestItemAccess()
 
     def testItems(self):
         """Test the items property of ItemAccess.
@@ -170,12 +173,20 @@ class TestItemNode(AbstractNodeTest):
     """
     
     def setUp(self):
-        self.itemAccess = None
+        self.itemAccess = createTestItemAccess()
     
     def testNodeInterface(self):
+        import stat
+        
         node = tagfs.ItemNode('test', self.itemAccess)
         
         self._testNodeInterface(node)
+    
+        direntry = node.direntry
+        self.assertEqual('test', direntry.name)
+        self.assertEqual(stat.S_IFLNK, direntry.type)
+        
+        self.assertNotEqual(None, node.link)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
