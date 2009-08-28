@@ -84,6 +84,12 @@ if not hasattr(fuse, '__version__'):
 fuse.fuse_python_api = (0, 2)
 
 def cache(f):
+    """This annotation is used to cache the result of a method call.
+    
+    @attention: The cache is never deleted. The first call initializes the
+    cache. The method's parameters just passed to the called method. The cache
+    is not evaluating the parameters.
+    """
     
     @functools.wraps(f)
     def cacher(*args, **kwargs):
