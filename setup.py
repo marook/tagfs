@@ -97,7 +97,7 @@ setup(
     description = '',
     long_description = '',
     author = 'Markus Pielmeier',
-    author_email = '',
+    author_email = 'markus.pielmeier@gmx.de',
     license = 'GPLv3',
     download_url = 'http://github.com/marook/tagfs/downloads/tagfs_0.1-src.tar.bz2',
     platforms = 'Linux',
