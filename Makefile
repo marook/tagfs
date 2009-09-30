@@ -78,3 +78,6 @@ unmounttest:
 	fusermount -u $(testmntdir)
 	rmdir -- $(testmntdir)
 
+.PHONY: umounttest
+umounttest: unmounttest
+
