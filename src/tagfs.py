@@ -85,15 +85,6 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-def hasField(obj, fieldName):
-    return fieldName in obj.__dict__
-
-def getField(obj, fieldName):
-    return obj.__dict__[fieldName] 
-    
-def setField(obj, fieldName, value):
-    obj.__dict__[fieldName] = value
-
 def noCacheStrategy(f, *args, **kwargs):
     """This cache strategy reloads the cache on every call.
     """
@@ -110,18 +101,18 @@ def timeoutReloadStrategy(f, *args, **kwargs):
     timestampFieldName = '__' + f.__name__ + 'Timestamp'
     now = time.time()
     
-    if not hasField(args[0], timestampFieldName):
-        setField(args[0], timestampFieldName, now)
+    if not hasattr(args[0], timestampFieldName):
+        setattr(args[0], timestampFieldName, now)
         
         return False
     
-    lastTime = getField(args[0], timestampFieldName)
+    lastTime = getattr(args[0], timestampFieldName)
     
     # TODO make time interval dynamic
     if now - lastTime < 10 * 60:
         return False
     
-    setField(args[0], timestampFieldName, now)
+    setattr(args[0], timestampFieldName, now)
     
     return True
     
@@ -145,14 +136,14 @@ def cache(f, reload = timeoutReloadStrategy):
         
         # the reload(...) call has to be first as we always have to call the
         # method. not only when there is a cache member available in the object.
-        if reload(f, *args, **kwargs) or not hasField(obj, cacheMemberName):
+        if reload(f, *args, **kwargs) or not hasattr(obj, cacheMemberName):
             value = f(*args, **kwargs)
             
-            setField(obj, cacheMemberName, value)
+            setattr(obj, cacheMemberName, value)
             
             return value
             
-        return getField(obj, cacheMemberName)
+        return getattr(obj, cacheMemberName)
     
     return cacher
     
