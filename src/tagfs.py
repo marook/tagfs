@@ -62,7 +62,9 @@ def setUpLogging():
 
 if __name__ == '__main__':
     # TODO implement cmd line configurable logging
-    #setUpLogging()
+    from os import environ as env
+    if env['DEBUG']:
+        setUpLogging()
     
     pass
 
