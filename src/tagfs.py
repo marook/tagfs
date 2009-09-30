@@ -83,9 +83,53 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-def cache(f):
+def hasField(obj, fieldName):
+    return fieldName in obj.__dict__
+
+def getField(obj, fieldName):
+    return obj.__dict__[fieldName] 
+    
+def setField(obj, fieldName, value):
+    obj.__dict__[fieldName] = value
+
+def noCacheStrategy(f, *args, **kwargs):
+    """This cache strategy reloads the cache on every call.
+    """
+    
+    return False
+
+def noReloadStrategy(f, *args, **kwargs):
+    """This cache strategy never reloads the cache.
+    """
+    
+    return True
+
+def timeoutReloadStrategy(f, *args, **kwargs):
+    timestampFieldName = '__' + f.__name__ + 'Timestamp'
+    now = time.time()
+    
+    if not hasField(args[0], timestampFieldName):
+        setField(args[0], timestampFieldName, now)
+        
+        return False
+    
+    lastTime = getField(args[0], timestampFieldName)
+    
+    # TODO make time interval dynamic
+    if now - lastTime < 10 * 60:
+        return False
+    
+    setField(args[0], timestampFieldName, now)
+    
+    return True
+    
+
+def cache(f, reload = timeoutReloadStrategy):
     """This annotation is used to cache the result of a method call.
     
+    @param f: This is the wrapped function which's return value will be cached.
+    @param reload: This is the reload strategy. This function returns True when
+    the cache should be reloaded. Otherwise False.
     @attention: The cache is never deleted. The first call initializes the
     cache. The method's parameters just passed to the called method. The cache
     is not evaluating the parameters.
@@ -97,12 +141,16 @@ def cache(f):
         
         cacheMemberName = '__' + f.__name__ + 'Cache'
         
-        if cacheMemberName not in obj.__dict__:
+        # the reload(...) call has to be first as we always have to call the
+        # method. not only when there is a cache member available in the object.
+        if reload(f, *args, **kwargs) or not hasField(obj, cacheMemberName):
             value = f(*args, **kwargs)
             
-            obj.__dict__[cacheMemberName] = value
+            setField(obj, cacheMemberName, value)
             
-        return obj.__dict__[cacheMemberName]
+            return value
+            
+        return getField(obj, cacheMemberName)
     
     return cacher
     
