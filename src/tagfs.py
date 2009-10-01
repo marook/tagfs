@@ -365,6 +365,13 @@ class MyStat(fuse.Stat):
 class Node(object):
     
     def _addSubNodes(self, subNodes, nodeNames, nodes):
+        """Adds the supplied nodes to the sub nodes.
+        
+        @param subNodes: This dict is extended with the nodes.
+        @param nodeNames: This is a logical name for the added nodes. It's just
+        used for logging.
+        @param nodes: This list contains the added nodes.
+        """
         for node in nodes:
             if node.name in subNodes:
                 logging.debug('%s is shadowed by %s',
