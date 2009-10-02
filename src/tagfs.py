@@ -499,6 +499,10 @@ class TagNode(Node):
     def __getItems(self):
         items, tags = self.itemAccess.filter(self.filterTags)
         
+        logging.debug('Items request for tag %s: %s',
+                      self.name,
+                      [item.name for item in items])
+        
         return items
     
     items = property(__getItems)
@@ -515,6 +519,10 @@ class TagNode(Node):
         self._addSubNodes(subNodes,
                           'tags',
                           [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in tags] if (len(items) > len(tagNode.items))])
+        
+        logging.debug('Sub nodes for tag %s: %s',
+                      self.name,
+                      subNodes)
         
         return subNodes
     
