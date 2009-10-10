@@ -62,7 +62,6 @@ def setUpLogging():
     logging.debug('Logging and exception handling has been set up')
 
 if __name__ == '__main__':
-    # TODO implement cmd line configurable logging
     from os import environ as env
     if 'DEBUG' in env:
         setUpLogging()
@@ -116,7 +115,6 @@ class TimeoutReloadStrategy(object):
     
         lastTime = getattr(args[0], timestampFieldName)
     
-        # TODO make time interval dynamic
         if now - lastTime < self.timeoutDuration:
             return False
     
@@ -292,8 +290,6 @@ class ItemAccess(object):
     @property
     @cache
     def items(self):
-        # TODO improve cache handling. especially reload the cache sometimes.
-        
         return self.__parseItems()
     
     @property
