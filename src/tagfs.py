@@ -401,14 +401,13 @@ class ItemNode(Node):
     def name(self):
         return self.item.name
         
-    def __getSubNodes(self):
+    @property
+    def subNodes(self):
         """Returns always [] because we don't have sub nodes.
         """
 
         return []
     
-    subNodes = property(__getSubNodes)
-
     def getSubNode(self, pathElement):
         """Returns always None as item nodes don't have sub nodes.
         """
