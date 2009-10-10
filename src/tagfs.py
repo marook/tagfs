@@ -85,21 +85,21 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-class NoCacheStrategy():
+class NoCacheStrategy(object):
     """This cache strategy reloads the cache on every call.
     """
     
     def isCacheValid(self, f, *args, **kwargs):
         return False
     
-class NoReloadStrategy():
+class NoReloadStrategy(object):
     """This cache strategy never reloads the cache.
     """
     
     def isCacheValid(self, f, *args, **kwargs):
         return True
 
-class TimeoutReloadStrategy():
+class TimeoutReloadStrategy(object):
     
     def __init__(self, timeoutDuration = 10 * 60):
         self.timeoutDuration = timeoutDuration
