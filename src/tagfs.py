@@ -85,39 +85,46 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-def noCacheStrategy(f, *args, **kwargs):
+class NoCacheStrategy():
     """This cache strategy reloads the cache on every call.
     """
     
-    return False
-
-def noReloadStrategy(f, *args, **kwargs):
+    def isCacheValid(self, f, *args, **kwargs):
+        return False
+    
+class NoReloadStrategy():
     """This cache strategy never reloads the cache.
     """
     
-    return True
+    def isCacheValid(self, f, *args, **kwargs):
+        return True
 
-def timeoutReloadStrategy(f, *args, **kwargs):
-    timestampFieldName = '__' + f.__name__ + 'Timestamp'
-    now = time.time()
+class TimeoutReloadStrategy():
     
-    if not hasattr(args[0], timestampFieldName):
-        setattr(args[0], timestampFieldName, now)
+    def __init__(self, timeoutDuration = 10 * 60):
+        self.timeoutDuration = timeoutDuration
+    
+    def isCacheValid(self, f, *args, **kwargs):
+        timestampFieldName = '__' + f.__name__ + 'Timestamp'
+        now = time.time()
+    
+        if not hasattr(args[0], timestampFieldName):
+            setattr(args[0], timestampFieldName, now)
         
-        return False
+            return False
     
-    lastTime = getattr(args[0], timestampFieldName)
+        lastTime = getattr(args[0], timestampFieldName)
     
-    # TODO make time interval dynamic
-    if now - lastTime < 10 * 60:
-        return False
+        # TODO make time interval dynamic
+        if now - lastTime < self.timeoutDuration:
+            return False
     
-    setattr(args[0], timestampFieldName, now)
+        setattr(args[0], timestampFieldName, now)
     
-    return True
+        return True
     
 
-def cache(f, reload = timeoutReloadStrategy):
+def cache(f, reloadStrategy = TimeoutReloadStrategy()):
     """This annotation is used to cache the result of a method call.
     
     @param f: This is the wrapped function which's return value will be cached.
@@ -136,7 +143,7 @@ def cache(f, reload = timeoutReloadStrategy):
         
         # the reload(...) call has to be first as we always have to call the
         # method. not only when there is a cache member available in the object.
-        if reload(f, *args, **kwargs) or not hasattr(obj, cacheMemberName):
+        if reloadStrategy.isCacheValid(f, *args, **kwargs) or not hasattr(obj, cacheMemberName):
             value = f(*args, **kwargs)
             
             setattr(obj, cacheMemberName, value)
