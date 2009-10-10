@@ -155,7 +155,6 @@ def cache(f, reloadStrategy = TimeoutReloadStrategy()):
     
     return cacher
     
-
 def parseTagsFromFile(tagFileName):
     """Parses the tags from the specified file.
     
@@ -186,67 +185,58 @@ class Item(object):
         
         # TODO register at file system to receive tag file change events.
         
+    @property
     @cache
-    def __getItemDirectory(self):
+    def itemDirectory(self):
         return os.path.join(self.itemAccess.dataDirectory, self.name)
     
-    itemDirectory = property(__getItemDirectory)
-    
+    @property
     @cache
-    def __getTagFileName(self):
+    def _tagFileName(self):
         """Returns the name of the tag file for this item.
-        
-        This method is published via the property __tagFileName.
         """
         
         itemDirectory = self.itemDirectory
 
         return os.path.join(itemDirectory, self.itemAccess.tagFileName)
-        
-    __tagFileName = property(__getTagFileName)
     
     def __parseTags(self):
-        tagFileName = self.__tagFileName
+        tagFileName = self._tagFileName
         
         if not os.path.exists(tagFileName):
             return None
 
         return parseTagsFromFile(tagFileName)
 
+    @property
     @cache
-    def __getTagsCreationTime(self):
+    def tagsCreationTime(self):
         
         # TODO implement some caching
         
-        tagFileName = self.__tagFileName
+        tagFileName = self._tagFileName
         
         if not os.path.exists(tagFileName):
             return None
 
-        return os.path.getctime(self.__tagFileName)
+        return os.path.getctime(self._tagFileName)
     
-    tagsCreationTime = property(__getTagsCreationTime)
-        
+    @property
     @cache
-    def __getTagsModificationTime(self):
+    def tagsModificationTime(self):
         """Returns the last time when the tags have been modified.
-        
-        This method is published via the property tagsModificationDate.
         """
         
-        # TODO implement some caching
-        
-        tagFileName = self.__tagFileName
+        tagFileName = self._tagFileName
         
         if not os.path.exists(tagFileName):
             return None
 
-        return os.path.getmtime(self.__tagFileName)
+        return os.path.getmtime(tagFileName)
     
-    tagsModificationTime = property(__getTagsModificationTime)
-        
+    @property
     @cache
-    def __getTags(self):
+    def tags(self):
         """Returns the tags as a list for this item.
         
         This method is published via the property tags.
@@ -256,17 +246,14 @@ class Item(object):
         
         return self.__parseTags()
     
-    tags = property(__getTags)
-    
+    @property
     @cache
-    def __isTagged(self):
+    def tagged(self):
         
         # TODO implement some caching
         
-        return os.path.exists(self.__tagFileName)
+        return os.path.exists(self._tagFileName)
     
-    tagged = property(__isTagged)
-        
 
 class ItemAccess(object):
     """This is the access point to the Items.
@@ -301,16 +288,16 @@ class ItemAccess(object):
         
         return items
     
+    @property
     @cache
-    def __getItems(self):
+    def items(self):
         # TODO improve cache handling. especially reload the cache sometimes.
         
         return self.__parseItems()
     
-    items = property(__getItems)
-    
+    @property
     @cache
-    def __getTags(self):
+    def tags(self):
         tags = set()
         
         for item in self.items.itervalues():
@@ -320,21 +307,17 @@ class ItemAccess(object):
             tags = tags | item.tags
             
         return tags
-    
-    tags = property(__getTags)
-    
+
+    @property
     @cache
-    def __getTaggedItems(self):
+    def taggedItems(self):
         return set([item for item in self.items.itervalues() if item.tagged])
     
-    taggedItems = property(__getTaggedItems)
-    
+    @property
     @cache
-    def __getUntaggedItems(self):
+    def untaggedItems(self):
         return set([item for item in self.items.itervalues() if not item.tagged])
 
-    untaggedItems = property(__getUntaggedItems)
-    
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
     
@@ -390,11 +373,10 @@ class Node(object):
                 
             subNodes[node.name] = node
     
+    @property
     @cache
-    def __getSubNodes(self):
+    def subNodes(self):
         return [node for name, node in self._getSubNodesDict().iteritems()]
-    
-    subNodes = property(__getSubNodes)
     
     def getSubNode(self, pathElement):
         subNodesDict = self._getSubNodesDict()
@@ -425,30 +407,27 @@ class ItemNode(Node):
         """
         return None
     
+    @property
     @cache
-    def __getAttr(self):
+    def attr(self):
         st = MyStat()
         st.st_mode = stat.S_IFLNK | 0444
         st.st_nlink = 2
             
         return st
     
-    attr = property(__getAttr)
-    
+    @property
     @cache
-    def __getDirentry(self):
+    def direntry(self):
         e = fuse.Direntry(self.name)
         e.type = stat.S_IFLNK
         
         return e
     
-    direntry = property(__getDirentry)
-    
+    @property
     @cache
-    def __getLink(self):
+    def link(self):
         return self.itemAccess.getItemDirectory(self.name)
-    
-    link = property(__getLink)
     
 class UntaggedItemsNode(Node):
     """Represents a node which contains not tagged items.
@@ -468,25 +447,23 @@ class UntaggedItemsNode(Node):
         
         return subNodes
     
+    @property
     @cache
-    def __getAttr(self):
+    def attr(self):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
             
         return st
     
-    attr = property(__getAttr)
-
+    @property
     @cache
-    def __getDirentry(self):
+    def direntry(self):
         e = fuse.Direntry(self.name)
         e.type = stat.S_IFDIR
         
         return e
     
-    direntry = property(__getDirentry)
-
 class TagNode(Node):
     
     def __init__(self, parentNode, tagName, itemAccess):
@@ -494,17 +471,17 @@ class TagNode(Node):
         self.name = tagName
         self.itemAccess = itemAccess
         
+    @property
     @cache
-    def __getFilterTags(self):
+    def filterTags(self):
         filterTags = [tag for tag in self.parentNode.filterTags]
         filterTags.append(self.name)
         
         return filterTags
     
-    filterTags = property(__getFilterTags)
-    
+    @property
     @cache
-    def __getItems(self):
+    def items(self):
         items, tags = self.itemAccess.filter(self.filterTags)
         
         logging.debug('Items request for tag %s: %s',
@@ -512,8 +489,6 @@ class TagNode(Node):
                       [item.name for item in items])
         
         return items
-    
-    items = property(__getItems)
     
     @cache
     def _getSubNodesDict(self):
@@ -534,24 +509,22 @@ class TagNode(Node):
         
         return subNodes
     
+    @property
     @cache
-    def __getAttr(self):
+    def attr(self):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
             
         return st
     
-    attr = property(__getAttr)
-
+    @property
     @cache
-    def __getDirentry(self):
+    def direntry(self):
         e = fuse.Direntry(self.name)
         e.type = stat.S_IFDIR
         
         return e
-    
-    direntry = property(__getDirentry)
     
 class RootNode(Node):
     
@@ -575,20 +548,18 @@ class RootNode(Node):
         
         return subNodes
         
+    @property
     @cache
-    def __getAttr(self):
+    def attr(self):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
 
         return st
     
-    attr = property(__getAttr)
-    
-    def __getDirentry(self):
+    @property
+    def direntry(self):
         return None
-    
-    direntry = property(__getDirentry)
     
 class TagFS(fuse.Fuse):
     
