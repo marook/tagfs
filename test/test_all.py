@@ -194,7 +194,9 @@ class TestItemNode(AbstractNodeTest):
     def testItemNodeInterface(self):
         import stat
         
-        node = tagfs.ItemNode('test', self.itemAccess)
+        item = tagfs.Item('test', self.itemAccess)
+        
+        node = tagfs.ItemNode(item, self.itemAccess)
         
         self._testNodeInterface(node)
     

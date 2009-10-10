@@ -254,6 +254,9 @@ class Item(object):
         
         return os.path.exists(self._tagFileName)
     
+    def __repr__(self):
+        return '<Item %s>' % self.name
+    
 
 class ItemAccess(object):
     """This is the access point to the Items.
@@ -390,10 +393,14 @@ class Node(object):
 
 class ItemNode(Node):
     
-    def __init__(self, itemName, itemAccess):
-        self.name = itemName
+    def __init__(self, item, itemAccess):
+        self.item = item
         self.itemAccess = itemAccess
-    
+        
+    @property
+    def name(self):
+        return self.item.name
+        
     def __getSubNodes(self):
         """Returns always [] because we don't have sub nodes.
         """
@@ -428,6 +435,9 @@ class ItemNode(Node):
     @cache
     def link(self):
         return self.itemAccess.getItemDirectory(self.name)
+    
+    def __repr__(self):
+        return '<ItemNode %s>' % self.name
     
 class UntaggedItemsNode(Node):
     """Represents a node which contains not tagged items.
@@ -541,7 +551,7 @@ class RootNode(Node):
                           [UntaggedItemsNode('.untagged', self.itemAccess), ])
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(item, self.itemAccess) for item in self.itemAccess.items])
+                          [ItemNode(item, self.itemAccess) for item in self.itemAccess.items.itervalues()])
         self._addSubNodes(subNodes,
                           'tags',
                           [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
