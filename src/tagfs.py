@@ -238,8 +238,6 @@ class Item(object):
     @cache
     def tags(self):
         """Returns the tags as a list for this item.
-        
-        This method is published via the property tags.
         """
         
         # TODO implement some caching
