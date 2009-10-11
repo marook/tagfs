@@ -153,10 +153,34 @@ def cache(f, reloadStrategy = TimeoutReloadStrategy()):
     
     return cacher
     
+class Tag(object):
+    
+    def __init__(self, value, context = None):
+        if context == None:
+            self.context = None
+        else:
+            self.context = context.strip()
+        
+        self.value = value.strip()
+        
+        if not self.context == None and len(self.context) == 0:
+            # we don't allow empty strings as they can't be represented as a
+            # directory very well
+            raise ValueError()
+
+        if len(self.value) == 0:
+            # we don't allow empty strings as they can't be represented as a
+            # directory very well
+            raise ValueError()
+        
+    def __repr__(self):
+        return '<Tag %s: %s>' % self.context, self.value
+
 def parseTagsFromFile(tagFileName):
     """Parses the tags from the specified file.
     
-    @return: The parsed values are returned as a set containing the tag strings.
+    @return: The parsed values are returned as a set containing Tag objects.
+    @see: Tag
     """
     
     tags = set()
@@ -164,11 +188,22 @@ def parseTagsFromFile(tagFileName):
     tagFile = open(tagFileName, 'r')
     try:
         for rawTag in tagFile.readlines():
-            tag = rawTag.strip()
-                        
-            if len(tag) == 0:
+            rawTag = rawTag.strip()
+            
+            if len(rawTag) == 0:
                 continue
-                        
+            
+            tagTuple = rawTag.split(':', 1)
+            
+            if len(tagTuple) == 1:
+                tagContext = None
+                tagValue = tagTuple[0]
+            else:
+                tagContext = tagTuple[0]
+                tagValue = tagTuple[1]
+                
+            tag = Tag(tagValue, context = tagContext)
+
             tags.add(tag)
     finally:
         tagFile.close()
