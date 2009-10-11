@@ -168,13 +168,11 @@ class TestItemAccess(unittest.TestCase):
         self.assertEqual(set(['2009-07-29 - no tags']),
                          set([item.name for item in untaggedItems]))
         
-    def _testFilter(self, filters, expectedResultItems, expectedResultTags):
+    def _testFilter(self, filters, expectedResultItems):
         resultItems = self.itemAccess.filterItems(filters)
-        resultTags = self.itemAccess.filterTags(filters)
         
         self.assertEqual(set(expectedResultItems),
                          set([item.name for item in resultItems]))
-        self.assertEqual(set(expectedResultTags), set(resultTags))
     
     def testFilterSingle(self):
         """Tests TagValueFilter filter argument.
@@ -183,11 +181,7 @@ class TestItemAccess(unittest.TestCase):
         """
         
         self._testFilter(tagfs.TagValueFilter('korea'),
-                         ['2008-03-29 - holiday south korea'],
-                         [tagfs.Tag('airport'),
-                          tagfs.Tag('holiday'),
-                          tagfs.Tag('india'),
-                          tagfs.Tag('Markus Pielmeier', context = 'creator')])
+                         ['2008-03-29 - holiday south korea'])
 
     def testFilterMultiple(self):
         """Tests AndFilter filter arguments at once.
@@ -197,10 +191,7 @@ class TestItemAccess(unittest.TestCase):
         
         self._testFilter(tagfs.AndFilter([tagfs.TagValueFilter('korea'),
                                           tagfs.TagValueFilter('airport')]),
-                         ['2008-03-29 - holiday south korea'],
-                         [tagfs.Tag('holiday'),
-                          tagfs.Tag('india'),
-                          tagfs.Tag('Markus Pielmeier', context = 'creator')])
+                         ['2008-03-29 - holiday south korea'])
 
 class AbstractNodeTest(unittest.TestCase):
     """This abstract TestCase checks the Node interface definitions.

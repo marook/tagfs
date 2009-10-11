@@ -316,15 +316,6 @@ class TagValueFilter(object):
                 
         items -= droppedItems
         
-    def filterTags(self, tags):
-        droppedTags = set()
-        
-        for tag in tags:
-            if tag.value == self.tagValue:
-                droppedTags.add(tag)
-                
-        tags -= droppedTags
-        
 class TagFilter(object):
     
     def __init__(self, tag):
@@ -339,9 +330,6 @@ class TagFilter(object):
                 
         items -= droppedItems
         
-    def filterTags(self, tags):
-        tags.discard(self.tag)
-        
 class AndFilter(object):
     """Concatenates two filters with a logical 'and'.
     """
@@ -353,18 +341,11 @@ class AndFilter(object):
         for subFilter in self.subFilters:
             subFilter.filterItems(items)
             
-    def filterTags(self, tags):
-        for subFilter in self.subFilters:
-            subFilter.filterTags(tags)
-        
 class NoneFilter(object):
     
     def filterItems(self, items):
         pass
     
-    def filterTags(self, tags):
-        pass
-        
 class ItemAccess(object):
     """This is the access point to the Items.
     """
@@ -435,13 +416,6 @@ class ItemAccess(object):
         filter.filterItems(resultItems)
         
         return resultItems
-    
-    def filterTags(self, filter):
-        resultTags = set([tag for tag in self.tags])
-        
-        filter.filterTags(resultTags)
-        
-        return resultTags
     
     def contextTags(self, context):
         contextTags = set()
@@ -541,15 +515,6 @@ class ContainerNode(Node):
                       [item.name for item in items])
         
         return items
-    
-    @property
-    @cache
-    def tags(self):
-        tags = self.itemAccess.filterTags(self.filter)
-        
-        logging.debug('Tags request for %s: %s', self, tags)
-        
-        return tags
     
     @property
     @cache
@@ -676,7 +641,7 @@ class TagValueNode(ContainerNode):
                           [ItemNode(item, self.itemAccess) for item in self.items])
         self._addSubNodes(subNodes,
                           'tags',
-                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
         
         logging.debug('Sub nodes for tag value %s: %s', self.tagValue, subNodes)
         
@@ -707,7 +672,7 @@ class TagNode(ContainerNode):
                           [ItemNode(item, self.itemAccess) for item in self.items])
         self._addSubNodes(subNodes,
                           'tags',
-                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
         
         logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
         
@@ -738,7 +703,7 @@ class ContextTagNode(ContainerNode):
                           [ItemNode(item, self.itemAccess) for item in self.items])
         self._addSubNodes(subNodes,
                           'tags',
-                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
         
         logging.debug('Sub nodes for %s: %s', self, subNodes)
         
