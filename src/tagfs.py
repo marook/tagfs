@@ -442,6 +442,28 @@ class ItemAccess(object):
         filter.filterTags(resultTags)
         
         return resultTags
+    
+    def contextTags(self, context):
+        contextTags = set()
+        
+        for tag in self.tags:
+            if tag.context == context:
+                contextTags.add(tag)
+                
+        return contextTags
+    
+    @property
+    @cache
+    def contexts(self):
+        contexts = set()
+        
+        for tag in self.tags:
+            if tag.context == None:
+                continue
+            
+            contexts.add(tag.context)
+        
+        return contexts
         
 class MyStat(fuse.Stat):
     
@@ -508,6 +530,26 @@ class ContainerNode(Node):
         parentFilter = self.parentNode.filter
         
         return AndFilter([parentFilter, self._myFilter])
+    
+    @property
+    @cache
+    def items(self):
+        items = self.itemAccess.filterItems(self.filter)
+        
+        logging.debug('Items request for %s: %s',
+                      self,
+                      [item.name for item in items])
+        
+        return items
+    
+    @property
+    @cache
+    def tags(self):
+        tags = self.itemAccess.filterTags(self.filter)
+        
+        logging.debug('Tags request for %s: %s', self, tags)
+        
+        return tags
     
     @property
     @cache
@@ -609,6 +651,37 @@ class UntaggedItemsNode(Node):
         
         return e
     
+class TagValueNode(ContainerNode):
+    
+    def __init__(self, parentNode, tagValue, itemAccess):
+        super(TagValueNode, self).__init__(parentNode)
+        self.tagValue = tagValue
+        self.itemAccess = itemAccess
+        
+    @property
+    def name(self):
+        return self.tagValue
+        
+    @property
+    @cache
+    def _myFilter(self):
+        return TagValueFilter(self.tagValue)
+    
+    @cache
+    def _getSubNodesDict(self):
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(item, self.itemAccess) for item in self.items])
+        self._addSubNodes(subNodes,
+                          'tags',
+                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+        
+        logging.debug('Sub nodes for tag value %s: %s', self.tagValue, subNodes)
+        
+        return subNodes
+    
 class TagNode(ContainerNode):
     
     def __init__(self, parentNode, tag, itemAccess):
@@ -623,28 +696,39 @@ class TagNode(ContainerNode):
     @property
     @cache
     def _myFilter(self):
-        return TagValueFilter(self.tag.value)
+        return TagFilter(self.tag)
     
+    @cache
+    def _getSubNodesDict(self):
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(item, self.itemAccess) for item in self.items])
+        self._addSubNodes(subNodes,
+                          'tags',
+                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+        
+        logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
+        
+        return subNodes
+    
+class ContextTagNode(ContainerNode):
+    
+    def __init__(self, parentNode, tag, itemAccess):
+        super(ContextTagNode, self).__init__(parentNode)
+        self.tag = tag
+        self.itemAccess = itemAccess
+        
+    @property
+    def name(self):
+        return self.tag.value
+        
     @property
     @cache
-    def items(self):
-        items = self.itemAccess.filterItems(self.filter)
-        
-        logging.debug('Items request for %s: %s',
-                      self.tag,
-                      [item.name for item in items])
-        
-        return items
-    
-    @property
-    @cache
-    def tags(self):
-        tags = self.itemAccess.filterTags(self.filter)
-        
-        logging.debug('Tags request for %s: %s', self.tag, tags)
-        
-        return tags
-    
+    def _myFilter(self):
+        return TagFilter(self.tag)
+
     @cache
     def _getSubNodesDict(self):
         subNodes = {}
@@ -656,10 +740,37 @@ class TagNode(ContainerNode):
                           'tags',
                           [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
         
-        logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
+        logging.debug('Sub nodes for %s: %s', self, subNodes)
         
         return subNodes
+
+class ContextContainerNode(ContainerNode):
     
+    def __init__(self, parentNode, context, itemAccess):
+        super(ContextContainerNode, self).__init__(parentNode)
+        self.context = context
+        self.itemAccess = itemAccess
+        
+    @property
+    def name(self):
+        return self.context
+        
+    @property
+    def filter(self):
+        return self.parentNode.filter
+    
+    @cache
+    def _getSubNodesDict(self):
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'tags',
+                          [tagNode for tagNode in [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)]])
+        
+        logging.debug('Sub nodes for %s: %s', self, subNodes)
+        
+        return subNodes
+
 class RootNode(Node):
     
     def __init__(self, itemAccess):
@@ -682,8 +793,11 @@ class RootNode(Node):
                           'items',
                           [ItemNode(item, self.itemAccess) for item in self.itemAccess.items.itervalues()])
         self._addSubNodes(subNodes,
+                          'contexts',
+                          [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+        self._addSubNodes(subNodes,
                           'tags',
-                          [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
+                          [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
         return subNodes
         
