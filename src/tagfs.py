@@ -472,7 +472,7 @@ class Node(object):
                 continue
                 
             subNodes[node.name] = node
-    
+            
     @property
     @cache
     def subNodes(self):
@@ -495,8 +495,21 @@ class ContainerNode(Node):
     * container nodes are always represented as directories
     """
     
+    def _addSubContainerNodes(self, subNodes, nodeNames, containerNodes):
+        items = self.items
+        
+        self._addSubNodes(subNodes,
+                          nodeNames,
+                          [n for n in containerNodes if n.required(items)])
+        
     def __init__(self, parentNode):
         self.parentNode = parentNode
+        
+    def required(self, items):
+        selfItems = self.items
+        selfItemsLen = len(self.items)
+        
+        return not selfItemsLen == 0 and not selfItemsLen == len(items)
             
     @property
     @cache
@@ -634,14 +647,16 @@ class TagValueNode(ContainerNode):
     
     @cache
     def _getSubNodesDict(self):
+        items = self.items
+        
         subNodes = {}
         
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(item, self.itemAccess) for item in self.items])
-        self._addSubNodes(subNodes,
-                          'tags',
-                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+                          [ItemNode(item, self.itemAccess) for item in items])
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for tag value %s: %s', self.tagValue, subNodes)
         
@@ -665,14 +680,16 @@ class TagNode(ContainerNode):
     
     @cache
     def _getSubNodesDict(self):
+        items = self.items
+        
         subNodes = {}
         
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(item, self.itemAccess) for item in self.items])
-        self._addSubNodes(subNodes,
-                          'tags',
-                          [tagNode for tagNode in [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+                          [ItemNode(item, self.itemAccess) for item in items])
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
         
@@ -696,14 +713,16 @@ class ContextTagNode(ContainerNode):
 
     @cache
     def _getSubNodesDict(self):
+        items = self.items
+        
         subNodes = {}
         
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(item, self.itemAccess) for item in self.items])
-        self._addSubNodes(subNodes,
-                          'tags',
-                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
+                          [ItemNode(item, self.itemAccess) for item in items])
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for %s: %s', self, subNodes)
         
