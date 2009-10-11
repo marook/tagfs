@@ -50,6 +50,12 @@ class TestParseTagsFromFile(unittest.TestCase):
         
         self.assertEqual(3, len(tags))
 
+        expectedTags = set([tagfs.Tag('holiday'),
+                            tagfs.Tag('airport'),
+                            tagfs.Tag('korea')])
+        self.assertEqual(expectedTags, tags)
+        
+
 class TestItem(unittest.TestCase):
     """This is a test case for the Item class.
     """

@@ -173,8 +173,14 @@ class Tag(object):
             # directory very well
             raise ValueError()
         
+    def __hash__(self):
+        return (self.context, self.value).__hash__()
+    
+    def __eq__(self, other):
+        return self.value == other.value and self.context == other.context
+        
     def __repr__(self):
-        return '<Tag %s: %s>' % self.context, self.value
+        return '<Tag %s: %s>' % (self.context, self.value)
 
 def parseTagsFromFile(tagFileName):
     """Parses the tags from the specified file.
