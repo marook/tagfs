@@ -1,3 +1,3 @@
 holiday
 airport
-india
+location: india
