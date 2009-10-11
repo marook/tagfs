@@ -107,7 +107,10 @@ class TestItem(unittest.TestCase):
         
         self.assertTrue(os.path.isdir(item.itemDirectory))
         
-        self.assertEqual(set(['holiday', 'airport', 'india']), item.tags)
+        expectedTags = set([tagfs.Tag('holiday'),
+                            tagfs.Tag('airport'),
+                            tagfs.Tag('india')])
+        self.assertEqual(expectedTags, item.tags)
         # TODO disabled timestamp tests until time in test is not human readable
         #self.assertAlmostEqual(1250195650.7, item.tagsModificationTime, 1)
         #self.assertAlmostEqual(1250195650.7, item.tagsCreationTime, 1)
@@ -127,7 +130,10 @@ class TestItemAccess(unittest.TestCase):
         """
         items = self.itemAccess.items
         
-        self.assertEqual(set(['2008-03-29 - holiday south korea', '2008-12-25 - holiday india', '2009-07-29 - no tags']),
+        expectedItems = set(['2008-03-29 - holiday south korea',
+                             '2008-12-25 - holiday india',
+                             '2009-07-29 - no tags'])
+        self.assertEqual(expectedItems,
                          set(items))
 
     def testTags(self):
@@ -136,7 +142,11 @@ class TestItemAccess(unittest.TestCase):
         
         tags = self.itemAccess.tags
         
-        self.assertEqual(set(['airport', 'holiday', 'india', 'korea']),
+        expectedTags = set([tagfs.Tag('airport'),
+                            tagfs.Tag('holiday'),
+                            tagfs.Tag('india'),
+                            tagfs.Tag('korea')])
+        self.assertEqual(expectedTags,
                          set(tags))
         
     def testTaggedItems(self):
@@ -144,7 +154,9 @@ class TestItemAccess(unittest.TestCase):
         """
         items = self.itemAccess.taggedItems
         
-        self.assertEqual(set(['2008-03-29 - holiday south korea', '2008-12-25 - holiday india']),
+        expectedItems = set(['2008-03-29 - holiday south korea',
+                             '2008-12-25 - holiday india'])
+        self.assertEqual(expectedItems,
                          set([item.name for item in items]))
 
     def testUntaggedItems(self):
@@ -167,17 +179,17 @@ class TestItemAccess(unittest.TestCase):
         """Tests a single filter argument.
         """
         
-        self.__testFilter(['korea'],
+        self.__testFilter([tagfs.Tag('korea')],
                           ['2008-03-29 - holiday south korea'],
-                          ['airport', 'holiday'])
+                          [tagfs.Tag('airport'), tagfs.Tag('holiday')])
 
     def testFilterMultiple(self):
         """Tests multiple filter arguments at once.
         """
         
-        self.__testFilter(['korea', 'airport'],
+        self.__testFilter([tagfs.Tag('korea'), tagfs.Tag('airport')],
                           ['2008-03-29 - holiday south korea'],
-                          ['holiday'])
+                          [tagfs.Tag('holiday')])
 
 class AbstractNodeTest(unittest.TestCase):
     """This abstract TestCase checks the Node interface definitions.
@@ -245,7 +257,7 @@ class TestTagNode(AbstractNodeTest):
     def testTagNode(self):
         parentNode = tagfs.RootNode(self.itemAccess)
         
-        node = tagfs.TagNode(parentNode, 'holiday', self.itemAccess)
+        node = tagfs.TagNode(parentNode, tagfs.Tag('holiday'), self.itemAccess)
         
         self._testNodeInterface(node)
 

@@ -510,16 +510,20 @@ class UntaggedItemsNode(Node):
     
 class TagNode(Node):
     
-    def __init__(self, parentNode, tagName, itemAccess):
+    def __init__(self, parentNode, tag, itemAccess):
         self.parentNode = parentNode
-        self.name = tagName
+        self.tag = tag
         self.itemAccess = itemAccess
+        
+    @property
+    def name(self):
+        return self.tag.value
         
     @property
     @cache
     def filterTags(self):
         filterTags = [tag for tag in self.parentNode.filterTags]
-        filterTags.append(self.name)
+        filterTags.append(self.tag)
         
         return filterTags
     
@@ -528,8 +532,8 @@ class TagNode(Node):
     def items(self):
         items, tags = self.itemAccess.filter(self.filterTags)
         
-        logging.debug('Items request for tag %s: %s',
-                      self.name,
+        logging.debug('Items request for %s: %s',
+                      self.tag,
                       [item.name for item in items])
         
         return items
@@ -547,8 +551,8 @@ class TagNode(Node):
                           'tags',
                           [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in tags] if (len(items) > len(tagNode.items))])
         
-        logging.debug('Sub nodes for tag %s: %s',
-                      self.name,
+        logging.debug('Sub nodes for %s: %s',
+                      self.tag,
                       subNodes)
         
         return subNodes
