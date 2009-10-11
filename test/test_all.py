@@ -48,11 +48,10 @@ class TestParseTagsFromFile(unittest.TestCase):
         
         tags = tagfs.parseTagsFromFile(tagFileName)
         
-        self.assertEqual(3, len(tags))
-
         expectedTags = set([tagfs.Tag('holiday'),
                             tagfs.Tag('airport'),
-                            tagfs.Tag('korea')])
+                            tagfs.Tag('korea'),
+                            tagfs.Tag('Markus Pielmeier', context = 'creator')])
         self.assertEqual(expectedTags, tags)
         
 
@@ -145,7 +144,8 @@ class TestItemAccess(unittest.TestCase):
         expectedTags = set([tagfs.Tag('airport'),
                             tagfs.Tag('holiday'),
                             tagfs.Tag('india'),
-                            tagfs.Tag('korea')])
+                            tagfs.Tag('korea'),
+                            tagfs.Tag('Markus Pielmeier', context = 'creator')])
         self.assertEqual(expectedTags,
                          set(tags))
         
@@ -181,7 +181,7 @@ class TestItemAccess(unittest.TestCase):
         
         self.__testFilter([tagfs.Tag('korea')],
                           ['2008-03-29 - holiday south korea'],
-                          [tagfs.Tag('airport'), tagfs.Tag('holiday')])
+                          [tagfs.Tag('airport'), tagfs.Tag('holiday'), tagfs.Tag('Markus Pielmeier', context = 'creator')])
 
     def testFilterMultiple(self):
         """Tests multiple filter arguments at once.
@@ -189,7 +189,7 @@ class TestItemAccess(unittest.TestCase):
         
         self.__testFilter([tagfs.Tag('korea'), tagfs.Tag('airport')],
                           ['2008-03-29 - holiday south korea'],
-                          [tagfs.Tag('holiday')])
+                          [tagfs.Tag('holiday'), tagfs.Tag('Markus Pielmeier', context = 'creator')])
 
 class AbstractNodeTest(unittest.TestCase):
     """This abstract TestCase checks the Node interface definitions.
