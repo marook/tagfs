@@ -36,6 +36,20 @@ class TestTestCaseEnvironment(unittest.TestCase):
         
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'etc/test/events')))
 
+class TestParseTagsFromFile(unittest.TestCase):
+    
+    def testParse(self):
+        """Tests the parseTagsFromFile(...) method.
+        """
+        
+        tagFileName = os.path.join(eventsdir,
+                                   '2008-03-29 - holiday south korea',
+                                   '.tag')
+        
+        tags = tagfs.parseTagsFromFile(tagFileName)
+        
+        self.assertEqual(3, len(tags))
+
 class TestItem(unittest.TestCase):
     """This is a test case for the Item class.
     """
