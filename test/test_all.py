@@ -168,28 +168,39 @@ class TestItemAccess(unittest.TestCase):
         self.assertEqual(set(['2009-07-29 - no tags']),
                          set([item.name for item in untaggedItems]))
         
-    def __testFilter(self, filters, expectedResultItems, expectedResultTags):
-        resultItems, resultTags = self.itemAccess.filter(filters)
+    def _testFilter(self, filters, expectedResultItems, expectedResultTags):
+        resultItems = self.itemAccess.filterItems(filters)
+        resultTags = self.itemAccess.filterTags(filters)
         
         self.assertEqual(set(expectedResultItems),
                          set([item.name for item in resultItems]))
         self.assertEqual(set(expectedResultTags), set(resultTags))
     
     def testFilterSingle(self):
-        """Tests a single filter argument.
+        """Tests TagValueFilter filter argument.
+        
+        @see: tagfs.TagValueFilter
         """
         
-        self.__testFilter([tagfs.Tag('korea')],
-                          ['2008-03-29 - holiday south korea'],
-                          [tagfs.Tag('airport'), tagfs.Tag('holiday'), tagfs.Tag('Markus Pielmeier', context = 'creator')])
+        self._testFilter(tagfs.TagValueFilter('korea'),
+                         ['2008-03-29 - holiday south korea'],
+                         [tagfs.Tag('airport'),
+                          tagfs.Tag('holiday'),
+                          tagfs.Tag('india'),
+                          tagfs.Tag('Markus Pielmeier', context = 'creator')])
 
     def testFilterMultiple(self):
-        """Tests multiple filter arguments at once.
+        """Tests AndFilter filter arguments at once.
+        
+        @see: tagfs.AndFilter
         """
         
-        self.__testFilter([tagfs.Tag('korea'), tagfs.Tag('airport')],
-                          ['2008-03-29 - holiday south korea'],
-                          [tagfs.Tag('holiday'), tagfs.Tag('Markus Pielmeier', context = 'creator')])
+        self._testFilter(tagfs.AndFilter([tagfs.TagValueFilter('korea'),
+                                          tagfs.TagValueFilter('airport')]),
+                         ['2008-03-29 - holiday south korea'],
+                         [tagfs.Tag('holiday'),
+                          tagfs.Tag('india'),
+                          tagfs.Tag('Markus Pielmeier', context = 'creator')])
 
 class AbstractNodeTest(unittest.TestCase):
     """This abstract TestCase checks the Node interface definitions.

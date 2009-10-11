@@ -294,7 +294,77 @@ class Item(object):
     def __repr__(self):
         return '<Item %s>' % self.name
     
-
+class TagValueFilter(object):
+    
+    def __init__(self, tagValue):
+        self.tagValue = tagValue
+        
+    def filterItems(self, items):
+        droppedItems = set()
+        
+        for item in items:
+            hasTagValue = False
+                
+            for itemTag in item.tags:
+                if itemTag.value == self.tagValue:
+                    hasTagValue = True
+                    
+                    break
+                
+            if not hasTagValue:
+                droppedItems.add(item)
+                
+        items -= droppedItems
+        
+    def filterTags(self, tags):
+        droppedTags = set()
+        
+        for tag in tags:
+            if tag.value == self.tagValue:
+                droppedTags.add(tag)
+                
+        tags -= droppedTags
+        
+class TagFilter(object):
+    
+    def __init__(self, tag):
+        self.tag = tag
+        
+    def filterItems(self, items):
+        droppedItems = set()
+        
+        for item in items:
+            if not self.tag in item.tags:
+                droppedItems.add(item)
+                
+        items -= droppedItems
+        
+    def filterTags(self, tags):
+        tags.discard(self.tag)
+        
+class AndFilter(object):
+    """Concatenates two filters with a logical 'and'.
+    """
+    
+    def __init__(self, subFilters):
+        self.subFilters = subFilters
+        
+    def filterItems(self, items):
+        for subFilter in self.subFilters:
+            subFilter.filterItems(items)
+            
+    def filterTags(self, tags):
+        for subFilter in self.subFilters:
+            subFilter.filterTags(tags)
+        
+class NoneFilter(object):
+    
+    def filterItems(self, items):
+        pass
+    
+    def filterTags(self, tags):
+        pass
+        
 class ItemAccess(object):
     """This is the access point to the Items.
     """
@@ -359,23 +429,19 @@ class ItemAccess(object):
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
     
-    def filter(self, tagFilters):
-        tagFiltersSet = set(tagFilters)
-        resultItems = []
-        resultTags = set()
+    def filterItems(self, filter):
+        resultItems = set([item for item in self.taggedItems])
         
-        for item in self.taggedItems:
-            if len(tagFiltersSet & item.tags) < len(tagFilters):
-                continue
-            
-            resultItems.append(item)
-            
-            for itemTag in item.tags:
-                resultTags.add(itemTag)
-                
-        resultTags = resultTags - tagFiltersSet
+        filter.filterItems(resultItems)
         
-        return (resultItems, resultTags)
+        return resultItems
+    
+    def filterTags(self, filter):
+        resultTags = set([tag for tag in self.tags])
+        
+        filter.filterTags(resultTags)
+        
+        return resultTags
         
 class MyStat(fuse.Stat):
     
@@ -425,6 +491,41 @@ class Node(object):
             return None
         
         return subNodesDict[pathElement]
+
+class ContainerNode(Node):
+    """Abstract base node for nodes which contain items and or tags.
+    
+    Facts about ContainerNodes:
+    * container nodes are always represented as directories
+    """
+    
+    def __init__(self, parentNode):
+        self.parentNode = parentNode
+            
+    @property
+    @cache
+    def filter(self):
+        parentFilter = self.parentNode.filter
+        
+        return AndFilter([parentFilter, self._myFilter])
+    
+    @property
+    @cache
+    def attr(self):
+        st = MyStat()
+        st.st_mode = stat.S_IFDIR | 0555
+        st.st_nlink = 2
+            
+        return st
+    
+    @property
+    @cache
+    def direntry(self):
+        e = fuse.Direntry(self.name)
+        e.type = stat.S_IFDIR
+        
+        return e
+    
 
 class ItemNode(Node):
     
@@ -508,10 +609,10 @@ class UntaggedItemsNode(Node):
         
         return e
     
-class TagNode(Node):
+class TagNode(ContainerNode):
     
     def __init__(self, parentNode, tag, itemAccess):
-        self.parentNode = parentNode
+        super(TagNode, self).__init__(parentNode)
         self.tag = tag
         self.itemAccess = itemAccess
         
@@ -521,16 +622,13 @@ class TagNode(Node):
         
     @property
     @cache
-    def filterTags(self):
-        filterTags = [tag for tag in self.parentNode.filterTags]
-        filterTags.append(self.tag)
-        
-        return filterTags
+    def _myFilter(self):
+        return TagValueFilter(self.tag.value)
     
     @property
     @cache
     def items(self):
-        items, tags = self.itemAccess.filter(self.filterTags)
+        items = self.itemAccess.filterItems(self.filter)
         
         logging.debug('Items request for %s: %s',
                       self.tag,
@@ -538,47 +636,40 @@ class TagNode(Node):
         
         return items
     
+    @property
+    @cache
+    def tags(self):
+        tags = self.itemAccess.filterTags(self.filter)
+        
+        logging.debug('Tags request for %s: %s', self.tag, tags)
+        
+        return tags
+    
     @cache
     def _getSubNodesDict(self):
-        items, tags = self.itemAccess.filter(self.filterTags)
-        
         subNodes = {}
         
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(item, self.itemAccess) for item in items])
+                          [ItemNode(item, self.itemAccess) for item in self.items])
         self._addSubNodes(subNodes,
                           'tags',
-                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in tags] if (len(items) > len(tagNode.items))])
+                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in self.tags] if (len(tagNode.items) > 0 and (len(self.items) > len(tagNode.items)))])
         
-        logging.debug('Sub nodes for %s: %s',
-                      self.tag,
-                      subNodes)
+        logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
         
         return subNodes
-    
-    @property
-    @cache
-    def attr(self):
-        st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0555
-        st.st_nlink = 2
-            
-        return st
-    
-    @property
-    @cache
-    def direntry(self):
-        e = fuse.Direntry(self.name)
-        e.type = stat.S_IFDIR
-        
-        return e
     
 class RootNode(Node):
     
     def __init__(self, itemAccess):
         self.itemAccess = itemAccess
         self.filterTags = []
+        
+    @property
+    @cache
+    def filter(self):
+        return NoneFilter()
         
     @cache
     def _getSubNodesDict(self):
