@@ -20,21 +20,39 @@
 
 import logging
 import unittest
+import os
+import sys
+
+def setupenv():
+    from os.path import dirname, abspath, exists, join as pjoin, split as psplit
+
+    global eventsdir
+    testdir = dirname(abspath(__file__))
+    srcdir = pjoin(psplit(testdir)[0], 'src')
+    eventsdir = pjoin(psplit(testdir)[0], 'etc', 'test', 'events')
+
+    for x in (testdir, srcdir, eventsdir):
+        assert exists(x), "Directory not found: %s" % x
+
+    sys.path.extend((testdir, srcdir))
+
+setupenv()
+import tagfs
 
 def createTestItemAccess():
-    return tagfs.ItemAccess(eventsdir, '.tag')
+    return tagfs.ItemAccess('etc/test/events', '.tag')
 
 class TestTestCaseEnvironment(unittest.TestCase):
     """Makes sure the environment for the test case is set up right.
     """
     
     def testCwd(self):
-        """Makes sure that the events directory is accessible.
+        """Makes sure that the current working directory is correct.
         """
         
         import os
         
-        self.assertTrue(os.path.exists(eventsdir))
+        self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'etc/test/events')))
 
 class TestParseTagsFromFile(unittest.TestCase):
     
@@ -59,7 +77,7 @@ class TestItem(unittest.TestCase):
         """
         
         def __init__(self):
-            self.dataDirectory = eventsdir
+            self.dataDirectory = 'etc/test/events'
             self.tagFileName = '.tag'
     
     def setUp(self):
@@ -253,18 +271,6 @@ class TestRootNode(AbstractNodeTest):
         self._testNodeInterface(node)
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
-    import sys, os.path
-
-    testdir = os.path.dirname(os.path.abspath(__file__))
-    srcdir = os.path.join(os.path.split(testdir)[0], 'src')
-    eventsdir = os.path.join(os.path.split(testdir)[0], 'etc', 'test', 'events')
-
-    for x in (testdir, srcdir, eventsdir):
-        assert os.path.exists(x), "Directory not found: %s" % x
-
-    sys.path.extend((testdir, srcdir))
-    
+    setupenv()
     import tagfs
-
     unittest.main()

@@ -34,7 +34,7 @@ from unittest import TestLoader, TextTestRunner
 srcdir = dirname(abspath(__file__))
 
 testdir = pjoin(srcdir, 'test')
-testdatadir = pjoin(srcdir, 'etc/test/events/')
+testdatadir = pjoin(srcdir, 'etc', 'test', 'events')
 testmntdir = pjoin(srcdir, 'mnt')
 
 class test(Command):
@@ -54,6 +54,13 @@ class test(Command):
                 testdir, '*.py'
         )) if not f.endswith('__init__.py')]
 
+        print "..using:"
+        print "  testdir:", testdir
+        print "  testdatadir:", testdatadir
+        print "  testmntdir:", testmntdir
+        print "  tests:", tests
+        print "  sys.path:", sys.path
+        print
         sys.path.append(pjoin(srcdir, 'src'))
 
         suite = TestLoader().loadTestsFromNames(tests)
