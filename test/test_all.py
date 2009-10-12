@@ -40,19 +40,19 @@ setupenv()
 import tagfs
 
 def createTestItemAccess():
-    return tagfs.ItemAccess('etc/test/events', '.tag')
+    return tagfs.ItemAccess(eventsdir, '.tag')
 
 class TestTestCaseEnvironment(unittest.TestCase):
     """Makes sure the environment for the test case is set up right.
     """
     
     def testCwd(self):
-        """Makes sure that the current working directory is correct.
+        """Makes sure that the events directory is accessible.
         """
         
         import os
         
-        self.assertTrue(os.path.exists(os.path.join(os.getcwd(), 'etc/test/events')))
+        self.assertTrue(os.path.exists(eventsdir))
 
 class TestParseTagsFromFile(unittest.TestCase):
     
@@ -77,7 +77,7 @@ class TestItem(unittest.TestCase):
         """
         
         def __init__(self):
-            self.dataDirectory = 'etc/test/events'
+            self.dataDirectory = eventsdir
             self.tagFileName = '.tag'
     
     def setUp(self):
