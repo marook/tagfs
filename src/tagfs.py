@@ -655,6 +655,9 @@ class TagValueNode(ContainerNode):
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
+                                   'contexts',
+                                   [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+        self._addSubContainerNodes(subNodes,
                                    'tags',
                                    [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
@@ -729,12 +732,24 @@ class ContextTagNode(ContainerNode):
         return subNodes
 
 class ContextContainerNode(ContainerNode):
+    """Contains directories for the target context's values.
+    
+    @attention: This node can only be contained by nodes which got an items
+    property. Reason is parentNode.items call in contextTagNodes(self) method.
+    """
     
     def __init__(self, parentNode, context, itemAccess):
         super(ContextContainerNode, self).__init__(parentNode)
         self.context = context
         self.itemAccess = itemAccess
         
+    def required(self, items):
+        for tagNode in self.contextTagNodes:
+            if not tagNode.required(items):
+                return False
+            
+        return True
+
     @property
     def name(self):
         return self.context
@@ -743,13 +758,18 @@ class ContextContainerNode(ContainerNode):
     def filter(self):
         return self.parentNode.filter
     
+    @property
+    @cache
+    def contextTagNodes(self):
+        return [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)] 
+    
     @cache
     def _getSubNodesDict(self):
         subNodes = {}
         
         self._addSubNodes(subNodes,
                           'tags',
-                          [tagNode for tagNode in [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)]])
+                          self.contextTagNodes)
         
         logging.debug('Sub nodes for %s: %s', self, subNodes)
         
