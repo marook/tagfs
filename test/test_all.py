@@ -108,7 +108,8 @@ class TestItem(unittest.TestCase):
         
         expectedTags = set([tagfs.Tag('holiday'),
                             tagfs.Tag('airport'),
-                            tagfs.Tag('india')])
+                            tagfs.Tag('india'),
+                            tagfs.Tag('Markus Pielmeier', context = 'creator')])
         self.assertEqual(expectedTags, item.tags)
         # TODO disabled timestamp tests until time in test is not human readable
         #self.assertAlmostEqual(1250195650.7, item.tagsModificationTime, 1)
@@ -131,7 +132,8 @@ class TestItemAccess(unittest.TestCase):
         
         expectedItems = set(['2008-03-29 - holiday south korea',
                              '2008-12-25 - holiday india',
-                             '2009-07-29 - no tags'])
+                             '2009-07-29 - no tags',
+                             '2008-11-11 - airport underground railway'])
         self.assertEqual(expectedItems,
                          set(items))
 
@@ -145,7 +147,9 @@ class TestItemAccess(unittest.TestCase):
                             tagfs.Tag('holiday'),
                             tagfs.Tag('india'),
                             tagfs.Tag('korea'),
-                            tagfs.Tag('Markus Pielmeier', context = 'creator')])
+                            tagfs.Tag('Markus Pielmeier', context = 'creator'),
+                            tagfs.Tag('Tama Yuri', context = 'creator'),
+                            tagfs.Tag('flickr', context = 'source')])
         self.assertEqual(expectedTags,
                          set(tags))
         
@@ -155,7 +159,8 @@ class TestItemAccess(unittest.TestCase):
         items = self.itemAccess.taggedItems
         
         expectedItems = set(['2008-03-29 - holiday south korea',
-                             '2008-12-25 - holiday india'])
+                             '2008-12-25 - holiday india',
+                             '2008-11-11 - airport underground railway'])
         self.assertEqual(expectedItems,
                          set([item.name for item in items]))
 
