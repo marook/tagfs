@@ -724,6 +724,9 @@ class ContextTagNode(ContainerNode):
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
+                                   'contexts',
+                                   [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+        self._addSubContainerNodes(subNodes,
                                    'tags',
                                    [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
         
@@ -745,10 +748,10 @@ class ContextContainerNode(ContainerNode):
         
     def required(self, items):
         for tagNode in self.contextTagNodes:
-            if not tagNode.required(items):
-                return False
+            if tagNode.required(items):
+                return True
             
-        return True
+        return False
 
     @property
     def name(self):
