@@ -31,11 +31,12 @@ from os.path import (
 from glob import glob
 from unittest import TestLoader, TextTestRunner
 
-srcdir = dirname(abspath(__file__))
-
-testdir = pjoin(srcdir, 'test')
-testdatadir = pjoin(srcdir, 'etc', 'test', 'events')
-testmntdir = pjoin(srcdir, 'mnt')
+projectdir = dirname(abspath(__file__))
+srcdir = pjoin(projectdir, 'src')
+moddir = pjoin(srcdir, 'modules')
+testdir = pjoin(projectdir, 'test')
+testdatadir = pjoin(projectdir, 'etc', 'test', 'events')
+testmntdir = pjoin(projectdir, 'mnt')
 
 class test(Command):
     description = 'run tests'
@@ -61,7 +62,8 @@ class test(Command):
         print "  tests:", tests
         print "  sys.path:", sys.path
         print
-        sys.path.append(pjoin(srcdir, 'src'))
+        sys.path.insert(0, moddir)
+        sys.path.insert(0, srcdir)
 
         suite = TestLoader().loadTestsFromNames(tests)
         TextTestRunner(verbosity=self._verbosity).run(suite)
@@ -75,7 +77,7 @@ class clean_pyc(Command):
 
     def initialize_options(self):
         self._delete = []
-        for cwd, dirs, files in os.walk(srcdir):
+        for cwd, dirs, files in os.walk(projectdir):
             self._delete.extend(
                 pjoin(cwd, f) for f in files if f.endswith('.pyc')
             )
@@ -120,7 +122,9 @@ setup(
         'Topic :: System :: Filesystems'
     ],
     data_files = [
-        ('share/doc/tagfs', ['AUTHORS', 'COPYING', 'README'])
+        (pjoin('share', 'doc', 'tagfs'), ['AUTHORS', 'COPYING', 'README'])
     ],
-    scripts = ['src/tagfs.py'],
+    scripts = [pjoin('src', 'tagfs')],
+    packages = ['tagfs'],
+    package_dir = {'': pjoin('src', 'modules')},
 )

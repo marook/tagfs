@@ -27,6 +27,8 @@ srcdir = .
 testdatadir = $(srcdir)/etc/test/events
 testmntdir = $(shell pwd)/mnt
 
+pymoddir = $(srcdir)/src/modules
+
 PYTHON = python
 INSTALL = install
 INSTALL_DATA = $(INSTALL) -m 644
@@ -58,7 +60,7 @@ $(installdirs):
 
 .PHONY: install
 install: $(installdirs)
-	$(INSTALL_PROGRAM) $(srcdir)/src/tagfs.py $(bindir)/tagfs
+	$(INSTALL_PROGRAM) $(srcdir)/src/tagfs $(bindir)/tagfs
 	$(INSTALL_DATA) $(DOCS) $(docdir)
 
 .PHONY: uninstall
@@ -71,7 +73,8 @@ $(testmntdir):
 
 .PHONY: mounttest
 mounttest: $(testmntdir)
-	$(PYTHON) $(srcdir)/src/tagfs.py -i $(testdatadir) $(testmntdir)
+	PYTHONPATH=$(PYTHONPATH):$(pymoddir) \
+		$(PYTHON) $(srcdir)/src/tagfs -i $(testdatadir) $(testmntdir)
 
 .PHONY: unmounttest
 unmounttest:
