@@ -682,7 +682,8 @@ def main():
         print "Error: Missing items directory option."
         sys.exit()
         
-    fs.main()
+    return fs.main()
 
 if __name__ == '__main__':
-    main()
+    import sys
+    sys.exit(main())
