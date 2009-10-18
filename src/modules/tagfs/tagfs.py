@@ -85,74 +85,9 @@ if not hasattr(fuse, '__version__'):
 
 fuse.fuse_python_api = (0, 2)
 
-class NoCacheStrategy(object):
-    """This cache strategy reloads the cache on every call.
-    """
-    
-    def isCacheValid(self, f, *args, **kwargs):
-        return False
-    
-class NoReloadStrategy(object):
-    """This cache strategy never reloads the cache.
-    """
-    
-    def isCacheValid(self, f, *args, **kwargs):
-        return True
+from cache import cache
 
-class TimeoutReloadStrategy(object):
-    
-    def __init__(self, timeoutDuration = 10 * 60):
-        self.timeoutDuration = timeoutDuration
-    
-    def isCacheValid(self, f, *args, **kwargs):
-        timestampFieldName = '__' + f.__name__ + 'Timestamp'
-        now = time.time()
-    
-        if not hasattr(args[0], timestampFieldName):
-            setattr(args[0], timestampFieldName, now)
-        
-            return False
-    
-        lastTime = getattr(args[0], timestampFieldName)
-    
-        if now - lastTime < self.timeoutDuration:
-            return False
-    
-        setattr(args[0], timestampFieldName, now)
-    
-        return True
-    
 
-def cache(f, reloadStrategy = TimeoutReloadStrategy()):
-    """This annotation is used to cache the result of a method call.
-    
-    @param f: This is the wrapped function which's return value will be cached.
-    @param reload: This is the reload strategy. This function returns True when
-    the cache should be reloaded. Otherwise False.
-    @attention: The cache is never deleted. The first call initializes the
-    cache. The method's parameters just passed to the called method. The cache
-    is not evaluating the parameters.
-    """
-    
-    @functools.wraps(f)
-    def cacher(*args, **kwargs):
-        obj = args[0]
-        
-        cacheMemberName = '__' + f.__name__ + 'Cache'
-        
-        # the reload(...) call has to be first as we always have to call the
-        # method. not only when there is a cache member available in the object.
-        if reloadStrategy.isCacheValid(f, *args, **kwargs) or not hasattr(obj, cacheMemberName):
-            value = f(*args, **kwargs)
-            
-            setattr(obj, cacheMemberName, value)
-            
-            return value
-            
-        return getattr(obj, cacheMemberName)
-    
-    return cacher
-    
 def parseTagsFromFile(tagFileName):
     """Parses the tags from the specified file.
     
