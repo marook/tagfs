@@ -1,3 +1,3 @@
 holiday
 airport
-korea
+location: korea

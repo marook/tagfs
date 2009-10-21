@@ -87,11 +87,40 @@ fuse.fuse_python_api = (0, 2)
 
 from cache import cache
 
+class Tag(object):
+    
+    def __init__(self, value, context = None):
+        if context == None:
+            self.context = None
+        else:
+            self.context = context.strip()
+        
+        self.value = value.strip()
+        
+        if not self.context == None and len(self.context) == 0:
+            # we don't allow empty strings as they can't be represented as a
+            # directory very well
+            raise ValueError()
+
+        if len(self.value) == 0:
+            # we don't allow empty strings as they can't be represented as a
+            # directory very well
+            raise ValueError()
+        
+    def __hash__(self):
+        return (self.context, self.value).__hash__()
+    
+    def __eq__(self, other):
+        return self.value == other.value and self.context == other.context
+        
+    def __repr__(self):
+        return '<Tag %s: %s>' % (self.context, self.value)
 
 def parseTagsFromFile(tagFileName):
     """Parses the tags from the specified file.
     
-    @return: The parsed values are returned as a set containing the tag strings.
+    @return: The parsed values are returned as a set containing Tag objects.
+    @see: Tag
     """
     
     tags = set()
@@ -99,11 +128,22 @@ def parseTagsFromFile(tagFileName):
     tagFile = open(tagFileName, 'r')
     try:
         for rawTag in tagFile.readlines():
-            tag = rawTag.strip()
-                        
-            if len(tag) == 0:
+            rawTag = rawTag.strip()
+            
+            if len(rawTag) == 0:
                 continue
-                        
+            
+            tagTuple = rawTag.split(':', 1)
+            
+            if len(tagTuple) == 1:
+                tagContext = None
+                tagValue = tagTuple[0]
+            else:
+                tagContext = tagTuple[0]
+                tagValue = tagTuple[1]
+                
+            tag = Tag(tagValue, context = tagContext)
+
             tags.add(tag)
     finally:
         tagFile.close()
@@ -188,7 +228,58 @@ class Item(object):
     def __repr__(self):
         return '<Item %s>' % self.name
     
-
+class TagValueFilter(object):
+    
+    def __init__(self, tagValue):
+        self.tagValue = tagValue
+        
+    def filterItems(self, items):
+        droppedItems = set()
+        
+        for item in items:
+            hasTagValue = False
+                
+            for itemTag in item.tags:
+                if itemTag.value == self.tagValue:
+                    hasTagValue = True
+                    
+                    break
+                
+            if not hasTagValue:
+                droppedItems.add(item)
+                
+        items -= droppedItems
+        
+class TagFilter(object):
+    
+    def __init__(self, tag):
+        self.tag = tag
+        
+    def filterItems(self, items):
+        droppedItems = set()
+        
+        for item in items:
+            if not self.tag in item.tags:
+                droppedItems.add(item)
+                
+        items -= droppedItems
+        
+class AndFilter(object):
+    """Concatenates two filters with a logical 'and'.
+    """
+    
+    def __init__(self, subFilters):
+        self.subFilters = subFilters
+        
+    def filterItems(self, items):
+        for subFilter in self.subFilters:
+            subFilter.filterItems(items)
+            
+class NoneFilter(object):
+    
+    def filterItems(self, items):
+        pass
+    
 class ItemAccess(object):
     """This is the access point to the Items.
     """
@@ -253,23 +344,34 @@ class ItemAccess(object):
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
     
-    def filter(self, tagFilters):
-        tagFiltersSet = set(tagFilters)
-        resultItems = []
-        resultTags = set()
+    def filterItems(self, filter):
+        resultItems = set([item for item in self.taggedItems])
         
-        for item in self.taggedItems:
-            if len(tagFiltersSet & item.tags) < len(tagFilters):
+        filter.filterItems(resultItems)
+        
+        return resultItems
+    
+    def contextTags(self, context):
+        contextTags = set()
+        
+        for tag in self.tags:
+            if tag.context == context:
+                contextTags.add(tag)
+                
+        return contextTags
+    
+    @property
+    @cache
+    def contexts(self):
+        contexts = set()
+        
+        for tag in self.tags:
+            if tag.context == None:
                 continue
             
-            resultItems.append(item)
-            
-            for itemTag in item.tags:
-                resultTags.add(itemTag)
-                
-        resultTags = resultTags - tagFiltersSet
+            contexts.add(tag.context)
         
-        return (resultItems, resultTags)
+        return contexts
         
 class MyStat(fuse.Stat):
     
@@ -304,7 +406,7 @@ class Node(object):
                 continue
                 
             subNodes[node.name] = node
-    
+            
     @property
     @cache
     def subNodes(self):
@@ -319,6 +421,65 @@ class Node(object):
             return None
         
         return subNodesDict[pathElement]
+
+class ContainerNode(Node):
+    """Abstract base node for nodes which contain items and or tags.
+    
+    Facts about ContainerNodes:
+    * container nodes are always represented as directories
+    """
+    
+    def _addSubContainerNodes(self, subNodes, nodeNames, containerNodes):
+        items = self.items
+        
+        self._addSubNodes(subNodes,
+                          nodeNames,
+                          [n for n in containerNodes if n.required(items)])
+        
+    def __init__(self, parentNode):
+        self.parentNode = parentNode
+        
+    def required(self, items):
+        selfItems = self.items
+        selfItemsLen = len(self.items)
+        
+        return not selfItemsLen == 0 and not selfItemsLen == len(items)
+            
+    @property
+    @cache
+    def filter(self):
+        parentFilter = self.parentNode.filter
+        
+        return AndFilter([parentFilter, self._myFilter])
+    
+    @property
+    @cache
+    def items(self):
+        items = self.itemAccess.filterItems(self.filter)
+        
+        logging.debug('Items request for %s: %s',
+                      self,
+                      [item.name for item in items])
+        
+        return items
+    
+    @property
+    @cache
+    def attr(self):
+        st = MyStat()
+        st.st_mode = stat.S_IFDIR | 0555
+        st.st_nlink = 2
+            
+        return st
+    
+    @property
+    @cache
+    def direntry(self):
+        e = fuse.Direntry(self.name)
+        e.type = stat.S_IFDIR
+        
+        return e
+    
 
 class ItemNode(Node):
     
@@ -402,73 +563,165 @@ class UntaggedItemsNode(Node):
         
         return e
     
-class TagNode(Node):
+class TagValueNode(ContainerNode):
     
-    def __init__(self, parentNode, tagName, itemAccess):
-        self.parentNode = parentNode
-        self.name = tagName
+    def __init__(self, parentNode, tagValue, itemAccess):
+        super(TagValueNode, self).__init__(parentNode)
+        self.tagValue = tagValue
         self.itemAccess = itemAccess
         
     @property
-    @cache
-    def filterTags(self):
-        filterTags = [tag for tag in self.parentNode.filterTags]
-        filterTags.append(self.name)
+    def name(self):
+        return self.tagValue
         
-        return filterTags
-    
     @property
     @cache
-    def items(self):
-        items, tags = self.itemAccess.filter(self.filterTags)
-        
-        logging.debug('Items request for tag %s: %s',
-                      self.name,
-                      [item.name for item in items])
-        
-        return items
+    def _myFilter(self):
+        return TagValueFilter(self.tagValue)
     
     @cache
     def _getSubNodesDict(self):
-        items, tags = self.itemAccess.filter(self.filterTags)
+        items = self.items
         
         subNodes = {}
         
         self._addSubNodes(subNodes,
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
-        self._addSubNodes(subNodes,
-                          'tags',
-                          [tagNode for tagNode in [TagNode(self, tag, self.itemAccess) for tag in tags] if (len(items) > len(tagNode.items))])
+        self._addSubContainerNodes(subNodes,
+                                   'contexts',
+                                   [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
-        logging.debug('Sub nodes for tag %s: %s',
-                      self.name,
-                      subNodes)
+        logging.debug('Sub nodes for tag value %s: %s', self.tagValue, subNodes)
         
         return subNodes
     
-    @property
-    @cache
-    def attr(self):
-        st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0555
-        st.st_nlink = 2
-            
-        return st
+class TagNode(ContainerNode):
     
-    @property
-    @cache
-    def direntry(self):
-        e = fuse.Direntry(self.name)
-        e.type = stat.S_IFDIR
+    def __init__(self, parentNode, tag, itemAccess):
+        super(TagNode, self).__init__(parentNode)
+        self.tag = tag
+        self.itemAccess = itemAccess
         
-        return e
+    @property
+    def name(self):
+        return self.tag.value
+        
+    @property
+    @cache
+    def _myFilter(self):
+        return TagFilter(self.tag)
     
+    @cache
+    def _getSubNodesDict(self):
+        items = self.items
+        
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(item, self.itemAccess) for item in items])
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
+        
+        logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
+        
+        return subNodes
+    
+class ContextTagNode(ContainerNode):
+    
+    def __init__(self, parentNode, tag, itemAccess):
+        super(ContextTagNode, self).__init__(parentNode)
+        self.tag = tag
+        self.itemAccess = itemAccess
+        
+    @property
+    def name(self):
+        return self.tag.value
+        
+    @property
+    @cache
+    def _myFilter(self):
+        return TagFilter(self.tag)
+
+    @cache
+    def _getSubNodesDict(self):
+        items = self.items
+        
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(item, self.itemAccess) for item in items])
+        self._addSubContainerNodes(subNodes,
+                                   'contexts',
+                                   [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
+        
+        logging.debug('Sub nodes for %s: %s', self, subNodes)
+        
+        return subNodes
+
+class ContextContainerNode(ContainerNode):
+    """Contains directories for the target context's values.
+    
+    @attention: This node can only be contained by nodes which got an items
+    property. Reason is parentNode.items call in contextTagNodes(self) method.
+    """
+    
+    def __init__(self, parentNode, context, itemAccess):
+        super(ContextContainerNode, self).__init__(parentNode)
+        self.context = context
+        self.itemAccess = itemAccess
+        
+    def required(self, items):
+        for tagNode in self.contextTagNodes:
+            if tagNode.required(items):
+                return True
+            
+        return False
+
+    @property
+    def name(self):
+        return self.context
+        
+    @property
+    def filter(self):
+        return self.parentNode.filter
+    
+    @property
+    @cache
+    def contextTagNodes(self):
+        return [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)] 
+    
+    @cache
+    def _getSubNodesDict(self):
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'tags',
+                          self.contextTagNodes)
+        
+        logging.debug('Sub nodes for %s: %s', self, subNodes)
+        
+        return subNodes
+
 class RootNode(Node):
     
     def __init__(self, itemAccess):
         self.itemAccess = itemAccess
         self.filterTags = []
+        
+    @property
+    @cache
+    def filter(self):
+        return NoneFilter()
         
     @cache
     def _getSubNodesDict(self):
@@ -481,8 +734,11 @@ class RootNode(Node):
                           'items',
                           [ItemNode(item, self.itemAccess) for item in self.itemAccess.items.itervalues()])
         self._addSubNodes(subNodes,
+                          'contexts',
+                          [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+        self._addSubNodes(subNodes,
                           'tags',
-                          [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
+                          [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
         return subNodes
         
