@@ -24,16 +24,27 @@ Installation
 
 To install tagfs into your home directory type the following:
 
-$ python setup.py install --user
+$ python setup.py install --home ~/.local
+
+If you haven't already extended your local python path then add the following
+to your environment configuration script. For example to your .bashrc:
+
+export PYTHONPATH=~/.local/lib/python:$PYTHONPATH
 
 ---------------------------------------------------------------------
 Usage
 
-* Mount a tagged directory:
+Mount a tagged directory:
 $ tagfs -i /path/to/my/items/directory /path/to/my/mount/point
 
-* Unmount a tagged directory: 
+Unmount a tagged directory: 
 $ fusermount -u /path/to/my/mount/point
+
+You can enable logging by setting a debug environment variable before you
+launch tagfs:
+$ export DEBUG=1
+
+tagfs will log to the console and the file /tmp/tagfs.log
 
 ---------------------------------------------------------------------
 Tests
