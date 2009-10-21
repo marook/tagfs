@@ -15,20 +15,22 @@ tagfs is used to organize your documents using tags.
 ---------------------------------------------------------------------
 Requirements
 
+* python 2.5, 2.6
 * Linux kernel with fuse enabled
 * python-fuse installed
 
 ---------------------------------------------------------------------
 Installation
 
-* Copy the tagfs.py file into your bin directory
-* Make sure that the tagfs.py file is executable
+To install tagfs into your home directory type the following:
+
+$ python setup.py install --user
 
 ---------------------------------------------------------------------
 Usage
 
 * Mount a tagged directory:
-$ tagfs.py -i /path/to/my/items/directory /path/to/my/mount/point
+$ tagfs -i /path/to/my/items/directory /path/to/my/mount/point
 
 * Unmount a tagged directory: 
 $ fusermount -u /path/to/my/mount/point
@@ -36,9 +38,10 @@ $ fusermount -u /path/to/my/mount/point
 ---------------------------------------------------------------------
 Tests
 
-You can execute the tests via make in the project's root directory.
+You can execute the test cases via the setup.py script in the project's root
+directory.
 
-$ make test
+$ python setup.py test
 
 ---------------------------------------------------------------------
 Contact
