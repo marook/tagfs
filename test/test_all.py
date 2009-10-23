@@ -73,6 +73,7 @@ class TestParseTagsFromFile(unittest.TestCase):
         expectedTags = set([tagfs.Tag('holiday'),
                             tagfs.Tag('airport'),
                             tagfs.Tag('korea'),
+                            tagfs.Tag('tube', context = 'object'),
                             tagfs.Tag('Markus Pielmeier', context = 'creator')])
         self.assertEqual(expectedTags, tags)
         
@@ -171,7 +172,8 @@ class TestItemAccess(unittest.TestCase):
                             tagfs.Tag('korea'),
                             tagfs.Tag('Markus Pielmeier', context = 'creator'),
                             tagfs.Tag('Tama Yuri', context = 'creator'),
-                            tagfs.Tag('flickr', context = 'source')])
+                            tagfs.Tag('flickr', context = 'source'),
+                            tagfs.Tag('tube', context = 'object')])
         self.assertEqual(expectedTags,
                          set(tags))
         
