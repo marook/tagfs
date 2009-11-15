@@ -72,8 +72,26 @@ class Node(object):
             return None
         
         return subNodesDict[pathElement]
+    
+class DirectoryNode(Node):
+    @property
+    @cache
+    def attr(self):
+        st = MyStat()
+        st.st_mode = stat.S_IFDIR | 0555
+        st.st_nlink = 2
+            
+        return st
+    
+    @property
+    @cache
+    def direntry(self):
+        e = fuse.Direntry(self.name)
+        e.type = stat.S_IFDIR
+        
+        return e
 
-class ContainerNode(Node):
+class ContainerNode(DirectoryNode):
     """Abstract base node for nodes which contain items and or tags.
     
     Facts about ContainerNodes:
@@ -113,24 +131,6 @@ class ContainerNode(Node):
                       [item.name for item in items])
         
         return items
-    
-    @property
-    @cache
-    def attr(self):
-        st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0555
-        st.st_nlink = 2
-            
-        return st
-    
-    @property
-    @cache
-    def direntry(self):
-        e = fuse.Direntry(self.name)
-        e.type = stat.S_IFDIR
-        
-        return e
-    
 
 class ItemNode(Node):
     
@@ -179,7 +179,7 @@ class ItemNode(Node):
     def __repr__(self):
         return '<ItemNode %s>' % self.name
     
-class UntaggedItemsNode(Node):
+class UntaggedItemsNode(DirectoryNode):
     """Represents a node which contains not tagged items.
     """
     
@@ -196,23 +196,6 @@ class UntaggedItemsNode(Node):
                           [ItemNode(item, self.itemAccess) for item in self.itemAccess.untaggedItems])
         
         return subNodes
-    
-    @property
-    @cache
-    def attr(self):
-        st = MyStat()
-        st.st_mode = stat.S_IFDIR | 0555
-        st.st_nlink = 2
-            
-        return st
-    
-    @property
-    @cache
-    def direntry(self):
-        e = fuse.Direntry(self.name)
-        e.type = stat.S_IFDIR
-        
-        return e
     
 class TagValueNode(ContainerNode):
     
