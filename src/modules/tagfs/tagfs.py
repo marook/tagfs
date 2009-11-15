@@ -87,6 +87,7 @@ fuse.fuse_python_api = (0, 2)
 
 from cache import cache
 import item_access
+import node
     
 class TagFS(fuse.Fuse):
     
@@ -124,7 +125,7 @@ class TagFS(fuse.Fuse):
     
         # try/except here?
         try:
-            return ItemAccess(self._itemsRoot, self.tagFileName)
+            return item_access.ItemAccess(self._itemsRoot, self.tagFileName)
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     self._itemsRoot, str(e.strerror))
@@ -132,7 +133,7 @@ class TagFS(fuse.Fuse):
     
     @cache
     def __getRootNode(self):
-        return RootNode(self.getItemAccess())
+        return node.RootNode(self.getItemAccess())
     
     def __getNode(self, path):
         logging.debug('Requesting node for path ' + path)
