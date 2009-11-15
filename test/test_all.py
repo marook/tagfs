@@ -303,6 +303,39 @@ class TestRootNode(AbstractNodeTest):
         n = node.RootNode(self.itemAccess)
         
         self._testNodeInterface(n)
+        
+class TestNodeRecurse(AbstractNodeTest):
+    """This test recurses through a RootNode and it's children.
+    
+    This test case tries to call many of the node functions to get a overall
+    performance measure.
+    """
+
+    def setUp(self):
+        unittest.TestCase.setUp(self)
+        
+        self.itemAccess = createTestItemAccess()
+        
+    def __recurseNode(self, n):
+        self._testNodeInterface(n)
+        
+        nDir = set(dir(n))
+        
+        if 'required' in nDir:
+            n.required([])
+            
+        if 'filter' in nDir:
+            self.assertNotEqual(None, n.filter)
+        
+        for sn in n.subNodes:
+            self.__recurseNode(sn)
+    
+    def testRecurse(self):
+        
+        n = node.RootNode(self.itemAccess)
+        
+        self.__recurseNode(n)
+        
 
 if __name__ == "__main__":
     setupenv()
