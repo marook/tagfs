@@ -136,9 +136,6 @@ class TagFS(fuse.Fuse):
         return node.RootNode(self.getItemAccess())
     
     def __getNode(self, path):
-        logging.debug('Requesting node for path ' + path)
-        
-        # TODO implement some caching
         rootNode = self.__getRootNode()
         
         parentNode = rootNode
