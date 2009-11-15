@@ -42,9 +42,10 @@ def setupenv():
 
 setupenv()
 import tagfs
+import tagfs.item_access as item_access
 
 def createTestItemAccess():
-    return tagfs.ItemAccess(eventsdir, '.tag')
+    return item_access.ItemAccess(eventsdir, '.tag')
 
 class TestTestCaseEnvironment(unittest.TestCase):
     """Makes sure the environment for the test case is set up right.
@@ -68,13 +69,13 @@ class TestParseTagsFromFile(unittest.TestCase):
                                    '2008-03-29 - holiday south korea',
                                    '.tag')
         
-        tags = tagfs.parseTagsFromFile(tagFileName)
+        tags = item_access.parseTagsFromFile(tagFileName)
         
-        expectedTags = set([tagfs.Tag('holiday'),
-                            tagfs.Tag('airport'),
-                            tagfs.Tag('korea'),
-                            tagfs.Tag('tube', context = 'object'),
-                            tagfs.Tag('Markus Pielmeier', context = 'creator')])
+        expectedTags = set([item_access.Tag('holiday'),
+                            item_access.Tag('airport'),
+                            item_access.Tag('korea'),
+                            item_access.Tag('tube', context = 'object'),
+                            item_access.Tag('Markus Pielmeier', context = 'creator')])
         self.assertEqual(expectedTags, tags)
         
 
@@ -99,7 +100,7 @@ class TestItem(unittest.TestCase):
         """Tests the results for items which don't exist.
         """
         
-        item = tagfs.Item('no such item', self.itemAccess)
+        item = item_access.Item('no such item', self.itemAccess)
         
         self.assertFalse(os.path.isdir(item.itemDirectory))
         
@@ -112,7 +113,7 @@ class TestItem(unittest.TestCase):
         """Tests the results for items which got no tags assigned.
         """
         
-        item = tagfs.Item('2009-07-29 - no tags', self.itemAccess)
+        item = item_access.Item('2009-07-29 - no tags', self.itemAccess)
         
         self.assertTrue(os.path.isdir(item.itemDirectory))
         
@@ -125,14 +126,14 @@ class TestItem(unittest.TestCase):
         """Tests an item with tags assigned to.
         """
         
-        item = tagfs.Item('2008-12-25 - holiday india', self.itemAccess)
+        item = item_access.Item('2008-12-25 - holiday india', self.itemAccess)
         
         self.assertTrue(os.path.isdir(item.itemDirectory))
         
-        expectedTags = set([tagfs.Tag('holiday'),
-                            tagfs.Tag('airport'),
-                            tagfs.Tag('india'),
-                            tagfs.Tag('Markus Pielmeier', context = 'creator')])
+        expectedTags = set([item_access.Tag('holiday'),
+                            item_access.Tag('airport'),
+                            item_access.Tag('india'),
+                            item_access.Tag('Markus Pielmeier', context = 'creator')])
         self.assertEqual(expectedTags, item.tags)
         # TODO disabled timestamp tests until time in test is not human readable
         #self.assertAlmostEqual(1250195650.7, item.tagsModificationTime, 1)
@@ -166,14 +167,14 @@ class TestItemAccess(unittest.TestCase):
         
         tags = self.itemAccess.tags
         
-        expectedTags = set([tagfs.Tag('airport'),
-                            tagfs.Tag('holiday'),
-                            tagfs.Tag('india'),
-                            tagfs.Tag('korea'),
-                            tagfs.Tag('Markus Pielmeier', context = 'creator'),
-                            tagfs.Tag('Tama Yuri', context = 'creator'),
-                            tagfs.Tag('flickr', context = 'source'),
-                            tagfs.Tag('tube', context = 'object')])
+        expectedTags = set([item_access.Tag('airport'),
+                            item_access.Tag('holiday'),
+                            item_access.Tag('india'),
+                            item_access.Tag('korea'),
+                            item_access.Tag('Markus Pielmeier', context = 'creator'),
+                            item_access.Tag('Tama Yuri', context = 'creator'),
+                            item_access.Tag('flickr', context = 'source'),
+                            item_access.Tag('tube', context = 'object')])
         self.assertEqual(expectedTags,
                          set(tags))
         
@@ -209,7 +210,7 @@ class TestItemAccess(unittest.TestCase):
         @see: tagfs.TagValueFilter
         """
         
-        self._testFilter(tagfs.TagValueFilter('korea'),
+        self._testFilter(item_access.TagValueFilter('korea'),
                          ['2008-03-29 - holiday south korea'])
 
     def testFilterMultiple(self):
@@ -218,8 +219,8 @@ class TestItemAccess(unittest.TestCase):
         @see: tagfs.AndFilter
         """
         
-        self._testFilter(tagfs.AndFilter([tagfs.TagValueFilter('korea'),
-                                          tagfs.TagValueFilter('airport')]),
+        self._testFilter(item_access.AndFilter([item_access.TagValueFilter('korea'),
+                                                item_access.TagValueFilter('airport')]),
                          ['2008-03-29 - holiday south korea'])
 
 class AbstractNodeTest(unittest.TestCase):
@@ -257,7 +258,7 @@ class TestItemNode(AbstractNodeTest):
     def testItemNodeInterface(self):
         import stat
         
-        item = tagfs.Item('test', self.itemAccess)
+        item = item_access.Item('test', self.itemAccess)
         
         node = tagfs.ItemNode(item, self.itemAccess)
         
@@ -288,7 +289,7 @@ class TestTagNode(AbstractNodeTest):
     def testTagNode(self):
         parentNode = tagfs.RootNode(self.itemAccess)
         
-        node = tagfs.TagNode(parentNode, tagfs.Tag('holiday'), self.itemAccess)
+        node = tagfs.TagNode(parentNode, item_access.Tag('holiday'), self.itemAccess)
         
         self._testNodeInterface(node)
 
