@@ -307,4 +307,12 @@ class TestRootNode(AbstractNodeTest):
 if __name__ == "__main__":
     setupenv()
     import tagfs
-    unittest.main()
+
+    if 'PROFILE' in os.environ:
+        import cProfile
+        
+        profileFile = os.path.join(os.getcwd(), 'tagfs_test.profile')
+        
+        cProfile.run('unittest.main()', profileFile)
+    else:
+        unittest.main()
