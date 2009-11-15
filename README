@@ -46,6 +46,14 @@ $ export DEBUG=1
 
 tagfs will log to the console and the file /tmp/tagfs.log
 
+You can enable profiling by setting a profile environment variable before you
+launch tagfs:
+$ export PROFILE=1
+
+After unmounting your tagfs file system a profile file will be written. The
+profile file will be written to the current directory. The profile file will
+be named 'tagfs.profile'.
+
 ---------------------------------------------------------------------
 Tests
 

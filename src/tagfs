@@ -26,6 +26,18 @@ if __name__ == '__main__':
     if 'DEBUG' in env:
         setUpLogging()
 
+    import logging
     import sys
-    sys.exit(main())
+    
+    if 'PROFILE' in env:
+        logging.info('Enabled tagfs profiling')
+    
+        import cProfile
+        import os
+        
+        profileFile = os.path.join(os.getcwd(), 'tagfs.profile')
+    
+        sys.exit(cProfile.run('main()', profileFile))
+    else:
+        sys.exit(main())
 
