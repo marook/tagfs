@@ -73,7 +73,7 @@ $(testmntdir):
 
 .PHONY: mounttest
 mounttest: $(testmntdir)
-	PYTHONPATH=$(PYTHONPATH):$(pymoddir) \
+	PYTHONPATH=$(pymoddir):$(PYTHONPATH) \
 		$(PYTHON) $(srcdir)/src/tagfs -i $(testdatadir) $(testmntdir)
 
 .PHONY: unmounttest
