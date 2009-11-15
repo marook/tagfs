@@ -41,22 +41,24 @@ class TimeoutReloadStrategy(object):
         self.timeoutDuration = timeoutDuration
     
     def isCacheValid(self, f, *args, **kwargs):
+        obj = args[0]
+        
         timestampFieldName = '__' + f.__name__ + 'Timestamp'
         now = time.time()
     
-        if not hasattr(args[0], timestampFieldName):
-            setattr(args[0], timestampFieldName, now)
+        if not hasattr(obj, timestampFieldName):
+            setattr(obj, timestampFieldName, now)
         
             return False
     
-        lastTime = getattr(args[0], timestampFieldName)
+        lastTime = getattr(obj, timestampFieldName)
     
         if now - lastTime < self.timeoutDuration:
-            return False
+            return True
     
-        setattr(args[0], timestampFieldName, now)
+        setattr(obj, timestampFieldName, now)
     
-        return True
+        return False
 
 
 def cache(f, reloadStrategy = TimeoutReloadStrategy()):
@@ -78,7 +80,7 @@ def cache(f, reloadStrategy = TimeoutReloadStrategy()):
         
         # the reload(...) call has to be first as we always have to call the
         # method. not only when there is a cache member available in the object.
-        if reloadStrategy.isCacheValid(f, *args, **kwargs) or not hasattr(obj, cacheMemberName):
+        if (not reloadStrategy.isCacheValid(f, *args, **kwargs)) or (not hasattr(obj, cacheMemberName)):
             value = f(*args, **kwargs)
             
             setattr(obj, cacheMemberName, value)
