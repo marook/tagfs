@@ -108,6 +108,9 @@ class ContainerNode(DirectoryNode):
     def __init__(self, parentNode):
         self.parentNode = parentNode
         
+    @cache
+    # DANGER! we can only cache this method because we know that the items from
+    # our parent will never ever change! 
     def required(self, items):
         selfItems = self.items
         selfItemsLen = len(self.items)
