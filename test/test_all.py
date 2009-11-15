@@ -41,8 +41,10 @@ def setupenv():
     sys.path.insert(0, srcdir)
 
 setupenv()
+
 import tagfs
 import tagfs.item_access as item_access
+import tagfs.node as node
 
 def createTestItemAccess():
     return item_access.ItemAccess(eventsdir, '.tag')
@@ -260,26 +262,26 @@ class TestItemNode(AbstractNodeTest):
         
         item = item_access.Item('test', self.itemAccess)
         
-        node = tagfs.ItemNode(item, self.itemAccess)
+        n = node.ItemNode(item, self.itemAccess)
         
-        self._testNodeInterface(node)
+        self._testNodeInterface(n)
     
-        direntry = node.direntry
+        direntry = n.direntry
         self.assertEqual('test', direntry.name)
         self.assertEqual(stat.S_IFLNK, direntry.type)
         
-        self.assertNotEqual(None, node.link)
+        self.assertNotEqual(None, n.link)
         
 class TestUntaggedItemsNode(AbstractNodeTest):
     """This test case tests the UntaggedItemsNode.
     """
     
     def testUntaggedItemsNodeInterface(self):
-        node = tagfs.UntaggedItemsNode('.untagged', self.itemAccess)
+        n = node.UntaggedItemsNode('.untagged', self.itemAccess)
         
-        self._testNodeInterface(node)
+        self._testNodeInterface(n)
 
-        direntry = node.direntry
+        direntry = n.direntry
         self.assertEqual('.untagged', direntry.name)
         
 class TestTagNode(AbstractNodeTest):
@@ -287,20 +289,20 @@ class TestTagNode(AbstractNodeTest):
     """
     
     def testTagNode(self):
-        parentNode = tagfs.RootNode(self.itemAccess)
+        parentNode = node.RootNode(self.itemAccess)
         
-        node = tagfs.TagNode(parentNode, item_access.Tag('holiday'), self.itemAccess)
+        n = node.TagNode(parentNode, item_access.Tag('holiday'), self.itemAccess)
         
-        self._testNodeInterface(node)
+        self._testNodeInterface(n)
 
 class TestRootNode(AbstractNodeTest):
     """This test case tests the RootNode class.
     """
     
     def testRootNode(self):
-        node = tagfs.RootNode(self.itemAccess)
+        n = node.RootNode(self.itemAccess)
         
-        self._testNodeInterface(node)
+        self._testNodeInterface(n)
 
 if __name__ == "__main__":
     setupenv()
