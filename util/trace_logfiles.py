@@ -23,9 +23,9 @@ import re
 
 class TraceLogEntry(object):
 
-    def __init__(self, context, fileName):
+    def __init__(self, context, path):
         self.context = context
-        self.fileName = fileName
+        self.path = path
 
 class TraceLog(object):
 
@@ -43,9 +43,9 @@ class TraceLog(object):
             return
 
         context = m.group(1)
-        fileName = m.group(2)
+        path = m.group(2)
 
-        self.entries.append(TraceLogEntry(context, fileName))
+        self.entries.append(TraceLogEntry(context, path))
 
     def readLogFile(self, fileName):
         logging.info('Reading logfile ' + fileName)
@@ -64,13 +64,31 @@ class TraceResult(object):
 
     def __init__(self):
         self.contextHistogram = {}
+        self.contextPathHistogram = {}
 
-    def _analyzeTraceLog(self, traceLog):
+    def _analyzeContextHistogram(self, traceLog):
         for e in traceLog.entries:
             if not e.context in self.contextHistogram:
                 self.contextHistogram[e.context] = 0
 
             self.contextHistogram[e.context] += 1
+
+    def _analyzeContextPathHistogram(self, traceLog):
+        for e in traceLog.entries:
+            if not e.context in self.contextPathHistogram:
+                self.contextPathHistogram[e.context] = {}
+
+            ph = self.contextPathHistogram[e.context]
+
+            if not e.path in ph:
+                ph[e.path] = 0
+
+            ph[e.path] += 1
+            
+
+    def _analyzeTraceLog(self, traceLog):
+        self._analyzeContextHistogram(traceLog)
+        self._analyzeContextPathHistogram(traceLog)
 
     def analyzeLogFile(self, fileName):
         tl = TraceLog()
@@ -82,6 +100,14 @@ def usage():
     # TODO print usage
 
     pass
+
+def writeCSV(fileName, pathHistogram):
+    import csv
+
+    w = csv.writer(open(fileName, 'w'))
+    
+    for path, histogram in pathHistogram.iteritems():
+        w.writerow([path, histogram])
 
 if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG)
@@ -109,3 +135,6 @@ if __name__ == '__main__':
     print "Context Histogram"
     for context, calls in tr.contextHistogram.iteritems():
         print ' %s: %s' % (context, calls)
+
+    for context, pathHistogram in tr.contextPathHistogram.iteritems():
+        writeCSV('pathHistogram_' + context + '.csv', pathHistogram)
