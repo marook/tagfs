@@ -144,8 +144,6 @@ class TagFS(fuse.Fuse):
             parentNode = parentNode.getSubNode(pathElement)
             
             if parentNode == None:
-                logging.info('No node can be resolved for path ' + path)
-                
                 return None
             
         return parentNode
