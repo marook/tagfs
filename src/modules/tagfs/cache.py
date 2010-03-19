@@ -61,7 +61,7 @@ class TimeoutReloadStrategy(object):
         return False
 
 
-def cache(f, reloadStrategy = TimeoutReloadStrategy()):
+def cache(f, reloadStrategy = NoReloadStrategy()):
     """This annotation is used to cache the result of a method call.
     
     @param f: This is the wrapped function which's return value will be cached.
