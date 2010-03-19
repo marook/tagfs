@@ -91,6 +91,11 @@ import node
 from transient_dict import TransientDict
     
 class TagFS(fuse.Fuse):
+
+    DEFAULT_NODES = {
+        '.DirIcon': None,
+        'AppRun': None
+        }
     
     def __init__(self, initwd, *args, **kw):
         fuse.Fuse.__init__(self, *args, **kw)
@@ -143,11 +148,21 @@ class TagFS(fuse.Fuse):
 
             return self._nodeCache[path]
 
+        pathSegments = [x for x in os.path.normpath(path).split(os.sep) if x != '']
+        pathSegmentsLen = len(pathSegments)
+        if pathSegmentsLen > 0:
+            lastSegment = pathSegments[pathSegmentsLen - 1]
+            
+            if lastSegment in TagFS.DEFAULT_NODES:
+                logging.debug('Using default node for path ' + path)
+
+                return TagFS.DEFAULT_NODES[lastSegment]
+        
+
         rootNode = self.__getRootNode()
         
         parentNode = rootNode
-        for pathElement in (x for x in
-                os.path.normpath(path).split(os.sep) if x != ''):
+        for pathElement in pathSegments:
             parentNode = parentNode.getSubNode(pathElement)
             
             if parentNode == None:
