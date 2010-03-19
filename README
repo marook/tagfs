@@ -12,6 +12,9 @@ Introduction
 
 tagfs is used to organize your documents using tags.
 
+This document contains basic usage instructions for users. To develop or debug
+tagfs see the README.dev file.
+
 ---------------------------------------------------------------------
 Requirements
 
