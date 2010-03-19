@@ -55,7 +55,15 @@ class TransientDict(object):
         if len(self.data) < self.averageCapacity:
             return
 
-        self.versions.sort(cmp)
+        def versionCmp(a, b):
+            if a.version < b.version:
+                return 1
+            if b.version < a.version:
+                return -1
+
+            return 0
+
+        self.versions.sort(versionCmp)
 
         while len(self.versions) > self.averageCapacity:
             version = self.versions.pop()
@@ -65,10 +73,12 @@ class TransientDict(object):
     def __setitem__(self, k, v):
         if k in self.data:
             value = self.data[k]
+
+            value.value = v
         else:
+            self.setCounter += 1
             if self.setCounter % self.averageCapacity == 0:
                 self._cleanUpCache()
-            self.setCounter += 1
 
             version = TransientDict.Version(k)
             self.versions.append(version)

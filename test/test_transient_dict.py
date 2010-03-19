@@ -44,11 +44,15 @@ class TestTransientDict(unittest.TestCase):
         """Test the forgett feature
         """
 
-        d = TransientDict(1)
+        d = TransientDict(2)
 
         d['1'] = 'a'
         d['2'] = 'b'
+        d['1'] = 'a'
         d['3'] = 'c'
+        d['1'] = 'a'
+        d['4'] = 'c'
 
-        self.assertTrue('1' not in d)
-        self.assertTrue('3' in d)
+        self.assertTrue('1' in d)
+        self.assertTrue('2' not in d)
+        self.assertTrue('4' in d)

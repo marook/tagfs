@@ -88,6 +88,7 @@ fuse.fuse_python_api = (0, 2)
 from cache import cache
 import item_access
 import node
+from transient_dict import TransientDict
     
 class TagFS(fuse.Fuse):
     
@@ -97,6 +98,7 @@ class TagFS(fuse.Fuse):
         self._initwd = initwd
         self._itemsRoot = None
         self.__itemAccess = None
+        self._nodeCache = TransientDict(100)
         
         self.parser.add_option('-i',
                                '--items-dir',
@@ -136,6 +138,11 @@ class TagFS(fuse.Fuse):
         return node.RootNode(self.getItemAccess())
     
     def __getNode(self, path):
+        if path in self._nodeCache:
+            logging.debug('tagfs _nodeCache hit')
+
+            return self._nodeCache[path]
+
         rootNode = self.__getRootNode()
         
         parentNode = rootNode
@@ -146,6 +153,9 @@ class TagFS(fuse.Fuse):
             if parentNode == None:
                 return None
             
+        logging.debug('tagfs _nodeCache miss')
+        self._nodeCache[path] = parentNode
+
         return parentNode
     
     def getattr(self, path):
