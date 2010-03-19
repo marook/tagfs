@@ -34,6 +34,8 @@ export PYTHONPATH=~/.local/lib/python:$PYTHONPATH
 ---------------------------------------------------------------------
 Usage
 
+After installation tagfs can be started the following way.
+
 Mount a tagged directory:
 $ tagfs -i /path/to/my/items/directory /path/to/my/mount/point
 
