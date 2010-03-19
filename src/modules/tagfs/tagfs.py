@@ -151,22 +151,26 @@ class TagFS(fuse.Fuse):
         return parentNode
     
     def getattr(self, path):
+        logging.debug('getattr ' + path)
+
         node = self.__getNode(path)
         
         if node == None:
-            logging.debug('Unknown node for path ' + path)
+            logging.info('Unknown node for path ' + path)
             
             return -errno.ENOENT
         
         return node.attr
 
     def readdir(self, path, offset):
+        logging.debug('readdir ' + path)
+
         yield fuse.Direntry('.')
         yield fuse.Direntry('..')
         
         node = self.__getNode(path)
         if node == None:
-            logging.debug('Unknown node for path ' + path)
+            logging.info('Unknown node for path ' + path)
             
             # TODO maybe we should fail here?
             return
@@ -175,10 +179,12 @@ class TagFS(fuse.Fuse):
             yield subNode.direntry
             
     def readlink(self, path):
+        logging.debug('readlink ' + path)
+
         node = self.__getNode(path)
         
         if node == None:
-            logging.debug('Unknown node for path ' + path)
+            logging.info('Unknown node for path ' + path)
             
             return -errno.ENOENT
         
