@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2009 Markus Pielmeier
+# Copyright 2009, 2010 Markus Pielmeier
 #
 # This file is part of tagfs.
 #
