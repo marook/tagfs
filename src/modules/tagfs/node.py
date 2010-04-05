@@ -20,6 +20,7 @@
 import fuse
 import logging
 import stat
+import time
 
 from cache import cache
 import item_access
@@ -80,6 +81,9 @@ class DirectoryNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
+        st.st_mtime = self.itemAccess.parseTime
+        st.st_ctime = st.st_mtime
+        st.st_atime = st.st_mtime
             
         return st
     
@@ -167,7 +171,7 @@ class ItemNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFLNK | 0444
         st.st_nlink = 2
-            
+
         return st
     
     @property
@@ -415,6 +419,9 @@ class RootNode(Node):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
+        st.st_mtime = time.time()
+        st.st_ctime = st.st_mtime
+        st.st_atime = st.st_mtime
 
         return st
     

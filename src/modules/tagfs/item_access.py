@@ -18,6 +18,7 @@
 
 import logging
 import os
+import time
 
 from cache import cache
 
@@ -218,6 +219,7 @@ class ItemAccess(object):
         self.__tags = None
         self.__taggedItems = None
         self.__untaggedItems = None
+        self.parseTime = 0
         
     def __parseItems(self):
         items = {}
@@ -237,13 +239,15 @@ class ItemAccess(object):
                 
         logging.debug('Found %s items', len(items))
         
+        self.parseTime = time.time()
+
         return items
     
     @property
     @cache
     def items(self):
         return self.__parseItems()
-    
+
     @property
     @cache
     def tags(self):
