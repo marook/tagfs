@@ -118,9 +118,6 @@ class Item(object):
     @property
     @cache
     def tagsCreationTime(self):
-        
-        # TODO implement some caching
-        
         tagFileName = self._tagFileName
         
         if not os.path.exists(tagFileName):
@@ -147,16 +144,11 @@ class Item(object):
         """Returns the tags as a list for this item.
         """
         
-        # TODO implement some caching
-        
         return self.__parseTags()
     
     @property
     @cache
     def tagged(self):
-        
-        # TODO implement some caching
-        
         return os.path.exists(self._tagFileName)
     
     def __repr__(self):
