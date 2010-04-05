@@ -214,12 +214,16 @@ class ReviewItemsNode(DirectoryNode):
     def _getSubNodesDict(self):
         items = [i for i in self.itemAccess.items.itervalues() if i.tagged]
         sorted(items, key = lambda i: i.tagsModificationTime)
+        prefixWidth = len(str(len(items)))
         
+        def prefix(i):
+            return str(i).rjust(prefixWidth, '0')
+
         subNodes = {}
 
         self._addSubNodes(subNodes,
                           'items',
-                          [ItemNode(item, self.itemAccess, prefix = str(i) + ' ') for i, item in enumerate(items)])
+                          [ItemNode(item, self.itemAccess, prefix = prefix(i) + ' ') for i, item in enumerate(items)])
 
         return subNodes
 
