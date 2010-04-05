@@ -217,9 +217,9 @@ class ReviewItemsNode(DirectoryNode):
     @cache
     def _getSubNodesDict(self):
         items = [i for i in self.itemAccess.items.itervalues() if i.tagged]
-        sorted(items, key = lambda i: i.tagsModificationTime)
+        items.sort(key = lambda i: i.tagsModificationTime)
         prefixWidth = len(str(len(items)))
-        
+
         def prefix(i):
             return str(i).rjust(prefixWidth, '0')
 
