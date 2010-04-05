@@ -137,13 +137,17 @@ class ContainerNode(DirectoryNode):
 
 class ItemNode(Node):
     
-    def __init__(self, item, itemAccess):
+    def __init__(self, item, itemAccess, prefix = None):
         self.item = item
         self.itemAccess = itemAccess
+        self.prefix = prefix
         
     @property
     def name(self):
-        return self.item.name
+        if not self.prefix:
+            return self.item.name
+
+        return self.prefix + self.item.name
         
     @property
     def subNodes(self):
@@ -177,7 +181,7 @@ class ItemNode(Node):
     @property
     @cache
     def link(self):
-        return self.itemAccess.getItemDirectory(self.name)
+        return self.item.itemDirectory
     
     def __repr__(self):
         return '<ItemNode %s>' % self.name
@@ -200,6 +204,25 @@ class UntaggedItemsNode(DirectoryNode):
         
         return subNodes
     
+class ReviewItemsNode(DirectoryNode):
+
+    def __init__(self, name, itemAccess):
+        self.name = name
+        self.itemAccess = itemAccess
+
+    @cache
+    def _getSubNodesDict(self):
+        items = [i for i in self.itemAccess.items.itervalues() if i.tagged]
+        sorted(items, key = lambda i: i.tagsModificationTime)
+        
+        subNodes = {}
+
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(item, self.itemAccess, prefix = str(i) + ' ') for i, item in enumerate(items)])
+
+        return subNodes
+
 class TagValueNode(ContainerNode):
     
     def __init__(self, parentNode, tagValue, itemAccess):
@@ -367,6 +390,9 @@ class RootNode(Node):
         self._addSubNodes(subNodes,
                           'untagged items',
                           [UntaggedItemsNode('.untagged', self.itemAccess), ])
+        self._addSubNodes(subNodes,
+                          'review items',
+                          [ReviewItemsNode('.review', self.itemAccess), ])
         self._addSubNodes(subNodes,
                           'items',
                           [ItemNode(item, self.itemAccess) for item in self.itemAccess.items.itervalues()])
