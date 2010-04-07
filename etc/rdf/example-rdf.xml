@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <!-- TODO define tfs XML namespace -->
+  <!-- TODO how to seperate between context and tag descriptions? -->
+
+  <rdf:Description rdf:about="location">
+    <!-- this is a context description -->
+
+    <dc:title>location</dc:title>
+
+    <!-- TODO -->
+  </rdf:Description>
+
+  <rdf:Description rdf:about="holiday">
+    <!-- this is a tag description -->
+
+    <dc:title>holiday</dc:title>
+
+    <!-- TODO -->
+  </rdf:Description>
+
+  <rdf:Description rdf:about="airport">
+    <!-- this is a tag description -->
+
+    <dc:title>airport</dc:title>
+
+    <!-- TODO -->
+  </rdf:Description>
+
+  <rdf:Description rdf:about="file://path/to/my/events/2008-03-29 - holiday south korea">
+    <!-- this is an item description -->
+
+    <dc:title>2008-03-29 - holiday south korea</dc:title>
+
+    <tfs:tagging>
+      <tfs:context rfd:resource="location" />
+      <tfs:tag rdf:resource="holiday" />
+    </tfs:tagging>
+
+    <tfs:tagging>
+      <tfs:tag rdf:resource="airport" />
+    </tfs:tagging>
+
+    <!-- TODO applied tags -->
+  </rdf:Description>
+</rdf:RDF>
