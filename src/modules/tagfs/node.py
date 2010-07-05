@@ -336,6 +336,36 @@ class ContextTagNode(ContainerNode):
         
         return subNodes
 
+class ContextNotSetNode(ContainerNode):
+
+    def __init__(self, parentNode, context, itemAccess):
+        super(ContextNotSetNode, self).__init__(parentNode)
+        self.context = context
+        self.itemAccess = itemAccess
+
+    @property
+    def name(self):
+        return '.unset'
+        
+    @property
+    @cache
+    def _myFilter(self):
+        return item_access.NotContextFilter(self.context)
+
+    @cache
+    def _getSubNodesDict(self):
+        items = self.items
+        
+        subNodes = {}
+        
+        self._addSubNodes(subNodes,
+                          'items',
+                          [ItemNode(item, self.itemAccess) for item in items])
+        
+        logging.debug('Sub nodes for %s: %s', self, subNodes)
+        
+        return subNodes
+
 class ContextContainerNode(ContainerNode):
     """Contains directories for the target context's values.
     
@@ -366,12 +396,15 @@ class ContextContainerNode(ContainerNode):
     @property
     @cache
     def contextTagNodes(self):
-        return [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)] 
-    
+        return [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)]
+
     @cache
     def _getSubNodesDict(self):
         subNodes = {}
         
+        self._addSubNodes(subNodes,
+                          'not_context',
+                          [ContextNotSetNode(self, self.context, self.itemAccess),])
         self._addSubNodes(subNodes,
                           'tags',
                           self.contextTagNodes)

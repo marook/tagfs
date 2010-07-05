@@ -206,7 +206,24 @@ class NoneFilter(object):
     
     def filterItems(self, items):
         pass
+
+class NotContextFilter(object):
+
+    def __init__(self, context):
+        self.context = context
     
+    def filterItems(self, items):
+        droppedItems = set()
+        
+        for item in items:
+            for tag in item.tags:
+                if self.context == tag.context:
+                    droppedItems.add(item)
+
+                    break
+                
+        items -= droppedItems
+
 class ItemAccess(object):
     """This is the access point to the Items.
     """
