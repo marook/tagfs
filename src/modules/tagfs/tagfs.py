@@ -78,6 +78,7 @@ import fuse
 import exceptions
 import time
 import functools
+import view
 
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
@@ -88,22 +89,15 @@ fuse.fuse_python_api = (0, 2)
 from cache import cache
 import item_access
 import node
-from transient_dict import TransientDict
     
 class TagFS(fuse.Fuse):
 
-    DEFAULT_NODES = {
-        '.DirIcon': None,
-        'AppRun': None
-        }
-    
     def __init__(self, initwd, *args, **kw):
         fuse.Fuse.__init__(self, *args, **kw)
         
         self._initwd = initwd
         self._itemsRoot = None
-        self.__itemAccess = None
-        self._nodeCache = TransientDict(100)
+        self._view = None
         
         self.parser.add_option('-i',
                                '--items-dir',
@@ -117,7 +111,6 @@ class TagFS(fuse.Fuse):
                                metavar = 'file',
                                default = '.tag')
 
-    @cache
     def getItemAccess(self):
         # Maybe we should move the parser run from main here.
         # Or we should at least check if it was run once...
@@ -125,99 +118,50 @@ class TagFS(fuse.Fuse):
 
         # Maybe we should add expand user? Maybe even vars???
         assert opts.itemsDir != None and opts.itemsDir != ''
-        self._itemsRoot = os.path.normpath(
+        itemsRoot = os.path.normpath(
                 os.path.join(self._initwd, opts.itemsDir))
         
         self.tagFileName = opts.tagFile
     
         # try/except here?
         try:
-            return item_access.ItemAccess(self._itemsRoot, self.tagFileName)
+            return item_access.ItemAccess(itemsRoot, self.tagFileName)
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
-                    self._itemsRoot, str(e.strerror))
+                    itemsRoot, str(e.strerror))
             raise
     
-    @cache
-    def __getRootNode(self):
-        return node.RootNode(self.getItemAccess())
-    
-    def __getNode(self, path):
-        if path in self._nodeCache:
-            logging.debug('tagfs _nodeCache hit')
+    @property
+    def view(self):
+        if not self._view:
+            itemAccess = self.getItemAccess()
 
-            return self._nodeCache[path]
+            self._view = view.View(itemAccess)
 
-        pathSegments = [x for x in os.path.normpath(path).split(os.sep) if x != '']
-        pathSegmentsLen = len(pathSegments)
-        if pathSegmentsLen > 0:
-            lastSegment = pathSegments[pathSegmentsLen - 1]
-            
-            if lastSegment in TagFS.DEFAULT_NODES:
-                logging.debug('Using default node for path ' + path)
+        logging.debug('view is %s' % self._view)
 
-                return TagFS.DEFAULT_NODES[lastSegment]
-        
+        return self._view
 
-        rootNode = self.__getRootNode()
-        
-        parentNode = rootNode
-        for pathElement in pathSegments:
-            parentNode = parentNode.getSubNode(pathElement)
-            
-            if parentNode == None:
-                return None
-            
-        logging.debug('tagfs _nodeCache miss')
-        self._nodeCache[path] = parentNode
-
-        return parentNode
-    
     def getattr(self, path):
-        logging.debug('getattr ' + path)
-
-        node = self.__getNode(path)
-        
-        if node == None:
-            logging.info('Unknown node for path ' + path)
-            
-            return -errno.ENOENT
-        
-        return node.attr
+        return self.view.getattr(path)
 
     def readdir(self, path, offset):
-        logging.debug('readdir ' + path)
-
-        yield fuse.Direntry('.')
-        yield fuse.Direntry('..')
-        
-        node = self.__getNode(path)
-        if node == None:
-            logging.info('Unknown node for path ' + path)
-            
-            # TODO maybe we should fail here?
-            return
-        
-        for subNode in node.subNodes:
-            yield subNode.direntry
+        return self.view.readdir(path, offset)
             
     def readlink(self, path):
-        logging.debug('readlink ' + path)
-
-        node = self.__getNode(path)
-        
-        if node == None:
-            logging.info('Unknown node for path ' + path)
-            
-            return -errno.ENOENT
-        
-        return node.link
+        return self.view.readlink(path)
 
     def open(self, path, flags):
-        return -errno.ENOENT
+        return self.view.open(path, flags)
 
     def read(self, path, size, offset):
-        return -errno.ENOENT
+        return self.view.read(path, size, offset)
+
+    def write(self, path, data, pos):
+        return self.view.write(path, data, pos)
+
+    def symlink(self, path, linkPath):
+        return self.view.symlink(path, linkPath)
 
 def main():
     fs = TagFS(os.getcwd(),

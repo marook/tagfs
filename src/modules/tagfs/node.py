@@ -75,9 +75,8 @@ class Node(object):
         return subNodesDict[pathElement]
     
 class DirectoryNode(Node):
-    @property
-    @cache
-    def attr(self):
+
+    def getattr(self, path):
         st = MyStat()
         st.st_mode = stat.S_IFDIR | 0555
         st.st_nlink = 2
@@ -94,6 +93,14 @@ class DirectoryNode(Node):
         e.type = stat.S_IFDIR
         
         return e
+
+    def readdir(self, path, offset):
+        yield fuse.Direntry('.')
+        yield fuse.Direntry('..')
+
+        for n in self.subNodes:
+            yield fuse.Direntry(n.name)
+
 
 class ContainerNode(DirectoryNode):
     """Abstract base node for nodes which contain items and or tags.
@@ -165,9 +172,7 @@ class ItemNode(Node):
         """
         return None
     
-    @property
-    @cache
-    def attr(self):
+    def getattr(self, path):
         st = MyStat()
         st.st_mode = stat.S_IFLNK | 0444
         st.st_nlink = 2
@@ -182,9 +187,7 @@ class ItemNode(Node):
         
         return e
     
-    @property
-    @cache
-    def link(self):
+    def readlink(self, path):
         return self.item.itemDirectory
     
     def __repr__(self):
@@ -413,7 +416,7 @@ class ContextContainerNode(ContainerNode):
         
         return subNodes
 
-class RootNode(Node):
+class RootNode(DirectoryNode):
     
     def __init__(self, itemAccess):
         self.itemAccess = itemAccess
