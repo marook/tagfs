@@ -438,9 +438,12 @@ class RootNode(DirectoryNode):
         self._addSubNodes(subNodes,
                           'review items',
                           [ReviewItemsNode('.review', self.itemAccess), ])
-        self._addSubNodes(subNodes,
-                          'items',
-                          [ItemNode(item, self.itemAccess) for item in self.itemAccess.items.itervalues()])
+
+        if self.config.enableRootItemLinks:
+            self._addSubNodes(subNodes,
+                              'items',
+                              [ItemNode(item, self.itemAccess) for item in self.itemAccess.items.itervalues()])
+
         self._addSubNodes(subNodes,
                           'contexts',
                           [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])

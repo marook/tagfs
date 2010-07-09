@@ -94,8 +94,11 @@ class Config(object):
 
     ENABLE_VALUE_FILTERS = True
 
+    ENABLE_ROOT_ITEM_LINKS = True
+
     def __init__(self):
         self.enableValueFilters = Config.ENABLE_VALUE_FILTERS
+        self.enableRootItemLinks = Config.ENABLE_ROOT_ITEM_LINKS
 
 class TagFS(fuse.Fuse):
 
@@ -128,6 +131,11 @@ class TagFS(fuse.Fuse):
                                dest = 'enableValueFilters',
                                help = 'Displays value filter directories on toplevel instead of only context entries',
                                default = Config.ENABLE_VALUE_FILTERS)
+        self.parser.add_option('--root-items',
+                               action = getStoreAction(not Config.ENABLE_ROOT_ITEM_LINKS),
+                               dest = 'enableRootItemLinks',
+                               help = 'Display item links in tagfs root directory.',
+                               default = Config.ENABLE_ROOT_ITEM_LINKS)
 
     def getItemAccess(self):
         # Maybe we should move the parser run from main here.
@@ -156,6 +164,7 @@ class TagFS(fuse.Fuse):
 
         c = Config()
         c.enableValueFilters = opts.enableValueFilters
+        c.enableRootItemLinks = opts.enableRootItemLinks
 
         return c
 
