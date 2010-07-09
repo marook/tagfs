@@ -110,6 +110,12 @@ class TagFS(fuse.Fuse):
                                help = 'tag file name',
                                metavar = 'file',
                                default = '.tag')
+        self.parser.add_option('-v',
+                               '--value-filter',
+                               action = 'store_true',
+                               dest = 'enableValueFilters',
+                               help = 'Displays value filter directories on toplevel instead of only context entries',
+                               default = False)
 
     def getItemAccess(self):
         # Maybe we should move the parser run from main here.
@@ -131,6 +137,19 @@ class TagFS(fuse.Fuse):
                     itemsRoot, str(e.strerror))
             raise
     
+    @property
+    @cache
+    def config(self):
+        opts, args = self.cmdline
+
+        class Config(object):
+            pass
+
+        c = Config()
+        c.enableValueFilters = opts.enableValueFilters
+
+        return c
+
     @property
     def view(self):
         if not self._view:
