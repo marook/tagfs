@@ -151,15 +151,11 @@ class TagFS(fuse.Fuse):
         return c
 
     @property
+    @cache
     def view(self):
-        if not self._view:
-            itemAccess = self.getItemAccess()
+        itemAccess = self.getItemAccess()
 
-            self._view = view.View(itemAccess)
-
-        logging.debug('view is %s' % self._view)
-
-        return self._view
+        return view.View(itemAccess)
 
     def getattr(self, path):
         return self.view.getattr(path)
