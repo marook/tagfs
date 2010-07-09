@@ -90,6 +90,13 @@ from cache import cache
 import item_access
 import node
     
+class Config(object):
+
+    ENABLE_VALUE_FILTERS = True
+
+    def __init__(self):
+        self.enableValueFilters = Config.ENABLE_VALUE_FILTERS
+
 class TagFS(fuse.Fuse):
 
     def __init__(self, initwd, *args, **kw):
@@ -97,6 +104,12 @@ class TagFS(fuse.Fuse):
         
         self._initwd = initwd
         self._itemsRoot = None
+
+        def getStoreAction(target):
+            if target:
+                return 'store_true'
+            else:
+                return 'store_false'
         
         self.parser.add_option('-i',
                                '--items-dir',
@@ -111,10 +124,10 @@ class TagFS(fuse.Fuse):
                                default = '.tag')
         self.parser.add_option('-v',
                                '--value-filter',
-                               action = 'store_true',
+                               action = getStoreAction(not Config.ENABLE_VALUE_FILTERS),
                                dest = 'enableValueFilters',
                                help = 'Displays value filter directories on toplevel instead of only context entries',
-                               default = False)
+                               default = Config.ENABLE_VALUE_FILTERS)
 
     def getItemAccess(self):
         # Maybe we should move the parser run from main here.
@@ -141,9 +154,6 @@ class TagFS(fuse.Fuse):
     def config(self):
         opts, args = self.cmdline
 
-        class Config(object):
-            pass
-
         c = Config()
         c.enableValueFilters = opts.enableValueFilters
 
@@ -154,7 +164,7 @@ class TagFS(fuse.Fuse):
     def view(self):
         itemAccess = self.getItemAccess()
 
-        return view.View(itemAccess)
+        return view.View(itemAccess, self.config)
 
     def getattr(self, path):
         return self.view.getattr(path)

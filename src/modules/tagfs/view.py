@@ -38,13 +38,14 @@ class View(object):
         'AppRun': None
         }
     
-    def __init__(self, itemAccess):
+    def __init__(self, itemAccess, config):
         self.itemAccess = itemAccess
+        self.config = config
         self._nodeCache = TransientDict(100)
 
     @cache
     def getRootNode(self):
-        return node.RootNode(self.itemAccess)
+        return node.RootNode(self.itemAccess, self.config)
 
     def getNode(self, path):
         if path in self._nodeCache:

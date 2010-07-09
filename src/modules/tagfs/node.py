@@ -418,8 +418,9 @@ class ContextContainerNode(ContainerNode):
 
 class RootNode(DirectoryNode):
     
-    def __init__(self, itemAccess):
+    def __init__(self, itemAccess, config):
         self.itemAccess = itemAccess
+        self.config = config
         self.filterTags = []
         
     @property
@@ -443,9 +444,11 @@ class RootNode(DirectoryNode):
         self._addSubNodes(subNodes,
                           'contexts',
                           [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
-        self._addSubNodes(subNodes,
-                          'tags',
-                          [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
+
+        if self.config.enableValueFilters:
+            self._addSubNodes(subNodes,
+                              'tags',
+                              [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
         return subNodes
         

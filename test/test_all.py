@@ -291,7 +291,9 @@ class TestTagNode(AbstractNodeTest):
     """
     
     def testTagNode(self):
-        parentNode = node.RootNode(self.itemAccess)
+        c = tagfs.Config()
+
+        parentNode = node.RootNode(self.itemAccess, c)
         
         n = node.TagNode(parentNode, item_access.Tag('holiday'), self.itemAccess)
         
@@ -302,7 +304,9 @@ class TestRootNode(AbstractNodeTest):
     """
     
     def testRootNode(self):
-        n = node.RootNode(self.itemAccess)
+        c = tagfs.Config()
+
+        n = node.RootNode(self.itemAccess, c)
         
         self._testNodeInterface(n)
         
@@ -333,8 +337,9 @@ class TestNodeRecurse(AbstractNodeTest):
             self.__recurseNode(sn)
     
     def testRecurse(self):
-        
-        n = node.RootNode(self.itemAccess)
+        c = tagfs.Config()
+
+        n = node.RootNode(self.itemAccess, c)
         
         self.__recurseNode(n)
         
