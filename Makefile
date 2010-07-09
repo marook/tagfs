@@ -84,3 +84,8 @@ unmounttest:
 .PHONY: umounttest
 umounttest: unmounttest
 
+.PHONY: mt
+mt: mounttest
+
+.PHONY: umt
+umt: unmounttest
