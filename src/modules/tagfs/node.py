@@ -236,10 +236,11 @@ class ReviewItemsNode(DirectoryNode):
 
 class TagValueNode(ContainerNode):
     
-    def __init__(self, parentNode, tagValue, itemAccess):
+    def __init__(self, parentNode, tagValue, itemAccess, config):
         super(TagValueNode, self).__init__(parentNode)
         self.tagValue = tagValue
         self.itemAccess = itemAccess
+        self.config = config
         
     @property
     def name(self):
@@ -261,10 +262,12 @@ class TagValueNode(ContainerNode):
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
                                    'contexts',
-                                   [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
-        self._addSubContainerNodes(subNodes,
-                                   'tags',
-                                   [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
+                                   [ContextContainerNode(self, context, self.itemAccess, self.config) for context in self.itemAccess.contexts])
+
+        if self.config.enableValueFilters:
+            self._addSubContainerNodes(subNodes,
+                                       'tags',
+                                       [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for tag value %s: %s', self.tagValue, subNodes)
         
@@ -272,10 +275,11 @@ class TagValueNode(ContainerNode):
     
 class TagNode(ContainerNode):
     
-    def __init__(self, parentNode, tag, itemAccess):
+    def __init__(self, parentNode, tag, itemAccess, config):
         super(TagNode, self).__init__(parentNode)
         self.tag = tag
         self.itemAccess = itemAccess
+        self.config = config
         
     @property
     def name(self):
@@ -297,7 +301,7 @@ class TagNode(ContainerNode):
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
                                    'tags',
-                                   [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
+                                   [TagValueNode(self, tag.value, self.itemAccess, self.config) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for %s: %s', self.tag, subNodes)
         
@@ -305,10 +309,11 @@ class TagNode(ContainerNode):
     
 class ContextTagNode(ContainerNode):
     
-    def __init__(self, parentNode, tag, itemAccess):
+    def __init__(self, parentNode, tag, itemAccess, config):
         super(ContextTagNode, self).__init__(parentNode)
         self.tag = tag
         self.itemAccess = itemAccess
+        self.config = config
         
     @property
     def name(self):
@@ -330,10 +335,12 @@ class ContextTagNode(ContainerNode):
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
                                    'contexts',
-                                   [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
-        self._addSubContainerNodes(subNodes,
-                                   'tags',
-                                   [TagNode(self, tag, self.itemAccess) for tag in self.itemAccess.tags])
+                                   [ContextContainerNode(self, context, self.itemAccess, self.config) for context in self.itemAccess.contexts])
+
+        if self.config.enableValueFilters:
+            self._addSubContainerNodes(subNodes,
+                                       'tags',
+                                       [TagNode(self, tag, self.itemAccess, self.config) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for %s: %s', self, subNodes)
         
@@ -376,10 +383,11 @@ class ContextContainerNode(ContainerNode):
     property. Reason is parentNode.items call in contextTagNodes(self) method.
     """
     
-    def __init__(self, parentNode, context, itemAccess):
+    def __init__(self, parentNode, context, itemAccess, config):
         super(ContextContainerNode, self).__init__(parentNode)
         self.context = context
         self.itemAccess = itemAccess
+        self.config = config
         
     def required(self, items):
         for tagNode in self.contextTagNodes:
@@ -399,7 +407,7 @@ class ContextContainerNode(ContainerNode):
     @property
     @cache
     def contextTagNodes(self):
-        return [ContextTagNode(self, tag, self.itemAccess) for tag in self.itemAccess.contextTags(self.context)]
+        return [ContextTagNode(self, tag, self.itemAccess, self.config) for tag in self.itemAccess.contextTags(self.context)]
 
     @cache
     def _getSubNodesDict(self):
@@ -446,12 +454,12 @@ class RootNode(DirectoryNode):
 
         self._addSubNodes(subNodes,
                           'contexts',
-                          [ContextContainerNode(self, context, self.itemAccess) for context in self.itemAccess.contexts])
+                          [ContextContainerNode(self, context, self.itemAccess, self.config) for context in self.itemAccess.contexts])
 
         if self.config.enableValueFilters:
             self._addSubNodes(subNodes,
                               'tags',
-                              [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
+                              [TagValueNode(self, tag.value, self.itemAccess, self.config) for tag in self.itemAccess.tags])
         
         return subNodes
         

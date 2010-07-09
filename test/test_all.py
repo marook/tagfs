@@ -295,7 +295,7 @@ class TestTagNode(AbstractNodeTest):
 
         parentNode = node.RootNode(self.itemAccess, c)
         
-        n = node.TagNode(parentNode, item_access.Tag('holiday'), self.itemAccess)
+        n = node.TagNode(parentNode, item_access.Tag('holiday'), self.itemAccess, c)
         
         self._testNodeInterface(n)
 
