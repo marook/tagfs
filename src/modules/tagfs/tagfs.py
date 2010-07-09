@@ -92,9 +92,9 @@ import node
     
 class Config(object):
 
-    ENABLE_VALUE_FILTERS = True
+    ENABLE_VALUE_FILTERS = False
 
-    ENABLE_ROOT_ITEM_LINKS = True
+    ENABLE_ROOT_ITEM_LINKS = False
 
     def __init__(self):
         self.enableValueFilters = Config.ENABLE_VALUE_FILTERS
@@ -125,8 +125,7 @@ class TagFS(fuse.Fuse):
                                help = 'tag file name',
                                metavar = 'file',
                                default = '.tag')
-        self.parser.add_option('-v',
-                               '--value-filter',
+        self.parser.add_option('--value-filter',
                                action = getStoreAction(not Config.ENABLE_VALUE_FILTERS),
                                dest = 'enableValueFilters',
                                help = 'Displays value filter directories on toplevel instead of only context entries',
