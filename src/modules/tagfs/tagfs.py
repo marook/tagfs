@@ -97,7 +97,6 @@ class TagFS(fuse.Fuse):
         
         self._initwd = initwd
         self._itemsRoot = None
-        self._view = None
         
         self.parser.add_option('-i',
                                '--items-dir',
