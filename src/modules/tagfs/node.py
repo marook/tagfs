@@ -424,6 +424,33 @@ class ContextContainerNode(ContainerNode):
         
         return subNodes
 
+class TagValueContainerNode(ContainerNode):
+    
+    def __init__(self, parentNode, itemAccess, config):
+        super(TagValueContainerNode, self).__init__(parentNode)
+        self.itemAccess = itemAccess
+        self.config = config
+
+    @property
+    def name(self):
+        return '.any_context'
+
+    @property
+    def filter(self):
+        return self.parentNode.filter
+    
+    @cache
+    def _getSubNodesDict(self):
+        items = self.items
+        
+        subNodes = {}
+        
+        self._addSubContainerNodes(subNodes,
+                                   'tags',
+                                   [TagValueNode(self, tag.value, self.itemAccess, self.config) for tag in self.itemAccess.tags])
+        
+        return subNodes
+
 class RootNode(DirectoryNode):
     
     def __init__(self, itemAccess, config):
@@ -460,6 +487,10 @@ class RootNode(DirectoryNode):
             self._addSubNodes(subNodes,
                               'tags',
                               [TagValueNode(self, tag.value, self.itemAccess, self.config) for tag in self.itemAccess.tags])
+        else:
+            self._addSubNodes(subNodes,
+                              'tags container',
+                              [TagValueContainerNode(self, self.itemAccess, self.config), ])
         
         return subNodes
         
