@@ -245,7 +245,8 @@ class AbstractNodeTest(unittest.TestCase):
 
         self.assertTrue('getSubNode' in set(dir(node)))
         
-        attr = node.attr
+        # TODO supply correct path to node.getattr
+        attr = node.getattr('/path')
         self.assertNotEqual(None, attr.st_mode)
 
         direntry = node.direntry
@@ -270,7 +271,8 @@ class TestItemNode(AbstractNodeTest):
         self.assertEqual('test', direntry.name)
         self.assertEqual(stat.S_IFLNK, direntry.type)
         
-        self.assertNotEqual(None, n.link)
+        # TODO supply correct path to n.readlink
+        self.assertNotEqual(None, n.readlink('/path'))
         
 class TestUntaggedItemsNode(AbstractNodeTest):
     """This test case tests the UntaggedItemsNode.
