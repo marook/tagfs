@@ -270,7 +270,7 @@ class TagValueNode(ContainerNode):
         if self.config.enableValueFilters:
             self._addSubContainerNodes(subNodes,
                                        'tags',
-                                       [TagValueNode(self, tag.value, self.itemAccess) for tag in self.itemAccess.tags])
+                                       [TagValueNode(self, tag.value, self.itemAccess, self.config) for tag in self.itemAccess.tags])
         
         logging.debug('Sub nodes for tag value %s: %s', self.tagValue, subNodes)
         
