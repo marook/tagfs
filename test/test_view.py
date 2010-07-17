@@ -96,7 +96,7 @@ class TestView(unittest.TestCase):
     def configs(self):
         for enableValueFilters in (True, False):
             for enableRootItemLinks in (True, False):
-                yield tagfs.Config(enableValueFilters, enableRootItemLinks),
+                yield tagfs.Config(enableValueFilters, enableRootItemLinks)
 
     @property
     def itemAccesses(self):

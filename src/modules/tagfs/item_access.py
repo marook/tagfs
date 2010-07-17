@@ -319,3 +319,6 @@ class ItemAccess(object):
             contexts.add(tag.context)
         
         return contexts
+
+    def __str__(self):
+        return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in ['dataDirectory', 'tagFileName']]) + ']'

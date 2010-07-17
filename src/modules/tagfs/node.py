@@ -39,6 +39,9 @@ class MyStat(fuse.Stat):
         self.st_mtime = 0
         self.st_ctime = 0
 
+    def __str__(self):
+        return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in self.__dict__]) + ']'
+
 class Node(object):
     
     def _addSubNodes(self, subNodes, nodeNames, nodes):

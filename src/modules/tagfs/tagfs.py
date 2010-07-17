@@ -100,6 +100,9 @@ class Config(object):
         self.enableValueFilters = enableValueFilters
         self.enableRootItemLinks = enableRootItemLinks
 
+    def __str__(self):
+        return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in self.__dict__]) + ']'
+
 class TagFS(fuse.Fuse):
 
     def __init__(self, initwd, *args, **kw):
