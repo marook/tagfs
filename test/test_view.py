@@ -109,6 +109,9 @@ class TestView(unittest.TestCase):
             
 
     def testView(self):
+        """Testing view interface
+        """
+
         for conf in self.configs:
             for itemAccess in self.itemAccesses:
                 try:
