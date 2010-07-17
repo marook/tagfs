@@ -28,7 +28,7 @@ import tagfs.item_access as item_access
 import tagfs.node as node
 
 def createTestItemAccess():
-    return item_access.ItemAccess(eventsdir, '.tag')
+    return item_access.ItemAccess(env.eventsdir, '.tag')
 
 class TestTestCaseEnvironment(unittest.TestCase):
     """Makes sure the environment for the test case is set up right.
@@ -40,7 +40,7 @@ class TestTestCaseEnvironment(unittest.TestCase):
         
         import os
         
-        self.assertTrue(os.path.exists(eventsdir))
+        self.assertTrue(os.path.exists(env.eventsdir))
 
 class TestParseTagsFromFile(unittest.TestCase):
     
@@ -48,7 +48,7 @@ class TestParseTagsFromFile(unittest.TestCase):
         """Tests the parseTagsFromFile(...) method.
         """
         
-        tagFileName = os.path.join(eventsdir,
+        tagFileName = os.path.join(env.eventsdir,
                                    '2008-03-29 - holiday south korea',
                                    '.tag')
         
@@ -71,7 +71,7 @@ class TestItem(unittest.TestCase):
         """
         
         def __init__(self):
-            self.dataDirectory = eventsdir
+            self.dataDirectory = env.eventsdir
             self.tagFileName = '.tag'
     
     def setUp(self):
