@@ -21,26 +21,7 @@
 import logging
 import unittest
 import os
-import sys
-
-def setupenv():
-    from os.path import dirname, abspath, exists, join as pjoin, split as psplit
-
-    global eventsdir
-    testdir = dirname(abspath(__file__))
-    projectdir = pjoin(psplit(testdir)[0])
-    srcdir = pjoin(projectdir, 'src')
-    moddir = pjoin(srcdir, 'modules')
-    eventsdir = pjoin(projectdir, 'etc', 'test', 'events')
-
-    for x in (testdir, srcdir, moddir, eventsdir):
-        assert exists(x), "Directory not found: %s" % x
-
-    sys.path.insert(0, testdir)
-    sys.path.insert(0, moddir)
-    sys.path.insert(0, srcdir)
-
-setupenv()
+import env
 
 import tagfs
 import tagfs.item_access as item_access

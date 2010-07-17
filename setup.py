@@ -49,11 +49,14 @@ class test(Command):
     def finalize_options(self): pass
 
     def run(self):
+        import re
+        testPyMatcher = re.compile('(.*/)?test[^/]*[.]py', re.IGNORECASE)
+
         tests = ['.'.join([
                 basename(testdir), splitext(basename(f))[0]
         ]) for f in glob(pjoin(
                 testdir, '*.py'
-        )) if not f.endswith('__init__.py')]
+        )) if testPyMatcher.match(f)]
 
         print "..using:"
         print "  testdir:", testdir

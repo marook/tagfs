@@ -96,9 +96,9 @@ class Config(object):
 
     ENABLE_ROOT_ITEM_LINKS = False
 
-    def __init__(self):
-        self.enableValueFilters = Config.ENABLE_VALUE_FILTERS
-        self.enableRootItemLinks = Config.ENABLE_ROOT_ITEM_LINKS
+    def __init__(self, enableValueFilters = ENABLE_VALUE_FILTERS, enableRootItemLinks = ENABLE_ROOT_ITEM_LINKS):
+        self.enableValueFilters = enableValueFilters
+        self.enableRootItemLinks = enableRootItemLinks
 
 class TagFS(fuse.Fuse):
 
