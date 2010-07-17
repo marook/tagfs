@@ -23,6 +23,7 @@ docdir = $(prefix)/share/doc/tagfs
 installdirs = $(bindir) $(docdir)
 
 srcdir = .
+targetdir = $(srcdir)/target
 
 testdatadir = $(srcdir)/etc/test/events
 testmntdir = $(shell pwd)/mnt
@@ -34,7 +35,10 @@ INSTALL = install
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_PROGRAM = $(INSTALL)
 
-DOCS = AUTHORS COPYING README
+DOCS = AUTHORS COPYING README VERSION
+
+VERSION = `cat VERSION`
+TSTAMP = `date '+%Y%m%d_%H%M'`
 
 .PHONY: all
 all:
@@ -50,6 +54,8 @@ clean:
 		echo 'removing $(testmntdir)'; \
 		rmdir '$(testmntdir)'; \
 	fi
+
+	rm -r -- "$(targetdir)"
 
 .PHONY: test
 test:
@@ -89,3 +95,11 @@ mt: mounttest
 
 .PHONY: umt
 umt: unmounttest
+
+.PHONY: distsnapshot
+distsnapshot:
+	mkdir -p -- "$(targetdir)/tagfs_$(VERSION)_snapshot_$(TSTAMP)"
+
+	cp -a $(DOCS) etc src test util setup.py README.dev Makefile "$(targetdir)/tagfs_$(VERSION)_snapshot_$(TSTAMP)"
+
+	tar cjf $(targetdir)/tagfs_$(VERSION)_snapshot_$(TSTAMP)-src.tar.bz2 '--exclude=*~' '--exclude=*.pyc' -C "$(targetdir)" "tagfs_$(VERSION)_snapshot_$(TSTAMP)"
