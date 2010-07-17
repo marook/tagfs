@@ -4,6 +4,8 @@ developer readme
 1) Logging
 2) Profiling
 3) Tracing
+4) Distribution
+4.1) tar Distribution
 
 ---------------------------------------------------------------------
 Logging
@@ -34,3 +36,14 @@ log files. To analyze a log file execute the following
 $ util/trace_logfiles.py /tmp/tagfs.log
 
 The tracing script will output some statistics.
+
+---------------------------------------------------------------------
+tar Distribution
+
+The tagfs project contains scripts for creating source distribution packages.
+To create a tar distribution package you execute the following:
+
+$ make distsnapshot
+
+The make call will create an archive within the target directory. The created
+tar file is used for tagfs source distribution.
