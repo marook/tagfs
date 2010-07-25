@@ -196,6 +196,67 @@ class ItemNode(Node):
     def __repr__(self):
         return '<ItemNode %s>' % self.name
     
+class CsvExportNode(Node):
+
+    def __init__(self):
+        self.name = 'export.csv'
+
+    @property
+    @cache
+    def content(self):
+        # TODO create real csv content
+        return 'hello world'
+
+    @property
+    def subNodes(self):
+        """Returns always [] because we don't have sub nodes.
+        """
+
+        return []
+    
+    def getSubNode(self, pathElement):
+        """Returns always None as file nodes don't have sub nodes.
+        """
+        return None
+    
+    def getattr(self, path):
+        a = MyStat()
+        a.st_mode = stat.S_IFREG | 0444
+        a.st_nlink = 2
+        a.st_size = len(self.content)
+
+        return a
+
+    @property
+    @cache
+    def direntry(self):
+        e = fuse.Direntry(self.name)
+        e.type = stat.S_IFREG
+        
+        return e
+    
+    def open(self, path, flags):
+        pass
+
+    def read(self, path, size, offset):
+        return self.content[offset:size - offset]
+
+class ExportDirectoryNode(DirectoryNode):
+
+    def __init__(self, name, itemAccess):
+        self.name = name
+        self.itemAccess = itemAccess
+
+    @cache
+    def _getSubNodesDict(self):
+        subNodes = {}
+
+        self._addSubNodes(subNodes,
+                          'csv',
+                          [CsvExportNode(), ])
+        
+        return subNodes
+
 class UntaggedItemsNode(DirectoryNode):
     """Represents a node which contains not tagged items.
     """
@@ -476,6 +537,9 @@ class RootNode(DirectoryNode):
         self._addSubNodes(subNodes,
                           'review items',
                           [ReviewItemsNode('.review', self.itemAccess), ])
+        self._addSubNodes(subNodes,
+                          'export',
+                          [ExportDirectoryNode('.export', self.itemAccess), ])
 
         if self.config.enableRootItemLinks:
             self._addSubNodes(subNodes,
