@@ -54,6 +54,8 @@ class TestView(unittest.TestCase):
         self.assertTrue(len(l) > 0)
 
     def validateRegularFilePath(self, view, path):
+        attr = view.getattr(path)
+
         self.assertTrue(attr.st_size >= 0)
 
         self.assertTrue(view.open(path, 32768) == None)
