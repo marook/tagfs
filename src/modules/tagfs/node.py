@@ -198,14 +198,58 @@ class ItemNode(Node):
     
 class CsvExportNode(Node):
 
-    def __init__(self):
+    COL_SEPARATOR = ';'
+
+    TEXT_CHAR = '"'
+
+    def __init__(self, parentNode, itemAccess):
         self.name = 'export.csv'
+        self.parentNode = parentNode
+        self.itemAccess = itemAccess
+
+    def formatRow(self, row):
+        first = True
+
+        s = ''
+
+        for col in row:
+            if first:
+                first = False
+            else:
+                s = s + CsvExportNode.COL_SEPARATOR
+
+            # TODO escape TEXT_CHAR in col string
+            s = s + CsvExportNode.TEXT_CHAR + str(col) + CsvExportNode.TEXT_CHAR
+
+        s = s + '\n'
+
+        return s
+
+    @property
+    def filter(self):
+        return self.parentNode.filter
+    
+    @property
+    @cache
+    def items(self):
+        items = self.itemAccess.filterItems(self.filter)
+        
+        logging.debug('Items request for %s: %s',
+                      self,
+                      [item.name for item in items])
+        
+        return items
 
     @property
     @cache
     def content(self):
-        # TODO create real csv content
-        return 'hello world'
+        s = ''
+
+        for i in self.items:
+            # TODO add column for each item context
+            s = s + self.formatRow([i.name, ])
+
+        return s
 
     @property
     def subNodes(self):
@@ -243,8 +287,9 @@ class CsvExportNode(Node):
 
 class ExportDirectoryNode(DirectoryNode):
 
-    def __init__(self, name, itemAccess):
+    def __init__(self, name, parentNode, itemAccess):
         self.name = name
+        self.parentNode = parentNode
         self.itemAccess = itemAccess
 
     @cache
@@ -253,9 +298,13 @@ class ExportDirectoryNode(DirectoryNode):
 
         self._addSubNodes(subNodes,
                           'csv',
-                          [CsvExportNode(), ])
+                          [CsvExportNode(self, self.itemAccess), ])
         
         return subNodes
+
+    @property
+    def filter(self):
+        return self.parentNode.filter
 
 class UntaggedItemsNode(DirectoryNode):
     """Represents a node which contains not tagged items.
@@ -539,7 +588,7 @@ class RootNode(DirectoryNode):
                           [ReviewItemsNode('.review', self.itemAccess), ])
         self._addSubNodes(subNodes,
                           'export',
-                          [ExportDirectoryNode('.export', self.itemAccess), ])
+                          [ExportDirectoryNode('.export', self, self.itemAccess), ])
 
         if self.config.enableRootItemLinks:
             self._addSubNodes(subNodes,
