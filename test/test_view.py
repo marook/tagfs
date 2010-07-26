@@ -33,6 +33,10 @@ class TestView(unittest.TestCase):
     def validateDirectoryPath(self, view, path):
         # path is a directory
 
+        # test rox filer default access
+        for file in ['AppRun', '.DirIcon']:
+            attr = view.getattr(os.path.join(path, file))
+
         # TODO implement propper offset handling
         for entry in view.readdir(path, 0):
             self.assertTrue(entry != None)
