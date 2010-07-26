@@ -146,6 +146,13 @@ class Item(object):
         """
         
         return self.__parseTags()
+
+    def getTagsByContext(self, context):
+        for t in self.tags:
+            if context != t.context:
+                continue
+
+            yield t.value
     
     @property
     @cache

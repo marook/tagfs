@@ -243,11 +243,26 @@ class CsvExportNode(Node):
     @property
     @cache
     def content(self):
+        contexts = set()
+        for i in self.items:
+            for t in i.tags:
+                contexts.add(t.context)
+
         s = ''
 
+        headline = ['name', ]
+        for c in contexts:
+            headline.append(c)
+        s = s + self.formatRow(headline)
+
         for i in self.items:
+            row = [i.name, ]
+
+            for c in contexts:
+                row.append('\n'.join(i.getTagsByContext(c)))
+
             # TODO add column for each item context
-            s = s + self.formatRow([i.name, ])
+            s = s + self.formatRow(row)
 
         return s
 
