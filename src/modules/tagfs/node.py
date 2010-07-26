@@ -386,6 +386,9 @@ class TagValueNode(ContainerNode):
         subNodes = {}
         
         self._addSubNodes(subNodes,
+                          'export',
+                          [ExportDirectoryNode('.export', self, self.itemAccess), ])
+        self._addSubNodes(subNodes,
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
@@ -425,6 +428,9 @@ class TagNode(ContainerNode):
         subNodes = {}
         
         self._addSubNodes(subNodes,
+                          'export',
+                          [ExportDirectoryNode('.export', self, self.itemAccess), ])
+        self._addSubNodes(subNodes,
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
         self._addSubContainerNodes(subNodes,
@@ -458,6 +464,9 @@ class ContextTagNode(ContainerNode):
         
         subNodes = {}
         
+        self._addSubNodes(subNodes,
+                          'export',
+                          [ExportDirectoryNode('.export', self, self.itemAccess), ])
         self._addSubNodes(subNodes,
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
@@ -496,6 +505,9 @@ class ContextNotSetNode(ContainerNode):
         
         subNodes = {}
         
+        self._addSubNodes(subNodes,
+                          'export',
+                          [ExportDirectoryNode('.export', self, self.itemAccess), ])
         self._addSubNodes(subNodes,
                           'items',
                           [ItemNode(item, self.itemAccess) for item in items])
@@ -573,6 +585,9 @@ class TagValueContainerNode(ContainerNode):
         
         subNodes = {}
         
+        self._addSubNodes(subNodes,
+                          'export',
+                          [ExportDirectoryNode('.export', self, self.itemAccess), ])
         self._addSubContainerNodes(subNodes,
                                    'tags',
                                    [TagValueNode(self, tag.value, self.itemAccess, self.config) for tag in self.itemAccess.tags])
