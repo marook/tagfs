@@ -283,6 +283,7 @@ class CsvExportNode(Node):
         a = MyStat()
         a.st_mode = stat.S_IFREG | 0444
         a.st_nlink = 2
+        # TODO bug: len of content is not size of content in bytes (unicode!)
         a.st_size = len(self.content)
 
         return a
