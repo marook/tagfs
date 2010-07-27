@@ -267,7 +267,8 @@ class CsvExportNode(Node):
     @property
     @cache
     def content(self):
-        return ''.join(self._content)
+        # TODO remove decode and fix size calculation in getattr(...) method
+        return (''.join(self._content)).decode('ascii', 'replace')
 
     @property
     def subNodes(self):
