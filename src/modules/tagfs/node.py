@@ -204,6 +204,8 @@ class CsvExportNode(Node):
 
     ROW_SEPARATOR = '\n'
 
+    TAG_VALUE_SEPARATOR = '\n'
+
     def __init__(self, parentNode, itemAccess):
         self.name = 'export.csv'
         self.parentNode = parentNode
@@ -261,7 +263,7 @@ class CsvExportNode(Node):
             row = [i.name, ]
 
             for c in contexts:
-                row.append('\n'.join(i.getTagsByContext(c)))
+                row.append(CsvExportNode.TAG_VALUE_SEPARATOR.join(i.getTagsByContext(c)))
 
             s = s + self.formatRow(row)
 
