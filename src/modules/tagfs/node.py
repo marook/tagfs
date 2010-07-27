@@ -214,20 +214,18 @@ class CsvExportNode(Node):
     def formatRow(self, row):
         first = True
 
-        s = ''
-
         for col in row:
             if first:
                 first = False
             else:
-                s = s + CsvExportNode.COL_SEPARATOR
+                yield CsvExportNode.COL_SEPARATOR
 
             # TODO escape TEXT_CHAR in col string
-            s = s + CsvExportNode.TEXT_CHAR + str(col) + CsvExportNode.TEXT_CHAR
+            yield CsvExportNode.TEXT_CHAR
+            yield str(col)
+            yield CsvExportNode.TEXT_CHAR
 
-        s = s + CsvExportNode.ROW_SEPARATOR
-
-        return s
+        yield CsvExportNode.ROW_SEPARATOR
 
     @property
     def filter(self):
@@ -245,19 +243,17 @@ class CsvExportNode(Node):
         return items
 
     @property
-    @cache
-    def content(self):
+    def _content(self):
         contexts = set()
         for i in self.items:
             for t in i.tags:
                 contexts.add(t.context)
 
-        s = ''
-
         headline = ['name', ]
         for c in contexts:
             headline.append(c)
-        s = s + self.formatRow(headline)
+        for s in self.formatRow(headline):
+            yield s
 
         for i in self.items:
             row = [i.name, ]
@@ -265,9 +261,13 @@ class CsvExportNode(Node):
             for c in contexts:
                 row.append(CsvExportNode.TAG_VALUE_SEPARATOR.join(i.getTagsByContext(c)))
 
-            s = s + self.formatRow(row)
+            for s in self.formatRow(row):
+                yield s
 
-        return s
+    @property
+    @cache
+    def content(self):
+        return ''.join(self._content)
 
     @property
     def subNodes(self):
