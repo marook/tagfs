@@ -267,8 +267,7 @@ class CsvExportNode(Node):
     @property
     @cache
     def content(self):
-        # TODO remove decode and fix size calculation in getattr(...) method
-        return (''.join(self._content)).decode('ascii', 'replace')
+        return ''.join(self._content)
 
     @property
     def subNodes(self):
@@ -286,8 +285,10 @@ class CsvExportNode(Node):
         a = MyStat()
         a.st_mode = stat.S_IFREG | 0444
         a.st_nlink = 2
-        # TODO bug: len of content is not size of content in bytes (unicode!)
-        a.st_size = len(self.content)
+
+        # TODO replace with memory saving size calculation
+        import array
+        a.st_size = len(array.array('c', self.content))
 
         return a
 
@@ -300,10 +301,10 @@ class CsvExportNode(Node):
         return e
     
     def open(self, path, flags):
-        pass
+        return 0
 
     def read(self, path, size, offset):
-        return self.content[offset:size - offset]
+        return self.content[offset:offset + size]
 
 class ExportDirectoryNode(DirectoryNode):
 
