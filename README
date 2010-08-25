@@ -5,7 +5,8 @@ tagfs - tag file system
 3) Installation
 4) Usage
 5) Tests
-6) Contact
+6) Further Reading
+7) Contact
 
 ---------------------------------------------------------------------
 Introduction
@@ -52,6 +53,12 @@ You can execute the test cases via the setup.py script in the project's root
 directory.
 
 $ python setup.py test
+
+---------------------------------------------------------------------
+Further Reading
+
+Using a file system for my bank account (Markus Pielmeier)
+http://pielmeier.blogspot.com/2010/08/using-file-system-for-my-bank-account.html
 
 ---------------------------------------------------------------------
 Contact
