@@ -22,7 +22,36 @@ import ConfigParser
 
 class Config(ConfigParser.SafeConfigParser):
 
-    def __init__(self):
-        super(self, Config).__ini__({})
+    def __init__(self, itemsDir):
+        super(self, Config).__init__({
+                'tagFileName': '.tag',
+                'enableValueFilters': False,
+                'enableRootItemLinks': False,
+                })
 
-        # self.read(
+        self.itemsDir = itemsDir
+
+        self.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
+                   os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
+                   os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
+
+    @property
+    def tagFileName(self):
+        return self.get('global', 'tagFileName')
+
+    # TODO implement generic approach to get/set boolean values
+    @property
+    def enableValueFilters(self):
+        return self.getboolean('global', 'enableValueFilters')
+
+    @enableValueFilters.setter
+    def enableValueFilters(self, enableValueFilters):
+        self.set('global', 'enableValueFilters', enableValueFilters)
+
+    @property
+    def enableRootItemLinks(self):
+        return self.getboolean('global', 'enableRootItemLinks')
+
+    @enableValueFilters.setter
+    def enableRootItemLinks(self, enableRootItemLinks):
+        self.set('global', 'enableRootItemLinks', enableRootItemLinks)
