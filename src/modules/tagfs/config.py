@@ -19,6 +19,7 @@
 #
 
 import ConfigParser
+import logging
 
 class Config(ConfigParser.SafeConfigParser):
 
@@ -31,9 +32,11 @@ class Config(ConfigParser.SafeConfigParser):
 
         self.itemsDir = itemsDir
 
-        self.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
-                   os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
-                   os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
+        parsedFiles = self.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
+                                 os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
+                                 os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
+
+        logging.debug('Parsed the following config files: %s' % ', '.join(parsedFiles))
 
     @property
     def tagFileName(self):

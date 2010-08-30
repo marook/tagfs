@@ -89,20 +89,8 @@ fuse.fuse_python_api = (0, 2)
 from cache import cache
 import item_access
 import node
+import config
     
-class Config(object):
-
-    ENABLE_VALUE_FILTERS = False
-
-    ENABLE_ROOT_ITEM_LINKS = False
-
-    def __init__(self, enableValueFilters = ENABLE_VALUE_FILTERS, enableRootItemLinks = ENABLE_ROOT_ITEM_LINKS):
-        self.enableValueFilters = enableValueFilters
-        self.enableRootItemLinks = enableRootItemLinks
-
-    def __str__(self):
-        return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in self.__dict__]) + ']'
-
 class TagFS(fuse.Fuse):
 
     def __init__(self, initwd, *args, **kw):
@@ -111,12 +99,8 @@ class TagFS(fuse.Fuse):
         self._initwd = initwd
         self._itemsRoot = None
 
-        def getStoreAction(target):
-            if target:
-                return 'store_true'
-            else:
-                return 'store_false'
-        
+        # TODO change command line arguments structure
+        # goal: tagfs <items dir> <mount dir>
         self.parser.add_option('-i',
                                '--items-dir',
                                dest = 'itemsDir',
@@ -124,20 +108,20 @@ class TagFS(fuse.Fuse):
                                metavar = 'dir')
         self.parser.add_option('-t',
                                '--tag-file',
-                               dest = 'tagFile',
+                               dest = 'tagFileName',
                                help = 'tag file name',
                                metavar = 'file',
-                               default = '.tag')
+                               default = None)
         self.parser.add_option('--value-filter',
-                               action = getStoreAction(not Config.ENABLE_VALUE_FILTERS),
+                               action = 'store_true',
                                dest = 'enableValueFilters',
                                help = 'Displays value filter directories on toplevel instead of only context entries',
-                               default = Config.ENABLE_VALUE_FILTERS)
+                               default = None)
         self.parser.add_option('--root-items',
-                               action = getStoreAction(not Config.ENABLE_ROOT_ITEM_LINKS),
+                               action = 'store_true',
                                dest = 'enableRootItemLinks',
                                help = 'Display item links in tagfs root directory.',
-                               default = Config.ENABLE_ROOT_ITEM_LINKS)
+                               default = None)
 
     def getItemAccess(self):
         # Maybe we should move the parser run from main here.
@@ -149,11 +133,9 @@ class TagFS(fuse.Fuse):
         itemsRoot = os.path.normpath(
                 os.path.join(self._initwd, opts.itemsDir))
         
-        self.tagFileName = opts.tagFile
-    
         # try/except here?
         try:
-            return item_access.ItemAccess(itemsRoot, self.tagFileName)
+            return item_access.ItemAccess(itemsRoot, self.config.tagFileName)
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     itemsRoot, str(e.strerror))
@@ -164,9 +146,16 @@ class TagFS(fuse.Fuse):
     def config(self):
         opts, args = self.cmdline
 
-        c = Config()
-        c.enableValueFilters = opts.enableValueFilters
-        c.enableRootItemLinks = opts.enableRootItemLinks
+        c = config.Config(opts.itemsDir)
+
+        if opts.tagFileName:
+            c.tagFileName = opts.tagFileName
+
+        if opts.enableValueFilters:
+            c.enableValueFilters = opts.enableValueFilters
+
+        if opts.enableRootItemLinks:
+            c.enableRootItemLinks = opts.enableRootItemLinks
 
         return c
 
