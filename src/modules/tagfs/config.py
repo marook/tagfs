@@ -22,7 +22,11 @@ import ConfigParser
 import logging
 import os
 
-class Config(ConfigParser.SafeConfigParser):
+class ConfigError(Exception):
+
+    pass
+
+class Config(object):
 
     GLOBAL_SECTION = 'global'
 
@@ -49,9 +53,22 @@ class Config(ConfigParser.SafeConfigParser):
 
         logging.debug('Parsed the following config files: %s' % ', '.join(parsedFiles))
 
+    def _boolToStr(self, b):
+        if b is True:
+            return 'true'
+        elif b is False:
+            return 'false'
+        else:
+            # TODO make error more verbose
+            raise ConfigError()
+
     @property
     def tagFileName(self):
         return self._config.get(Config.GLOBAL_SECTION, 'tagFileName')
+
+    @tagFileName.setter
+    def tagFileName(self, tagFileName):
+        self._config.set(Config.GLOBAL_SECTION, 'tagFileName', tagFileName)
 
     # TODO implement generic approach to get/set boolean values
     @property
@@ -60,12 +77,16 @@ class Config(ConfigParser.SafeConfigParser):
 
     @enableValueFilters.setter
     def enableValueFilters(self, enableValueFilters):
-        self._config.set(Config.GLOBAL_SECTION, 'enableValueFilters', enableValueFilters)
+        self._config.set(Config.GLOBAL_SECTION, 'enableValueFilters', self._boolToStr(enableValueFilters))
 
     @property
     def enableRootItemLinks(self):
         return self._config.getboolean(Config.GLOBAL_SECTION, 'enableRootItemLinks')
 
-    @enableValueFilters.setter
+    @enableRootItemLinks.setter
     def enableRootItemLinks(self, enableRootItemLinks):
-        self._config.set(Config.GLOBAL_SECTION, 'enableRootItemLinks', enableRootItemLinks)
+        self._config.set(Config.GLOBAL_SECTION, 'enableRootItemLinks', self._boolToStr(enableRootItemLinks))
+
+    def __str__(self):
+        #return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in ['tagFileName', 'enableValueFilters', 'enableRootItemLinks']]) + ']'
+        return '[tagFileName: %s, enableValueFilters: %s, enableRootItemLinks: %s]' % (self.tagFileName, self.enableValueFilters, self.enableRootItemLinks)

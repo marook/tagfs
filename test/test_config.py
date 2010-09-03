@@ -31,11 +31,14 @@ class TestConfig(unittest.TestCase):
         for dir in setup.validItemDirectories:
             yield config.Config(dir)
 
-
     def testConfig(self):
         for c in self.configs():
             logging.debug('Testing config %s' % c)
 
-            logging.debug('Tag file name is: %s' % c.tagFileName)
-            logging.debug('Enable value filters: %s' % c.enableValueFilters)
-            logging.debug('Enable root item links: %s' % c.enableRootItemLinks)
+            self.assertTrue(isinstance(c.tagFileName, str))
+            self.assertTrue(isinstance(c.enableValueFilters, bool))
+            self.assertTrue(isinstance(c.enableRootItemLinks, bool))
+
+            c.enableValueFilters = True
+            self.assertTrue(isinstance(c.enableValueFilters, bool))
+            self.assertEqual(True, c.enableValueFilters)

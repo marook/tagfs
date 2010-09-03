@@ -28,18 +28,18 @@
 import os
 import stat
 import errno
-import fuse
 import exceptions
 import time
 import functools
-import view
+import logging
 
+import fuse
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
         "your fuse-py doesn't know of fuse.__version__, probably it's too old."
-
 fuse.fuse_python_api = (0, 2)
 
+import view
 from cache import cache
 import item_access
 import node
@@ -100,7 +100,7 @@ class TagFS(fuse.Fuse):
     def config(self):
         opts, args = self.cmdline
 
-        c = config.Config(opts.itemsDir)
+        c = config.Config(os.path.normpath(os.path.join(self._initwd, opts.itemsDir)))
 
         if opts.tagFileName:
             c.tagFileName = opts.tagFileName
@@ -110,6 +110,8 @@ class TagFS(fuse.Fuse):
 
         if opts.enableRootItemLinks:
             c.enableRootItemLinks = opts.enableRootItemLinks
+
+        logging.debug('Using configuration %s' % c)
 
         return c
 
