@@ -18,13 +18,12 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs import main, setUpLogging
+from tagfs import main, log_config
 
 if __name__ == '__main__':
-    # TODO implement cmd line configurable logging
     from os import environ as env
     if 'DEBUG' in env:
-        setUpLogging()
+        log_config.setUpLogging()
 
     import logging
     import sys

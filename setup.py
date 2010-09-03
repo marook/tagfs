@@ -68,6 +68,14 @@ class test(Command):
         sys.path.insert(0, moddir)
         sys.path.insert(0, srcdir)
 
+        # configure logging
+        # TODO not sure how to enable this... it's a bit complicate to enable
+        # logging only for 'make mt' and disable it then for
+        # 'python setup.py test'. 'python setup.py test' is such a gabber...
+        #if 'DEBUG' in os.environ:
+        #    from tagfs import log_config
+        #    log_config.setUpLogging()
+
         suite = TestLoader().loadTestsFromNames(tests)
         TextTestRunner(verbosity=self._verbosity).run(suite)
 

@@ -25,52 +25,6 @@
 # * tag: A tag is a text string which can be assigned to an item. Tags can
 # consist of any character except newlines.
 
-
-#====================================================================
-# first set up exception handling and logging
-
-import logging
-import sys
-
-def setUpLogging():
-    def exceptionCallback(eType, eValue, eTraceBack):
-        import cgitb
-
-        txt = cgitb.text((eType, eValue, eTraceBack))
-
-        logging.fatal(txt)
-    
-        # sys.exit(1)
-
-    # configure file logger
-    logging.basicConfig(level = logging.DEBUG,
-                        format = '%(asctime)s %(levelname)s %(message)s',
-                        filename = '/tmp/tagfs.log',
-                        filemode = 'a')
-    
-    # configure console logger
-    consoleHandler = logging.StreamHandler(sys.stdout)
-    consoleHandler.setLevel(logging.DEBUG)
-    
-    consoleFormatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    consoleHandler.setFormatter(consoleFormatter)
-    logging.getLogger().addHandler(consoleHandler)
-
-    # replace default exception handler
-    sys.excepthook = exceptionCallback
-    
-    logging.debug('Logging and exception handling has been set up')
-
-if __name__ == '__main__':
-    from os import environ as env
-    if 'DEBUG' in env:
-        setUpLogging()
-    
-    pass
-
-#====================================================================
-# here the application begins
-
 import os
 import stat
 import errno
