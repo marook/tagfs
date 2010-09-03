@@ -28,6 +28,7 @@ import traceback
 from tagfs import item_access
 from tagfs import view
 import mock_config
+import setup
 
 class TestView(unittest.TestCase):
 
@@ -116,12 +117,8 @@ class TestView(unittest.TestCase):
 
     @property
     def itemAccesses(self):
-        yield item_access.ItemAccess(os.path.join(env.projectdir, 'etc', 'test', 'events'),
-                                     '.tag')
-
-        yield item_access.ItemAccess(os.path.join(env.projectdir, 'etc', 'demo', 'events'),
-                                     '.tag')
-            
+        for dir in setup.validItemDirectories:
+            yield item_access.ItemAccess(dir, '.tag')
 
     def testView(self):
         """Testing view interface

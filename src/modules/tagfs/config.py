@@ -20,41 +20,52 @@
 
 import ConfigParser
 import logging
+import os
 
 class Config(ConfigParser.SafeConfigParser):
 
+    GLOBAL_SECTION = 'global'
+
+    def applyDefaults(self):
+        self.tagFileName = '.tag'
+        self.enableValueFilters = False
+        self.enableRootItemLinks = False
+
     def __init__(self, itemsDir):
-        super(self, Config).__init__({
+        self._config = ConfigParser.SafeConfigParser({
                 'tagFileName': '.tag',
                 'enableValueFilters': False,
                 'enableRootItemLinks': False,
                 })
+        self._config.add_section(Config.GLOBAL_SECTION)
 
         self.itemsDir = itemsDir
 
-        parsedFiles = self.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
-                                 os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
-                                 os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
+        self.applyDefaults()
+
+        parsedFiles = self._config.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
+                                         os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
+                                         os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
 
         logging.debug('Parsed the following config files: %s' % ', '.join(parsedFiles))
 
     @property
     def tagFileName(self):
-        return self.get('global', 'tagFileName')
+        return self._config.get(Config.GLOBAL_SECTION, 'tagFileName')
 
     # TODO implement generic approach to get/set boolean values
     @property
     def enableValueFilters(self):
-        return self.getboolean('global', 'enableValueFilters')
+        return self._config.getboolean(Config.GLOBAL_SECTION, 'enableValueFilters')
 
     @enableValueFilters.setter
     def enableValueFilters(self, enableValueFilters):
-        self.set('global', 'enableValueFilters', enableValueFilters)
+        self._config.set(Config.GLOBAL_SECTION, 'enableValueFilters', enableValueFilters)
 
     @property
     def enableRootItemLinks(self):
-        return self.getboolean('global', 'enableRootItemLinks')
+        return self._config.getboolean(Config.GLOBAL_SECTION, 'enableRootItemLinks')
 
     @enableValueFilters.setter
     def enableRootItemLinks(self, enableRootItemLinks):
-        self.set('global', 'enableRootItemLinks', enableRootItemLinks)
+        self._config.set(Config.GLOBAL_SECTION, 'enableRootItemLinks', enableRootItemLinks)
