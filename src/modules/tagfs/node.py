@@ -301,7 +301,7 @@ class CsvExportNode(Node):
         return e
     
     def open(self, path, flags):
-        return 0
+        return
 
     def read(self, path, size, offset):
         return self.content[offset:offset + size]

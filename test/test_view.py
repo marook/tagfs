@@ -27,8 +27,15 @@ import env
 import traceback
 from tagfs import item_access
 from tagfs import view
+import mock_config
 
 class TestView(unittest.TestCase):
+
+    def assertEqual(self, expected, actual, msg = None):
+        if not msg is None:
+            msg = '%s (%s != %s)' % (msg, expected, actual);
+
+        super(TestView, self).assertEqual(expected, actual, msg)
 
     def validateDirectoryPath(self, view, path):
         # path is a directory
@@ -62,7 +69,9 @@ class TestView(unittest.TestCase):
 
         self.assertTrue(attr.st_size >= 0)
 
-        self.assertTrue(view.open(path, 32768) == None)
+        self.assertEqual(None,
+                         view.open(path, 32768),
+                         'Failure with path %s' % path)
 
         content = view.read(path, 4096, 0)
 
@@ -103,7 +112,7 @@ class TestView(unittest.TestCase):
     def configs(self):
         for enableValueFilters in (True, False):
             for enableRootItemLinks in (True, False):
-                yield tagfs.Config(enableValueFilters, enableRootItemLinks)
+                yield mock_config.Config('.tag', enableValueFilters, enableRootItemLinks)
 
     @property
     def itemAccesses(self):
