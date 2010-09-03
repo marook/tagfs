@@ -27,6 +27,8 @@ import tagfs
 import tagfs.item_access as item_access
 import tagfs.node as node
 
+import mock_config
+
 def createTestItemAccess():
     return item_access.ItemAccess(env.eventsdir, '.tag')
 
@@ -272,7 +274,7 @@ class TestTagNode(AbstractNodeTest):
     """
     
     def testTagNode(self):
-        c = tagfs.Config()
+        c = mock_config.Config('.tag', False, False)
 
         parentNode = node.RootNode(self.itemAccess, c)
         
@@ -285,7 +287,7 @@ class TestRootNode(AbstractNodeTest):
     """
     
     def testRootNode(self):
-        c = tagfs.Config()
+        c = mock_config.Config('.tag', False, False)
 
         n = node.RootNode(self.itemAccess, c)
         
@@ -318,7 +320,7 @@ class TestNodeRecurse(AbstractNodeTest):
             self.__recurseNode(sn)
     
     def testRecurse(self):
-        c = tagfs.Config()
+        c = mock_config.Config('.tag', False, False)
 
         n = node.RootNode(self.itemAccess, c)
         
