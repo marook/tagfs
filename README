@@ -4,9 +4,14 @@ tagfs - tag file system
 2) Requirements
 3) Installation
 4) Usage
-5) Tests
-6) Further Reading
-7) Contact
+5) Configuration
+5.1) Options
+5.1.1) tagFileName
+5.1.2) enableValueFilters
+5.1.3) enableRootItemLinks
+6) Tests
+7) Further Reading
+8) Contact
 
 ---------------------------------------------------------------------
 Introduction
@@ -45,6 +50,52 @@ $ tagfs -i /path/to/my/items/directory /path/to/my/mount/point
 
 Unmount a tagged directory: 
 $ fusermount -u /path/to/my/mount/point
+
+---------------------------------------------------------------------
+Configuration
+
+tagfs can be configured through configuration files. Configuration files are
+searched in different locations by tagfs. The following locations are used.
+Locations with higher priority come first:
+- <items directory>/.tagfs/tagfs.conf
+- ~/.tagfs/tagfs.conf
+- /etc/tagfs/tagfs.conf
+
+Right now the following configuration options are supported.
+
+---------------------------------------------------------------------
+Configuration - Options - tagFileName
+
+Through this option the name of the parsed tag files can be specified. The
+default value is '.tag'.
+
+Example:
+
+[global]
+tagFileName = ABOUT
+
+---------------------------------------------------------------------
+Configuration - Options - enableValueFilters
+
+You can enable or disable value filters. If you enable value filters you will
+see filter directories for each tag value. For value filters the tag's
+context can be anyone. The default value is 'false'.
+
+Example:
+
+[global]
+enableValueFilters = true
+
+---------------------------------------------------------------------
+Configuration - Options - enableRootItemLinks
+
+To show links to all items in the tagfs '/' directory enable this option. The
+default value is 'false'.
+
+Example:
+
+[global]
+enableRootItemLinks = true
 
 ---------------------------------------------------------------------
 Tests
