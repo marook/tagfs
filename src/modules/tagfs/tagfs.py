@@ -155,6 +155,10 @@ def main():
         fs.parser.print_help()
         # items dir should probably be an arg, not an option.
         print "Error: Missing items directory option."
+        # Quickfix rel https://github.com/marook/tagfs/issues/#issue/3
+        # FIXME: since we run main via sys.exit(main()), this should
+        #        probably be handled via some return code.
+        import sys
         sys.exit()
         
     return fs.main()
