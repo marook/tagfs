@@ -86,6 +86,11 @@ class TagFS(fuse.Fuse):
         assert opts.itemsDir != None and opts.itemsDir != ''
         itemsRoot = os.path.normpath(
                 os.path.join(self._initwd, opts.itemsDir))
+
+        # TODO rel https://github.com/marook/tagfs/issues#issue/2
+        # Ensure that mount-point and items dir are disjoined.
+        # Something along
+        # assert not os.path.normpath(itemsDir).startswith(itemsRoot)
         
         # try/except here?
         try:
