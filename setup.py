@@ -57,6 +57,10 @@ class Report(object):
     def coverageReportFileName(self):
         return os.path.join(self.reportDir, 'coverage.txt')
 
+    @property
+    def unitTestReportFileName(self):
+        return os.path.join(self.reportDir, 'tests.txt')
+
 def sourceFiles():
     yield os.path.join(bindir, 'tagfs')
     
@@ -67,6 +71,15 @@ def sourceFiles():
                 continue
 
             yield os.path.join(root, f)
+
+def printFile(fileName):
+    if(not os.path.exists(fileName)):
+        # TODO maybe we should not silently return?
+        return
+
+    with open(fileName, 'r') as f:
+        for line in f:
+            sys.stdout.write(line)
 
 class test(Command):
     description = 'run tests'
@@ -108,30 +121,35 @@ class test(Command):
         #    log_config.setUpLogging()
 
         suite = TestLoader().loadTestsFromNames(tests)
-        r = TextTestRunner(verbosity = self._verbosity)
 
-        def runTests():
-            r.run(suite)
+        with open(report.unitTestReportFileName, 'w') as testResultsFile:
+            r = TextTestRunner(stream = testResultsFile, verbosity = self._verbosity)
 
-        try:
-            import coverage
+            def runTests():
+                r.run(suite)
 
-            c = coverage.coverage()
-            c.start()
-            runTests()
-            c.stop()
+            try:
+                import coverage
+
+                c = coverage.coverage()
+                c.start()
+                runTests()
+                c.stop()
     
-            with open(report.coverageReportFileName, 'w') as reportFile:
-                c.report([f for f in sourceFiles()], file = reportFile)
+                with open(report.coverageReportFileName, 'w') as reportFile:
+                    c.report([f for f in sourceFiles()], file = reportFile)
 
-        except ImportError:
-            print ''
-            print 'coverage module not found.'
-            print 'To view source coverage stats install http://nedbatchelder.com/code/coverage/'
-            print ''
+            except ImportError:
+                print ''
+                print 'coverage module not found.'
+                print 'To view source coverage stats install http://nedbatchelder.com/code/coverage/'
+                print ''
 
-            runTests()
+                runTests()
 
+        # TODO use two streams instead of printing files after writing
+        printFile(report.unitTestReportFileName)
+        printFile(report.coverageReportFileName)
 
 # Overrides default clean (which cleans from build runs)
 # This clean should probably be hooked into that somehow.
