@@ -42,7 +42,7 @@ testmntdir = pjoin(projectdir, 'mnt')
 def sourceFiles():
     yield os.path.join(srcdir, 'tagfs')
     
-    sourceFilePattern = re.compile('.*[.]py')
+    sourceFilePattern = re.compile('^.*[.]py$')
     for root, dirs, files in os.walk(moddir):
         for f in files:
             if(not sourceFilePattern.match(f)):
@@ -96,12 +96,14 @@ class test(Command):
         try:
             import coverage
 
-            c = coverage.the_coverage
+            c = coverage.coverage()
             c.start()
             runTests()
             c.stop()
     
-            c.report([f for f in sourceFiles()])
+            with open('coverage.txt', 'w') as reportFile:
+                c.report([f for f in sourceFiles()], file = reportFile)
+
         except ImportError:
             print ''
             print 'coverage module not found.'
