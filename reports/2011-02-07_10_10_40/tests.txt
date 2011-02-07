@@ -1,0 +1,41 @@
+Tests an item with tags assigned to. ... ok
+Tests the results for items which got no tags assigned. ... ok
+Tests the results for items which don't exist. ... ok
+Tests AndFilter filter arguments at once. ... ok
+Tests TagValueFilter filter argument. ... ok
+Test the items property of ItemAccess. ... FAIL
+Test the items property of ItemAccess. ... ok
+Test the tag property of ItemAccess ... ok
+Test the untaggedItems property of ItemAccess ... FAIL
+testItemNodeInterface (test.test_all.TestItemNode) ... ok
+testRecurse (test.test_all.TestNodeRecurse) ... ok
+Tests the parseTagsFromFile(...) method. ... ok
+testRootNode (test.test_all.TestRootNode) ... ok
+testTagNode (test.test_all.TestTagNode) ... ok
+Makes sure that the events directory is accessible. ... ok
+testUntaggedItemsNodeInterface (test.test_all.TestUntaggedItemsNode) ... ok
+Test the forgett feature ... ok
+Test some simple get, set an in calls. ... ok
+Testing view interface ... ok
+testConfig (test.test_config.TestConfig) ... ok
+
+======================================================================
+FAIL: Test the items property of ItemAccess.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/marook/work/devel/projects/tagfs/src/test/test_all.py", line 147, in testItems
+    set(items))
+AssertionError: set(['2008-12-25 - holiday india', '2009-07-29 - no tags', '2008-03-29 - holiday south korea', '2008-11-11 - airport underground railway']) != set(['.tagfs', '2008-12-25 - holiday india', '2008-03-29 - holiday south korea', '2009-07-29 - no tags', '2008-11-11 - airport underground railway'])
+
+======================================================================
+FAIL: Test the untaggedItems property of ItemAccess
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/marook/work/devel/projects/tagfs/src/test/test_all.py", line 184, in testUntaggedItems
+    set([item.name for item in untaggedItems]))
+AssertionError: set(['2009-07-29 - no tags']) != set(['.tagfs', '2009-07-29 - no tags'])
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.370s
+
+FAILED (failures=2)
