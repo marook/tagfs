@@ -31,13 +31,28 @@ from os.path import (
 from glob import glob
 from unittest import TestLoader, TextTestRunner
 import re
+import datetime
 
 projectdir = dirname(abspath(__file__))
+reportdir = pjoin(projectdir, 'reports')
 srcdir = pjoin(projectdir, 'src')
 moddir = pjoin(srcdir, 'modules')
 testdir = pjoin(projectdir, 'test')
 testdatadir = pjoin(projectdir, 'etc', 'test', 'events')
 testmntdir = pjoin(projectdir, 'mnt')
+
+class Report(object):
+
+    def __init__(self):
+        self.reportDateTime = datetime.datetime.utcnow()
+        self.reportDir = os.path.join(reportdir, self.reportDateTime.strftime('%Y-%m-%d_%H_%M_%S'))
+        
+        # fails when dir already exists which is nice
+        os.makedirs(self.reportDir)
+
+    @property
+    def coverageReportFileName(self):
+        return os.path.join(self.reportDir, 'coverage.txt')
 
 def sourceFiles():
     yield os.path.join(srcdir, 'tagfs')
@@ -61,6 +76,8 @@ class test(Command):
     def finalize_options(self): pass
 
     def run(self):
+        report = Report()
+
         testPyMatcher = re.compile('(.*/)?test[^/]*[.]py', re.IGNORECASE)
 
         tests = ['.'.join([
@@ -101,7 +118,7 @@ class test(Command):
             runTests()
             c.stop()
     
-            with open('coverage.txt', 'w') as reportFile:
+            with open(report.coverageReportFileName, 'w') as reportFile:
                 c.report([f for f in sourceFiles()], file = reportFile)
 
         except ImportError:
