@@ -60,6 +60,6 @@ The coverage lib is available here: http://nedbatchelder.com/code/coverage
 If you're a debian user you can try:
 $ apt-get install python-coverage
 
-The code coverage will be written to coverage.txt after executing the test
-cases:
+The code coverage will be written below the reports directory after executing
+the test cases:
 $ python setup.py test
