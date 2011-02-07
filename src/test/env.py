@@ -24,17 +24,18 @@ def setupenv():
 
     global eventsdir
     global projectdir
+
+    # TODO this code is duplicate with path generation from setup.py
     testdir = dirname(abspath(__file__))
-    projectdir = pjoin(psplit(testdir)[0])
+    projectdir = pjoin(testdir, '..', '..')
     srcdir = pjoin(projectdir, 'src')
     moddir = pjoin(srcdir, 'modules')
     eventsdir = pjoin(projectdir, 'etc', 'test', 'events')
 
-    for x in (testdir, srcdir, moddir, eventsdir):
+    for x in (testdir, eventsdir, projectdir):
         assert exists(x), "Directory not found: %s" % x
 
     sys.path.insert(0, testdir)
     sys.path.insert(0, moddir)
-    sys.path.insert(0, srcdir)
 
 setupenv()

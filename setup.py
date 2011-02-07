@@ -35,9 +35,12 @@ import datetime
 
 projectdir = dirname(abspath(__file__))
 reportdir = pjoin(projectdir, 'reports')
+
 srcdir = pjoin(projectdir, 'src')
+bindir = pjoin(srcdir, 'bin')
 moddir = pjoin(srcdir, 'modules')
-testdir = pjoin(projectdir, 'test')
+testdir = pjoin(srcdir, 'test')
+
 testdatadir = pjoin(projectdir, 'etc', 'test', 'events')
 testmntdir = pjoin(projectdir, 'mnt')
 
@@ -55,7 +58,7 @@ class Report(object):
         return os.path.join(self.reportDir, 'coverage.txt')
 
 def sourceFiles():
-    yield os.path.join(srcdir, 'tagfs')
+    yield os.path.join(bindir, 'tagfs')
     
     sourceFilePattern = re.compile('^.*[.]py$')
     for root, dirs, files in os.walk(moddir):
@@ -185,7 +188,8 @@ setup(
     data_files = [
         (pjoin('share', 'doc', 'tagfs'), ['AUTHORS', 'COPYING', 'README'])
     ],
-    scripts = [pjoin('src', 'tagfs')],
+    # TODO maybe we should include src/bin/*?
+    scripts = [pjoin(bindir, 'tagfs')],
     packages = ['tagfs'],
-    package_dir = {'': pjoin('src', 'modules')},
+    package_dir = {'': moddir},
 )
