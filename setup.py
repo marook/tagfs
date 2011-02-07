@@ -30,6 +30,7 @@ from os.path import (
 )
 from glob import glob
 from unittest import TestLoader, TextTestRunner
+import re
 
 projectdir = dirname(abspath(__file__))
 srcdir = pjoin(projectdir, 'src')
@@ -37,6 +38,17 @@ moddir = pjoin(srcdir, 'modules')
 testdir = pjoin(projectdir, 'test')
 testdatadir = pjoin(projectdir, 'etc', 'test', 'events')
 testmntdir = pjoin(projectdir, 'mnt')
+
+def sourceFiles():
+    yield os.path.join(srcdir, 'tagfs')
+    
+    sourceFilePattern = re.compile('.*[.]py')
+    for root, dirs, files in os.walk(moddir):
+        for f in files:
+            if(not sourceFilePattern.match(f)):
+                continue
+
+            yield os.path.join(root, f)
 
 class test(Command):
     description = 'run tests'
@@ -49,7 +61,6 @@ class test(Command):
     def finalize_options(self): pass
 
     def run(self):
-        import re
         testPyMatcher = re.compile('(.*/)?test[^/]*[.]py', re.IGNORECASE)
 
         tests = ['.'.join([
@@ -77,7 +88,27 @@ class test(Command):
         #    log_config.setUpLogging()
 
         suite = TestLoader().loadTestsFromNames(tests)
-        TextTestRunner(verbosity=self._verbosity).run(suite)
+        r = TextTestRunner(verbosity = self._verbosity)
+
+        def runTests():
+            r.run(suite)
+
+        try:
+            import coverage
+
+            c = coverage.the_coverage
+            c.start()
+            runTests()
+            c.stop()
+    
+            c.report([f for f in sourceFiles()])
+        except ImportError:
+            print ''
+            print 'coverage module not found.'
+            print 'To view source coverage stats install http://nedbatchelder.com/code/coverage/'
+            print ''
+
+            runTests()
 
 
 # Overrides default clean (which cleans from build runs)
