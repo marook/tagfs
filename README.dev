@@ -6,6 +6,7 @@ developer readme
 3) Tracing
 4) Distribution
 4.1) tar Distribution
+5) Code Coverage
 
 ---------------------------------------------------------------------
 Logging
@@ -47,3 +48,17 @@ $ make distsnapshot
 
 The make call will create an archive within the target directory. The created
 tar file is used for tagfs source distribution.
+
+---------------------------------------------------------------------
+Code Coverage
+
+The tagfs unit tests can be executed with code coverage measurement enabled.
+setup.py will measure the code coverage if the coverage lib is installed.
+
+The coverage lib is available here: http://nedbatchelder.com/code/coverage
+
+If you're a debian user you can try:
+$ apt-get install python-coverage
+
+The code coverage will be shown after executing the test cases:
+$ python setup.py test
