@@ -34,7 +34,10 @@ class View(object):
     """
 
     DEFAULT_NODES = {
+        # directory icons for rox filer
         '.DirIcon': None,
+
+        # launch script for rox filer application directories
         'AppRun': None
         }
     
