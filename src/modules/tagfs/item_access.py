@@ -19,6 +19,7 @@
 import logging
 import os
 import time
+import traceback
 
 from cache import cache
 
@@ -65,21 +66,25 @@ def parseTagsFromFile(tagFileName):
         for rawTag in tagFile.readlines():
             rawTag = rawTag.strip()
             
-            if len(rawTag) == 0:
-                continue
+            try:
+                if len(rawTag) == 0:
+                    continue
             
-            tagTuple = rawTag.split(':', 1)
+                tagTuple = rawTag.split(':', 1)
             
-            if len(tagTuple) == 1:
-                tagContext = None
-                tagValue = tagTuple[0]
-            else:
-                tagContext = tagTuple[0]
-                tagValue = tagTuple[1]
+                if len(tagTuple) == 1:
+                    tagContext = None
+                    tagValue = tagTuple[0]
+                else:
+                    tagContext = tagTuple[0]
+                    tagValue = tagTuple[1]
                 
-            tag = Tag(tagValue, context = tagContext)
+                tag = Tag(tagValue, context = tagContext)
 
-            tags.add(tag)
+                tags.add(tag)
+            except:
+                logging.warning('Skipping tagging \'%s\' from file \'%s\' as it can\'t be parsed\n%s.' % (rawTag, tagFileName, traceback.format_exc()))
+
     finally:
         tagFile.close()
         
