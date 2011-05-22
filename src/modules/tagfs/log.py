@@ -1,5 +1,5 @@
 #
-# Copyright 2010 Markus Pielmeier
+# Copyright 2010, 2011 Markus Pielmeier
 #
 # This file is part of tagfs.
 #
@@ -20,15 +20,41 @@
 import functools
 import logging
 
+def getLogger(*args):
+    o = args[0]
+
+    logger = logging.getLogger(o.__class__.__name__)
+
+    return logger
+    
+
 def logCall(f):
 
     @functools.wraps(f)
     def logCall(*args, **kwargs):
-        o = args[0]
+        logger = getLogger(*args)
 
-        logger = logging.getLogger(o.__class__.__name__)
-        logger.debug(f.__name__ + '(' + (', '.join('\'' + str(a) + '\'' for a in args[1:])) + ')')
+        if(logger.isEnabledFor(logging.DEBUG)):
+            logger.debug(f.__name__ + '(' + (', '.join('\'' + str(a) + '\'' for a in args[1:])) + ')')
 
         return f(*args, **kwargs)
 
     return logCall
+
+def logException(f):
+
+    @functools.wraps(f)
+    def logException(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except:
+            logger = getLogger(*args)
+
+            if(logger.isEnabledFor(logging.ERROR)):
+                import traceback
+
+                logger.error(traceback.format_exc())
+
+            raise
+
+    return logException

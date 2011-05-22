@@ -44,6 +44,7 @@ from cache import cache
 import item_access
 import node
 import config
+from log import logException
     
 class TagFS(fuse.Fuse):
 
@@ -127,24 +128,31 @@ class TagFS(fuse.Fuse):
 
         return view.View(itemAccess, self.config)
 
+    @logException
     def getattr(self, path):
         return self.view.getattr(path)
 
+    @logException
     def readdir(self, path, offset):
         return self.view.readdir(path, offset)
             
+    @logException
     def readlink(self, path):
         return self.view.readlink(path)
 
+    @logException
     def open(self, path, flags):
         return self.view.open(path, flags)
 
+    @logException
     def read(self, path, size, offset):
         return self.view.read(path, size, offset)
 
+    @logException
     def write(self, path, data, pos):
         return self.view.write(path, data, pos)
 
+    @logException
     def symlink(self, path, linkPath):
         return self.view.symlink(path, linkPath)
 
