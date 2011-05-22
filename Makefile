@@ -80,7 +80,7 @@ $(testmntdir):
 .PHONY: mounttest
 mounttest: $(testmntdir)
 	PYTHONPATH=$(pymoddir):$(PYTHONPATH) \
-		$(PYTHON) $(srcdir)/src/tagfs -i $(testdatadir) $(testmntdir)
+		$(PYTHON) $(srcdir)/src/bin/tagfs -i $(testdatadir) $(testmntdir)
 
 .PHONY: unmounttest
 unmounttest:
