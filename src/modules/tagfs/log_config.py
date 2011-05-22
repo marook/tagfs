@@ -27,7 +27,7 @@ def setUpLogging():
 
         txt = cgitb.text((eType, eValue, eTraceBack))
 
-        logging.fatal(txt)
+        logging.critical(txt)
     
         # sys.exit(1)
 
