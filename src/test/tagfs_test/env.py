@@ -27,7 +27,7 @@ def setupenv():
 
     # TODO this code is duplicate with path generation from setup.py
     testdir = dirname(abspath(__file__))
-    projectdir = pjoin(testdir, '..', '..')
+    projectdir = pjoin(testdir, '..', '..', '..')
     srcdir = pjoin(projectdir, 'src')
     moddir = pjoin(srcdir, 'modules')
     eventsdir = pjoin(projectdir, 'etc', 'test', 'events')

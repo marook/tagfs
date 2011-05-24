@@ -44,6 +44,13 @@ testdir = pjoin(srcdir, 'test')
 testdatadir = pjoin(projectdir, 'etc', 'test', 'events')
 testmntdir = pjoin(projectdir, 'mnt')
 
+assert os.path.isdir(srcdir)
+assert os.path.isdir(bindir)
+assert os.path.isdir(moddir)
+assert os.path.isdir(testdir)
+
+assert os.path.isdir(testdatadir)
+
 class Report(object):
 
     def __init__(self):
@@ -70,8 +77,36 @@ def sourceFiles():
             if(not sourceFilePattern.match(f)):
                 continue
 
+            if(f.startswith('.#')):
+                continue
+
             yield os.path.join(root, f)
 
+def fullSplit(p):
+    head, tail = os.path.split(p)
+ 
+    if(len(head) > 0):
+        for n in fullSplit(head):
+            yield n
+ 
+    yield tail
+ 
+def testModules():
+    testFilePattern = re.compile('^(test.*)[.]py$', re.IGNORECASE)
+ 
+    for root, dirs, files in os.walk(testdir):
+        for f in files:
+            m = testFilePattern.match(f)
+ 
+            if(not m):
+                continue
+ 
+            relDir = os.path.relpath(root, testdir)
+
+            print 'relDir %s' % relDir
+ 
+            yield '.'.join([n for n in fullSplit(relDir)] + [m.group(1), ])
+ 
 def printFile(fileName):
     if(not os.path.exists(fileName)):
         # TODO maybe we should not silently return?
@@ -94,13 +129,7 @@ class test(Command):
     def run(self):
         report = Report()
 
-        testPyMatcher = re.compile('(.*/)?test[^/]*[.]py', re.IGNORECASE)
-
-        tests = ['.'.join([
-                basename(testdir), splitext(basename(f))[0]
-        ]) for f in glob(pjoin(
-                testdir, '*.py'
-        )) if testPyMatcher.match(f)]
+        tests = [m for m in testModules()]
 
         print "..using:"
         print "  testdir:", testdir
@@ -110,7 +139,10 @@ class test(Command):
         print "  sys.path:", sys.path
         print
         sys.path.insert(0, moddir)
-        sys.path.insert(0, srcdir)
+        sys.path.insert(0, testdir)
+
+        # TODO try to import all test cases here. the TestLoader is throwing
+        # very confusing errors when imports can't be resolved.
 
         # configure logging
         # TODO not sure how to enable this... it's a bit complicate to enable
@@ -119,6 +151,10 @@ class test(Command):
         #if 'DEBUG' in os.environ:
         #    from tagfs import log_config
         #    log_config.setUpLogging()
+
+        if 'DEBUG' in os.environ:
+            import logging
+            logging.basicConfig(level = logging.DEBUG)
 
         suite = TestLoader().loadTestsFromNames(tests)
 
@@ -164,7 +200,8 @@ class clean_pyc(Command):
                 pjoin(cwd, f) for f in files if f.endswith('.pyc')
             )
 
-    def finalize_options(self): pass
+    def finalize_options(self):
+        pass
 
     def run(self):
         for f in self._delete:
