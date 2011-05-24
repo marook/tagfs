@@ -256,6 +256,10 @@ class ItemAccess(object):
         logging.debug('Start parsing items from dir: %s', self.dataDirectory)
         
         for itemName in os.listdir(self.dataDirectory):
+            if itemName == '.tagfs':
+                # skip directory with configuration
+                continue
+
             try:
                 item = Item(itemName, self)
                 
