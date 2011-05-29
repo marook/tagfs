@@ -19,7 +19,6 @@
 
 from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode, DirectoryNode
-import stat
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 
 class RootDirectoryNode(DirectoryNode):
