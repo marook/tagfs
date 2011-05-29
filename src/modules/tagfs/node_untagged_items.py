@@ -18,10 +18,10 @@
 #
 
 from tagfs.cache import cache
-from tagfs.node import Stat, ItemLinkNode
+from tagfs.node import Stat, ItemLinkNode, DirectoryNode
 import stat
 
-class UntaggedItemsDirectoryNode(object):
+class UntaggedItemsDirectoryNode(DirectoryNode):
     
     def __init__(self, name, itemAccess):
         self.name = name
@@ -29,11 +29,11 @@ class UntaggedItemsDirectoryNode(object):
 
     @property
     def attr(self):
-        s = Stat()
+        s = super(UntaggedItemsDirectoryNode, self).attr
 
-        s.st_mode = stat.S_IFDIR | 0555
         # TODO why nlink == 2?
         s.st_nlink = 2
+
         # TODO write test case which tests st_mtime == itemAccess.parseTime
         s.st_mtime = self.itemAccess.parseTime
         s.st_ctime = s.st_mtime
@@ -42,5 +42,6 @@ class UntaggedItemsDirectoryNode(object):
         return s
 
     @property
-    def entries(self):
-        return dict([[item.name, ItemLinkNode(item)] for item in self.itemAccess.untaggedItems])
+    def _entries(self):
+        for item in self.itemAccess.untaggedItems:
+            yield ItemLinkNode(item)

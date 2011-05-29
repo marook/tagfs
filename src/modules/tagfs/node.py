@@ -58,3 +58,21 @@ class ItemLinkNode(object):
     @property
     def link(self):
         return self.item.itemDirectory
+
+class DirectoryNode(object):
+
+    @property
+    def attr(self):
+        s = Stat()
+
+        s.st_mode = stat.S_IFDIR | 0555
+
+        s.st_mtime = 0
+        s.st_ctime = s.st_mtime
+        s.st_atime = s.st_mtime
+
+        return s
+
+    @property
+    def entries(self):
+        return dict([[e.name, e] for e in self._entries])
