@@ -157,7 +157,18 @@ class Item(object):
             if context != t.context:
                 continue
 
-            yield t.value
+            yield t
+
+    def isTaggedWithContextValue(self, context, value):
+        for t in self.getTagsByContext(context):
+            if value == t.value:
+                return True
+
+        return False
+
+    def isTaggedWithContext(self, context):
+        # TODO don't create whole list... just check wheather list is empty
+        return (len([c for c in self.getTagsByContext(context)]) > 0)
     
     @property
     @cache

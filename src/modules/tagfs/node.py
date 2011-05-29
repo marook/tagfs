@@ -20,6 +20,8 @@
 import fuse
 import stat
 
+from tagfs.cache import cache
+
 class Stat(fuse.Stat):
     
     def __init__(self):
@@ -74,5 +76,6 @@ class DirectoryNode(object):
         return s
 
     @property
+    @cache
     def entries(self):
         return dict([[e.name, e] for e in self._entries])

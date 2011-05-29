@@ -20,6 +20,7 @@
 from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode, DirectoryNode
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
+from tagfs.node_filter_context import ContextValueListDirectoryNode
 
 class RootDirectoryNode(DirectoryNode):
     
@@ -41,8 +42,31 @@ class RootDirectoryNode(DirectoryNode):
         return s
 
     @property
-    def _entries(self):
-        for item in self.itemAccess.taggedItems:
-            yield ItemLinkNode(item)
+    @cache
+    def items(self):
+        return self.itemAccess.taggedItems
 
+    @property
+    def contexts(self):
+        c = set()
+
+        for item in self.items:
+            for t in item.tags:
+                context = t.context
+
+                if context is None:
+                    continue
+
+                c.add(t.context)
+
+        return c
+
+    @property
+    def _entries(self):
         yield UntaggedItemsDirectoryNode('.untagged', self.itemAccess)
+
+        for context in self.contexts:
+            yield ContextValueListDirectoryNode(self.itemAccess, self, context)
+
+        for item in self.items:
+            yield ItemLinkNode(item)
