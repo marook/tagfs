@@ -24,7 +24,7 @@ import os
 from tagfs.log import logCall, logException
 from tagfs.cache import cache
 from tagfs.transient_dict import TransientDict
-from tagfs.node_untagged_items import UntaggedItemsContainerNode
+from tagfs.node_root import RootDirectoryNode
 from fuse import Direntry
 
 class View(object):
@@ -49,11 +49,11 @@ class View(object):
 
     @property
     @cache
-    def rootEntry(self):
+    def rootNode(self):
         # TODO return node.RootNode(self.itemAccess, self.config)
-        return UntaggedItemsContainerNode(self.itemAccess).getEntry('root')
+        return RootDirectoryNode(self.itemAccess)
 
-    def getEntry(self, path):
+    def getNode(self, path):
         if path in self._entryCache:
             # simple path name based caching is implemented here
 
@@ -73,7 +73,7 @@ class View(object):
 
                 return View.DEFAULT_NODES[lastSegment]
 
-        e = self.rootEntry
+        e = self.rootNode
 
         for pe in path.split('/')[1:]:
             if pe == '':
@@ -96,7 +96,7 @@ class View(object):
 
     @logCall
     def getattr(self, path):
-        e = self.getEntry(path)
+        e = self.getNode(path)
 
         if not e:
             logging.debug('Try to read attributes from not existing node: ' + path)
@@ -107,7 +107,7 @@ class View(object):
 
     @logCall
     def readdir(self, path, offset):
-        e = self.getEntry(path)
+        e = self.getNode(path)
 
         if not e:
             logging.warn('Try to read not existing directory: ' + path)
@@ -120,7 +120,7 @@ class View(object):
 
     @logCall
     def readlink(self, path):
-        n = self.getEntry(path)
+        n = self.getNode(path)
 
         if not n:
             logging.warn('Try to read not existing link from node: ' + path)
@@ -133,7 +133,7 @@ class View(object):
     def symlink(self, path, linkPath):
         linkPathSegs = linkPath.split('/')
 
-        n = self.getEntry('/'.join(linkPathSegs[0:len(linkPathSegs) - 2]))
+        n = self.getNode('/'.join(linkPathSegs[0:len(linkPathSegs) - 2]))
 
         if not n:
             return -errno.ENOENT
@@ -142,7 +142,7 @@ class View(object):
 
     @logCall
     def open(self, path, flags):
-        n = self.getEntry(path)
+        n = self.getNode(path)
 
         if not n:
             logging.warn('Try to open not existing node: ' + path)
@@ -153,7 +153,7 @@ class View(object):
 
     @logCall
     def read(self, path, len, offset):
-        n = self.getEntry(path)
+        n = self.getNode(path)
 
         if not n:
             logging.warn('Try to read from not existing node: ' + path)
@@ -164,7 +164,7 @@ class View(object):
 
     @logCall
     def write(self, path, data, pos):
-        n = self.getEntry(path)
+        n = self.getNode(path)
 
         if not n:
             logging.warn('Try to write to not existing node: ' + path)

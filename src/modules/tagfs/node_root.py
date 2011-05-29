@@ -20,11 +20,11 @@
 from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode
 import stat
+from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 
-class UntaggedItemsDirectoryNode(object):
+class RootDirectoryNode(object):
     
-    def __init__(self, name, itemAccess):
-        self.name = name
+    def __init__(self, itemAccess):
         self.itemAccess = itemAccess
 
     @property
@@ -42,5 +42,12 @@ class UntaggedItemsDirectoryNode(object):
         return s
 
     @property
+    def _entries(self):
+        for item in self.itemAccess.taggedItems:
+            yield ItemLinkNode(item)
+
+        yield UntaggedItemsDirectoryNode('.untagged', self.itemAccess)
+
+    @property
     def entries(self):
-        return dict([[item.name, ItemLinkNode(item)] for item in self.itemAccess.untaggedItems])
+        return dict([[e.name, e] for e in self._entries])

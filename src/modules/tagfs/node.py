@@ -37,14 +37,14 @@ class Stat(fuse.Stat):
     def __str__(self):
         return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in self.__dict__]) + ']'
 
-class ItemLinkEntry(object):
+class ItemLinkNode(object):
 
     def __init__(self, item):
         self.item = item
 
     @property
     def name(self):
-        return item.name
+        return self.item.name
 
     @property
     def attr(self):

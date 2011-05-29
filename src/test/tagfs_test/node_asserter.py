@@ -22,11 +22,23 @@ import stat
 def hasMode(attr, mode):
     return (attr.st_mode & mode > 0)
 
-def validateFileEntryInterface(test, entry):
-    attr = entry.attr
-
-    test.assertTrue(hasMode(attr, stat.S_IFLNK))
+def validateNodeInterface(test, node):
+    attr = node.attr
 
     test.assertTrue(attr.st_atime >= 0)
     test.assertTrue(attr.st_mtime >= 0)
     test.assertTrue(attr.st_ctime >= 0)
+
+def validateDirectoryInterface(test, node):
+    attr = node.attr
+
+    test.assertTrue(hasMode(attr, stat.S_IFDIR))
+
+    validateNodeInterface(test, node)
+
+def validateLinkInterface(test, node):
+    attr = node.attr
+
+    test.assertTrue(hasMode(attr, stat.S_IFLNK))
+
+    validateNodeInterface(test, node)

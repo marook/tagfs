@@ -18,12 +18,8 @@
 #
 
 from unittest import TestCase
-import stat
-from tagfs.node_untagged_items import UntaggedItemsDirectoryEntry
-from tagfs_test.entry_asserter import validateFileEntryInterface
-
-def attrIsDirectory(attr):
-    return (attr.st_mode & stat.S_IFDIR != 0)
+from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
+from tagfs_test.node_asserter import validateLinkInterface, validateDirectoryInterface
 
 class ItemMock(object):
 
@@ -36,27 +32,30 @@ class ItemAccessMock(object):
         self.parseTime = 42
         self.untaggedItems = [ItemMock(name) for name in ['item1', 'item2']]
 
-class TestUntaggedItemsDirectoryEntry(TestCase):
+class TestUntaggedItemsDirectoryNode(TestCase):
 
     def setUp(self):
         self.itemAccess = ItemAccessMock()
+        self.nodeName = 'e'
+        self.node = UntaggedItemsDirectoryNode(self.nodeName, self.itemAccess)
 
-    def testEntryAttrMTimeIsItemAccessParseTime(self):
-        attr = UntaggedItemsDirectoryEntry('e', self.itemAccess).attr
+    def testNodeAttrMTimeIsItemAccessParseTime(self):
+        attr = self.node.attr
 
         self.assertEqual(self.itemAccess.parseTime, attr.st_mtime)
 
-    def testEntryAttrModeIsDirectory(self):
-        attr = UntaggedItemsDirectoryEntry('e', self.itemAccess).attr
-
-        self.assertTrue(attrIsDirectory(attr))
+    def testNodeIsDirectory(self):
+        validateDirectoryInterface(self, self.node)
 
     def testUntaggedItemAccessItemsAreUntaggedItemsDirectoryEntries(self):
-        entries = UntaggedItemsDirectoryEntry('e', self.itemAccess).entries
+        entries = self.node.entries
 
         self.assertEqual(len(self.itemAccess.untaggedItems), len(entries))
 
         for i in self.itemAccess.untaggedItems:
             self.assertTrue(i.name in entries)
 
-            validateFileEntryInterface(self, entries[i.name])
+            validateLinkInterface(self, entries[i.name])
+
+    def testNodeHasName(self):
+        self.assertEqual(self.nodeName, self.node.name)
