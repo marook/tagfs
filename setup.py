@@ -103,8 +103,6 @@ def testModules():
  
             relDir = os.path.relpath(root, testdir)
 
-            print 'relDir %s' % relDir
- 
             yield '.'.join([n for n in fullSplit(relDir)] + [m.group(1), ])
  
 def printFile(fileName):
@@ -132,12 +130,16 @@ class test(Command):
         tests = [m for m in testModules()]
 
         print "..using:"
+        print "  moddir:", moddir
         print "  testdir:", testdir
         print "  testdatadir:", testdatadir
         print "  testmntdir:", testmntdir
         print "  tests:", tests
         print "  sys.path:", sys.path
         print
+
+        # insert project lookup paths at index 0 to make sure they are used
+        # over global libraries
         sys.path.insert(0, moddir)
         sys.path.insert(0, testdir)
 
@@ -176,6 +178,8 @@ class test(Command):
                     c.report([f for f in sourceFiles()], file = reportFile)
 
             except ImportError:
+                # TODO ImportErrors from runTests() may look like coverage is missing
+
                 print ''
                 print 'coverage module not found.'
                 print 'To view source coverage stats install http://nedbatchelder.com/code/coverage/'
