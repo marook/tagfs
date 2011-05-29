@@ -1,5 +1,5 @@
 #
-# Copyright 2010 Markus Pielmeier
+# Copyright 2011 Markus Pielmeier
 #
 # This file is part of tagfs.
 #
@@ -17,11 +17,16 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import env
-import os
+import stat
 
-# this is a list whith paths to valid item directories
-validItemDirectories = [
-    os.path.join(env.projectdir, 'etc', 'test', 'events'),
-    os.path.join(env.projectdir, 'etc', 'demo', 'events')
-]
+def hasMode(attr, mode):
+    return (attr.st_mode & mode > 0)
+
+def validateFileEntryInterface(test, entry):
+    attr = entry.attr
+
+    test.assertTrue(hasMode(attr, stat.S_IFLNK))
+
+    test.assertTrue(attr.st_atime >= 0)
+    test.assertTrue(attr.st_mtime >= 0)
+    test.assertTrue(attr.st_ctime >= 0)

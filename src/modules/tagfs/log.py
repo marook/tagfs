@@ -53,7 +53,7 @@ def logException(f):
             if(logger.isEnabledFor(logging.ERROR)):
                 import traceback
 
-                logger.error(traceback.format_exc())
+                logger.warn(traceback.format_exc())
 
             raise
 

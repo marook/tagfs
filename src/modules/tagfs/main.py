@@ -39,11 +39,10 @@ if not hasattr(fuse, '__version__'):
         "your fuse-py doesn't know of fuse.__version__, probably it's too old."
 fuse.fuse_python_api = (0, 2)
 
-import view
-from cache import cache
-import item_access
-import node
-import config
+from tagfs.view import View
+from tagfs.cache import cache
+from tagfs.item_access import ItemAccess
+from config import Config
 from log import logException
     
 class TagFS(fuse.Fuse):
@@ -95,7 +94,7 @@ class TagFS(fuse.Fuse):
         
         # try/except here?
         try:
-            return item_access.ItemAccess(itemsRoot, self.config.tagFileName)
+            return ItemAccess(itemsRoot, self.config.tagFileName)
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     itemsRoot, str(e.strerror))
@@ -106,7 +105,7 @@ class TagFS(fuse.Fuse):
     def config(self):
         opts, args = self.cmdline
 
-        c = config.Config(os.path.normpath(os.path.join(self._initwd, opts.itemsDir)))
+        c = Config(os.path.normpath(os.path.join(self._initwd, opts.itemsDir)))
 
         if opts.tagFileName:
             c.tagFileName = opts.tagFileName
@@ -126,7 +125,7 @@ class TagFS(fuse.Fuse):
     def view(self):
         itemAccess = self.getItemAccess()
 
-        return view.View(itemAccess, self.config)
+        return View(itemAccess, self.config)
 
     @logException
     def getattr(self, path):

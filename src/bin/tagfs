@@ -18,12 +18,13 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs import main, log_config
+from tagfs.main import main
+from tagfs.log_config import setUpLogging
 
 if __name__ == '__main__':
     from os import environ as env
     if 'DEBUG' in env:
-        log_config.setUpLogging()
+        setUpLogging()
 
     import logging
     import sys
