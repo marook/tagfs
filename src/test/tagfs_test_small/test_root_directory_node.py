@@ -32,7 +32,6 @@ class ItemAccessMock(object):
         self.parseTime = 42
         
         self._taggedItemNames = ['item1']
-        #self.items = [ItemMock(name) for name in ['item1', 'item2', '.untagged']]
         self.taggedItems = [ItemMock(name) for name in self._taggedItemNames + ['.untagged']]
 
 class TestRootDirectoryNode(TestCase):
