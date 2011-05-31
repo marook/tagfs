@@ -18,13 +18,11 @@
 #
 
 from unittest import TestCase
+
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
+
 from tagfs_test.node_asserter import validateLinkInterface, validateDirectoryInterface
-
-class ItemMock(object):
-
-    def __init__(self, name):
-        self.name = name
+from tagfs_test.item_mock import ItemMock
 
 class ItemAccessMock(object):
 
