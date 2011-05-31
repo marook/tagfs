@@ -1,0 +1,18 @@
+testForgettValuesWhenDictSizeExceeded (tagfs_test_small.test_transient_dict.TestTransientDict) ... ok
+testGetAndSetValues (tagfs_test_small.test_transient_dict.TestTransientDict) ... ok
+testNodeAttrMTimeIsItemAccessParseTime (tagfs_test_small.test_untagged_items_directory_node.TestUntaggedItemsDirectoryNode) ... ok
+testNodeHasName (tagfs_test_small.test_untagged_items_directory_node.TestUntaggedItemsDirectoryNode) ... ok
+testNodeIsDirectory (tagfs_test_small.test_untagged_items_directory_node.TestUntaggedItemsDirectoryNode) ... ok
+testUntaggedItemAccessItemsAreUntaggedItemsDirectoryEntries (tagfs_test_small.test_untagged_items_directory_node.TestUntaggedItemsDirectoryNode) ... ok
+testItemLinksReplaceUntaggedDirectory (tagfs_test_small.test_root_directory_node.TestRootDirectoryNode) ... ok
+testNodeAttrMTimeIsItemAccessParseTime (tagfs_test_small.test_root_directory_node.TestRootDirectoryNode) ... ok
+testNodeContainerContainsTaggedNodeLinks (tagfs_test_small.test_root_directory_node.TestRootDirectoryNode) ... ok
+testNodeIsDirectory (tagfs_test_small.test_root_directory_node.TestRootDirectoryNode) ... ok
+testNodeContainsUntaggedDirectory (tagfs_test_small.test_root_directory_node.TestRootDirectoryNodeUntaggedDirectory) ... ok
+testNodeAttrMTimeIsItemAccessParseTime (tagfs_test_small.test_filter_context_value_list_directory_node.TestContextValueListDirectoryNode) ... ok
+testNodeIsDirectory (tagfs_test_small.test_filter_context_value_list_directory_node.TestContextValueListDirectoryNode) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.005s
+
+OK
