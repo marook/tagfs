@@ -18,27 +18,39 @@
 #
 
 from unittest import TestCase
+
 from tagfs.node_root import RootDirectoryNode
+
 from tagfs_test.node_asserter import validateDirectoryInterface, validateLinkInterface
-
-class ItemMock(object):
-
-    def __init__(self, name):
-        self.name = name
+from tagfs_test.item_mock import ItemMock
 
 class ItemAccessMock(object):
 
     def __init__(self):
         self.parseTime = 42
         
-        self._taggedItemNames = ['item1']
-        self.taggedItems = [ItemMock(name) for name in self._taggedItemNames + ['.untagged']]
+    def createItems(self, itemNames):
+        self.taggedItems = [ItemMock(name, []) for name in itemNames]
+        
+class AbstractRootDirectoryNodeTest(TestCase):
 
-class TestRootDirectoryNode(TestCase):
-
+    @property
+    def _itemNames(self):
+        return self._taggedItemNames
+    
     def setUp(self):
+        self._taggedItemNames = ['item1']
+
         self.itemAccess = ItemAccessMock()
+        self.itemAccess.createItems(self._itemNames)
+
         self.node = RootDirectoryNode(self.itemAccess)
+
+class TestRootDirectoryNode(AbstractRootDirectoryNodeTest):
+
+    @property
+    def _itemNames(self):
+        return self._taggedItemNames + ['.untagged']
 
     def testNodeAttrMTimeIsItemAccessParseTime(self):
         attr = self.node.attr
@@ -48,17 +60,24 @@ class TestRootDirectoryNode(TestCase):
     def testNodeIsDirectory(self):
         validateDirectoryInterface(self, self.node)
 
-    def testNodeContainsUntaggedDirectory(self):
+    def testItemLinksReplaceUntaggedDirectory(self):
         untaggedNode = self.node.entries['.untagged']
 
-        # untagged node must be a directory as the untagged directory node
-        # weights more than the '.untagged' item from the tagged items.
-        validateDirectoryInterface(self, untaggedNode)
+        # untagged node must be a link as the untagged directory node
+        # weights less than the '.untagged' item from the tagged items.
+        validateLinkInterface(self, untaggedNode)
 
     def testNodeContainerContainsTaggedNodeLinks(self):
         entries = self.node.entries
-        
-        for itemName in self.itemAccess._taggedItemNames:
+
+        for itemName in self._taggedItemNames:
             self.assertTrue(itemName in entries)
 
             validateLinkInterface(self, entries[itemName])
+
+class TestRootDirectoryNodeUntaggedDirectory(AbstractRootDirectoryNodeTest):
+
+    def testNodeContainsUntaggedDirectory(self):
+        untaggedNode = self.node.entries['.untagged']
+
+        validateDirectoryInterface(self, untaggedNode)
