@@ -22,16 +22,9 @@ from unittest import TestCase
 from tagfs.node_root import RootDirectoryNode
 
 from tagfs_test.node_asserter import validateDirectoryInterface, validateLinkInterface
-from tagfs_test.item_mock import ItemMock
+from tagfs_test.item_access_mock import ItemAccessMock
+from tagfs_test.item_mock import createItemMocks
 
-class ItemAccessMock(object):
-
-    def __init__(self):
-        self.parseTime = 42
-        
-    def createItems(self, itemNames):
-        self.taggedItems = [ItemMock(name, []) for name in itemNames]
-        
 class AbstractRootDirectoryNodeTest(TestCase):
 
     @property
@@ -42,7 +35,7 @@ class AbstractRootDirectoryNodeTest(TestCase):
         self._taggedItemNames = ['item1']
 
         self.itemAccess = ItemAccessMock()
-        self.itemAccess.createItems(self._itemNames)
+        self.itemAccess.taggedItems = createItemMocks(self._itemNames)
 
         self.node = RootDirectoryNode(self.itemAccess)
 

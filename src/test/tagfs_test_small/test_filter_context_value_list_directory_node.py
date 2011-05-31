@@ -22,14 +22,8 @@ from unittest import TestCase
 from tagfs.node_filter_context import ContextValueListDirectoryNode
 
 from tagfs_test.node_asserter import validateDirectoryInterface, validateLinkInterface
-from tagfs_test.item_mock import ItemMock
-
-class ItemAccessMock(object):
-
-    def __init__(self):
-        self.parseTime = 42
-        
-        self.taggedItems = [ItemMock(name, []) for name in ['item1']]
+from tagfs_test.item_access_mock import ItemAccessMock
+from tagfs_test.item_mock import createItemMocks
 
 class ParentNodeMock(object):
 
@@ -39,6 +33,8 @@ class TestContextValueListDirectoryNode(TestCase):
 
     def setUp(self):
         self.itemAccess = ItemAccessMock()
+        self.itemAccess.taggedItems = createItemMocks(['item1'])
+
         self.parentNode = ParentNodeMock()
         self.context = 'c1'
         self.node = ContextValueListDirectoryNode(self.itemAccess, self.parentNode, self.context)

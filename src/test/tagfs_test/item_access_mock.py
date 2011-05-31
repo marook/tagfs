@@ -17,11 +17,11 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-class ItemMock(object):
+from tagfs_test.item_mock import ItemMock
 
-    def __init__(self, name, tags = []):
-        self.name = name
-        self.tags = tags
+class ItemAccessMock(object):
 
-def createItemMocks(itemNames):
-    return [ItemMock(name, []) for name in itemNames]
+    def __init__(self):
+        self.parseTime = 42
+        self.taggedItems = []
+        self.untaggedItems = []

@@ -22,18 +22,15 @@ from unittest import TestCase
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 
 from tagfs_test.node_asserter import validateLinkInterface, validateDirectoryInterface
-from tagfs_test.item_mock import ItemMock
-
-class ItemAccessMock(object):
-
-    def __init__(self):
-        self.parseTime = 42
-        self.untaggedItems = [ItemMock(name) for name in ['item1', 'item2']]
+from tagfs_test.item_access_mock import ItemAccessMock
+from tagfs_test.item_mock import createItemMocks
 
 class TestUntaggedItemsDirectoryNode(TestCase):
 
     def setUp(self):
         self.itemAccess = ItemAccessMock()
+        self.itemAccess.untaggedItems = createItemMocks(['item1', 'item2'])
+
         self.nodeName = 'e'
         self.node = UntaggedItemsDirectoryNode(self.nodeName, self.itemAccess)
 
