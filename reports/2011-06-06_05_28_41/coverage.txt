@@ -1,0 +1,20 @@
+Name                                    Stmts   Exec  Cover   Missing
+---------------------------------------------------------------------
+src/bin/tagfs                              15      0     0%   21-42
+src/modules/tagfs/__init__                  1      0     0%   1
+src/modules/tagfs/cache                    33      7    21%   21-35, 38-75, 90-92
+src/modules/tagfs/config                   38      0     0%   21-92
+src/modules/tagfs/item_access             195      0     0%   19-351
+src/modules/tagfs/log                      24      0     0%   20-60
+src/modules/tagfs/log_config               15      0     0%   21-51
+src/modules/tagfs/main                     77      0     0%   28-180
+src/modules/tagfs/node                     40     23    57%   20-27, 39-44, 47, 51, 60-66, 78-79
+src/modules/tagfs/node_export              19      0     0%   20-53
+src/modules/tagfs/node_filter              27     19    70%   20-25, 28, 42, 51, 57
+src/modules/tagfs/node_filter_context      45     17    37%   20-27, 33-37, 41, 45-47, 52, 56, 70-91
+src/modules/tagfs/node_root                14      5    35%   20-28, 31, 35
+src/modules/tagfs/node_untagged_items      16     10    62%   20-25, 29, 43
+src/modules/tagfs/transient_dict           51     38    74%   20-24, 27, 30-32, 36, 43, 47, 54, 64, 73, 92
+src/modules/tagfs/view                     81      0     0%   21-174
+---------------------------------------------------------------------
+TOTAL                                     691    119    17%   
