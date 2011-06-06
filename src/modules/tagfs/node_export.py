@@ -19,16 +19,21 @@
 
 from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode, DirectoryNode
-from tagfs.node_export import ExportDirectoryNode
+from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 
-class FilterDirectoryNode(DirectoryNode):
-    
-    def __init__(self, itemAccess):
+class ExportDirectoryNode(DirectoryNode):
+
+    def __init__(self, itemAccess, parentNode):
         self.itemAccess = itemAccess
+        self.parentNode = parentNode
+
+    @property
+    def name(self):
+        return '.export'
 
     @property
     def attr(self):
-        s = super(FilterDirectoryNode, self).attr
+        s = super(ExportDirectoryNode, self).attr
 
         # TODO why nlink == 2?
         s.st_nlink = 2
@@ -41,30 +46,9 @@ class FilterDirectoryNode(DirectoryNode):
         return s
 
     @property
-    def contexts(self):
-        c = set()
-
-        for item in self.items:
-            for t in item.tags:
-                context = t.context
-
-                if context is None:
-                    continue
-
-                c.add(t.context)
-
-        return c
-
+    def items(self):
+        return self.parentNode.items
+    
     @property
     def _entries(self):
-        # the import is not global because we want to prevent a cyclic
-        # dependency
-        from tagfs.node_filter_context import ContextValueListDirectoryNode
-
-        yield ExportDirectoryNode(self.itemAccess, self)
-
-        for context in self.contexts:
-            yield ContextValueListDirectoryNode(self.itemAccess, self, context)
-
-        for item in self.items:
-            yield ItemLinkNode(item)
+        return []
