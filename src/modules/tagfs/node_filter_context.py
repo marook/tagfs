@@ -19,12 +19,13 @@
 
 from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode, DirectoryNode
+from tagfs.node_filter import FilterDirectoryNode
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 
-class ContextValueFilterDirectoryNode(DirectoryNode):
+class ContextValueFilterDirectoryNode(FilterDirectoryNode):
 
     def __init__(self, itemAccess, parentNode, context, value):
-        self.itemAccess = itemAccess
+        super(ContextValueFilterDirectoryNode, self).__init__(itemAccess)
         self.parentNode = parentNode
         self.context = context
         self.value = value
@@ -32,20 +33,6 @@ class ContextValueFilterDirectoryNode(DirectoryNode):
     @property
     def name(self):
         return self.value
-
-    @property
-    def attr(self):
-        s = super(ContextValueFilterDirectoryNode, self).attr
-
-        # TODO why nlink == 2?
-        s.st_nlink = 2
-
-        # TODO write test case which tests st_mtime == itemAccess.parseTime
-        s.st_mtime = self.itemAccess.parseTime
-        s.st_ctime = s.st_mtime
-        s.st_atime = s.st_mtime
-
-        return s
 
     @property
     @cache
@@ -56,11 +43,6 @@ class ContextValueFilterDirectoryNode(DirectoryNode):
 
             yield item
     
-    @property
-    def _entries(self):
-        for item in self.items:
-            yield ItemLinkNode(item)
-
 class ContextValueListDirectoryNode(DirectoryNode):
     
     def __init__(self, itemAccess, parentNode, context):

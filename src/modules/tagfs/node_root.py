@@ -18,28 +18,15 @@
 #
 
 from tagfs.cache import cache
-from tagfs.node import Stat, ItemLinkNode, DirectoryNode
+from tagfs.node import Stat, ItemLinkNode
+from tagfs.node_filter import FilterDirectoryNode
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 from tagfs.node_filter_context import ContextValueListDirectoryNode
 
-class RootDirectoryNode(DirectoryNode):
+class RootDirectoryNode(FilterDirectoryNode):
     
     def __init__(self, itemAccess):
-        self.itemAccess = itemAccess
-
-    @property
-    def attr(self):
-        s = super(RootDirectoryNode, self).attr
-
-        # TODO why nlink == 2?
-        s.st_nlink = 2
-
-        # TODO write test case which tests st_mtime == itemAccess.parseTime
-        s.st_mtime = self.itemAccess.parseTime
-        s.st_ctime = s.st_mtime
-        s.st_atime = s.st_mtime
-
-        return s
+        super(RootDirectoryNode, self).__init__(itemAccess)
 
     @property
     @cache
@@ -47,26 +34,8 @@ class RootDirectoryNode(DirectoryNode):
         return self.itemAccess.taggedItems
 
     @property
-    def contexts(self):
-        c = set()
-
-        for item in self.items:
-            for t in item.tags:
-                context = t.context
-
-                if context is None:
-                    continue
-
-                c.add(t.context)
-
-        return c
-
-    @property
     def _entries(self):
         yield UntaggedItemsDirectoryNode('.untagged', self.itemAccess)
 
-        for context in self.contexts:
-            yield ContextValueListDirectoryNode(self.itemAccess, self, context)
-
-        for item in self.items:
-            yield ItemLinkNode(item)
+        for e in super(RootDirectoryNode, self)._entries:
+            yield e
