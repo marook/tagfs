@@ -29,7 +29,6 @@ class RootDirectoryNode(FilterDirectoryNode):
         super(RootDirectoryNode, self).__init__(itemAccess)
 
     @property
-    @cache
     def items(self):
         return self.itemAccess.taggedItems
 

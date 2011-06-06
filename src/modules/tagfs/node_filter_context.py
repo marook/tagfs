@@ -35,7 +35,6 @@ class ContextValueFilterDirectoryNode(FilterDirectoryNode):
         return self.value
 
     @property
-    @cache
     def items(self):
         for item in self.parentNode.items:
             if not item.isTaggedWithContextValue(self.context, self.value):
@@ -69,7 +68,6 @@ class ContextValueListDirectoryNode(DirectoryNode):
         return s
 
     @property
-    @cache
     def items(self):
         for item in self.parentNode.items:
             if not item.isTaggedWithContext(self.context):
