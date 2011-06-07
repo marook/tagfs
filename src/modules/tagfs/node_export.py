@@ -20,6 +20,7 @@
 from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode, DirectoryNode
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
+from tagfs.node_export_csv import ExportCsvFileNode
 
 class ExportDirectoryNode(DirectoryNode):
 
@@ -51,4 +52,4 @@ class ExportDirectoryNode(DirectoryNode):
     
     @property
     def _entries(self):
-        return []
+        yield ExportCsvFileNode(self.itemAccess, self.parentNode)
