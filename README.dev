@@ -6,7 +6,8 @@ developer readme
 3) Tracing
 4) Distribution
 4.1) tar Distribution
-5) Code Coverage
+5) Tests
+6) Code Coverage
 
 ---------------------------------------------------------------------
 Logging
@@ -48,6 +49,14 @@ $ make distsnapshot
 
 The make call will create an archive within the target directory. The created
 tar file is used for tagfs source distribution.
+
+---------------------------------------------------------------------
+Tests
+
+You can execute the test cases via the setup.py script in the project's root
+directory.
+
+$ python setup.py test
 
 ---------------------------------------------------------------------
 Code Coverage
