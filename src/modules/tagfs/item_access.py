@@ -178,75 +178,6 @@ class Item(object):
     def __repr__(self):
         return '<Item %s>' % self.name
     
-class TagValueFilter(object):
-    
-    def __init__(self, tagValue):
-        self.tagValue = tagValue
-        
-    def filterItems(self, items):
-        droppedItems = set()
-        
-        for item in items:
-            hasTagValue = False
-                
-            for itemTag in item.tags:
-                if itemTag.value == self.tagValue:
-                    hasTagValue = True
-                    
-                    break
-                
-            if not hasTagValue:
-                droppedItems.add(item)
-                
-        items -= droppedItems
-        
-class TagFilter(object):
-    
-    def __init__(self, tag):
-        self.tag = tag
-        
-    def filterItems(self, items):
-        droppedItems = set()
-        
-        for item in items:
-            if not self.tag in item.tags:
-                droppedItems.add(item)
-                
-        items -= droppedItems
-        
-class AndFilter(object):
-    """Concatenates two filters with a logical 'and'.
-    """
-    
-    def __init__(self, subFilters):
-        self.subFilters = subFilters
-        
-    def filterItems(self, items):
-        for subFilter in self.subFilters:
-            subFilter.filterItems(items)
-            
-class NoneFilter(object):
-    
-    def filterItems(self, items):
-        pass
-
-class NotContextFilter(object):
-
-    def __init__(self, context):
-        self.context = context
-    
-    def filterItems(self, items):
-        droppedItems = set()
-        
-        for item in items:
-            for tag in item.tags:
-                if self.context == tag.context:
-                    droppedItems.add(item)
-
-                    break
-                
-        items -= droppedItems
-
 class ItemAccess(object):
     """This is the access point to the Items.
     """
@@ -317,13 +248,6 @@ class ItemAccess(object):
 
     def getItemDirectory(self, item):
         return os.path.join(self.dataDirectory, item)
-    
-    def filterItems(self, filter):
-        resultItems = set([item for item in self.taggedItems])
-        
-        filter.filterItems(resultItems)
-        
-        return resultItems
     
     def contextTags(self, context):
         contextTags = set()
