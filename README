@@ -24,7 +24,7 @@ tagfs see the README.dev file.
 ---------------------------------------------------------------------
 Requirements
 
-* python 2.5, 2.6
+* python 2.5, 2.6, 2.7
 * Linux kernel with fuse enabled
 * python-fuse installed
 
