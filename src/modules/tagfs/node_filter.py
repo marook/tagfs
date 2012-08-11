@@ -57,6 +57,10 @@ class FilterDirectoryNode(DirectoryNode):
         return c
 
     @property
+    def _enableItemLinks(self):
+        return True
+
+    @property
     def _entries(self):
         # the import is not global because we want to prevent a cyclic
         # dependency (ugly but works)
@@ -72,8 +76,9 @@ class FilterDirectoryNode(DirectoryNode):
         for context in self.contexts:
             yield ContextValueListDirectoryNode(self.itemAccess, self.config, self, context)
 
-        for item in self.items:
-            yield ItemLinkNode(item)
+        if(self._enableItemLinks):
+            for item in self.items:
+                yield ItemLinkNode(item)
 
     def addsValue(self, parentItems):
         itemsLen = len(list(self.items))

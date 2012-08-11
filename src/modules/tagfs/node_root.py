@@ -30,6 +30,10 @@ class RootDirectoryNode(FilterDirectoryNode):
         return self.itemAccess.taggedItems
 
     @property
+    def _enableItemLinks(self):
+        return self.config.enableRootItemLinks
+
+    @property
     def _entries(self):
         yield UntaggedItemsDirectoryNode('.untagged', self.itemAccess)
 
