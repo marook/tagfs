@@ -57,6 +57,9 @@ class ItemLinkNode(object):
     
         return s
 
+    def addsValue(self, items):
+        return True
+
     @property
     def link(self):
         return self.item.itemDirectory
@@ -75,7 +78,13 @@ class DirectoryNode(object):
 
         return s
 
+    def addsValue(self, items):
+        return True
+
+    def _addsValue(self, child):
+        return True
+
     @property
     @cache
     def entries(self):
-        return dict([[e.name, e] for e in self._entries])
+        return dict([[e.name, e] for e in self._entries if self._addsValue(e)])

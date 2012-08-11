@@ -74,3 +74,17 @@ class FilterDirectoryNode(DirectoryNode):
 
         for item in self.items:
             yield ItemLinkNode(item)
+
+    def addsValue(self, parentItems):
+        itemsLen = len(list(self.items))
+        if(itemsLen == 0):
+            return False
+
+        # TODO we should not compare the lengths but whether the child and
+        # parent items are different
+        parentItemsLen = len(list(parentItems))
+
+        return itemsLen != parentItemsLen
+
+    def _addsValue(self, child):
+        return child.addsValue(self.items)
