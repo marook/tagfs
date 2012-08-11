@@ -21,7 +21,7 @@ import os
 import time
 import traceback
 
-from tagfs.cache import cache
+from cache import cache
 
 class Tag(object):
     

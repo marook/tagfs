@@ -19,8 +19,8 @@
 
 import stat
 
-from tagfs.cache import cache
-from tagfs.node import Stat
+from cache import cache
+from node import Stat
 
 class ExportCsvFileNode(object):
 

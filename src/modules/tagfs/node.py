@@ -20,7 +20,7 @@
 import fuse
 import stat
 
-from tagfs.cache import cache
+from cache import cache
 
 class Stat(fuse.Stat):
     

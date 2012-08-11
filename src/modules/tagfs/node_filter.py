@@ -17,9 +17,9 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs.cache import cache
-from tagfs.node import Stat, ItemLinkNode, DirectoryNode
-from tagfs.node_export import ExportDirectoryNode
+from cache import cache
+from node import Stat, ItemLinkNode, DirectoryNode
+from node_export import ExportDirectoryNode
 
 class FilterDirectoryNode(DirectoryNode):
     
@@ -60,8 +60,8 @@ class FilterDirectoryNode(DirectoryNode):
     def _entries(self):
         # the import is not global because we want to prevent a cyclic
         # dependency (ugly but works)
-        from tagfs.node_filter_context import ContextValueListDirectoryNode
-        from tagfs.node_filter_value import ValueFilterDirectoryNode
+        from node_filter_context import ContextValueListDirectoryNode
+        from node_filter_value import ValueFilterDirectoryNode
 
         yield ExportDirectoryNode(self.itemAccess, self)
 

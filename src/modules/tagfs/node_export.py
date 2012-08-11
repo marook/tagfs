@@ -17,10 +17,10 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs.cache import cache
-from tagfs.node import Stat, ItemLinkNode, DirectoryNode
-from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
-from tagfs.node_export_csv import ExportCsvFileNode
+from cache import cache
+from node import Stat, ItemLinkNode, DirectoryNode
+from node_untagged_items import UntaggedItemsDirectoryNode
+from node_export_csv import ExportCsvFileNode
 
 class ExportDirectoryNode(DirectoryNode):
 

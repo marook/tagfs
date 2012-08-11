@@ -17,7 +17,7 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs.node_filter import FilterDirectoryNode
+from node_filter import FilterDirectoryNode
 
 class ValueFilterDirectoryNode(FilterDirectoryNode):
 

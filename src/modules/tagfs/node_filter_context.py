@@ -17,10 +17,10 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs.cache import cache
-from tagfs.node import Stat, ItemLinkNode, DirectoryNode
-from tagfs.node_filter import FilterDirectoryNode
-from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
+from cache import cache
+from node import Stat, ItemLinkNode, DirectoryNode
+from node_filter import FilterDirectoryNode
+from node_untagged_items import UntaggedItemsDirectoryNode
 
 class ContextValueFilterDirectoryNode(FilterDirectoryNode):
 

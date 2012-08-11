@@ -17,8 +17,8 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from tagfs.cache import cache
-from tagfs.node import Stat, ItemLinkNode, DirectoryNode
+from cache import cache
+from node import Stat, ItemLinkNode, DirectoryNode
 
 class UntaggedItemsDirectoryNode(DirectoryNode):
     

@@ -39,9 +39,9 @@ if not hasattr(fuse, '__version__'):
         "your fuse-py doesn't know of fuse.__version__, probably it's too old."
 fuse.fuse_python_api = (0, 2)
 
-from tagfs.view import View
-from tagfs.cache import cache
-from tagfs.item_access import ItemAccess
+from view import View
+from cache import cache
+from item_access import ItemAccess
 from config import Config
 from log import logException
     

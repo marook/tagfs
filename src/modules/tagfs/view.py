@@ -21,10 +21,10 @@
 import errno
 import logging
 import os
-from tagfs.log import logCall, logException
-from tagfs.cache import cache
-from tagfs.transient_dict import TransientDict
-from tagfs.node_root import RootDirectoryNode
+from log import logCall, logException
+from cache import cache
+from transient_dict import TransientDict
+from node_root import RootDirectoryNode
 from fuse import Direntry
 
 class View(object):
