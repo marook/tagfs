@@ -12,6 +12,7 @@ tagfs - tag file system
 6) Further Reading
 7) Contact
 
+
 ---------------------------------------------------------------------
 Introduction
 
@@ -20,12 +21,14 @@ tagfs is used to organize your files using tags.
 This document contains basic usage instructions for users. To develop or debug
 tagfs see the README.dev file.
 
+
 ---------------------------------------------------------------------
 Requirements
 
 * python 2.5, 2.6, 2.7
 * Linux kernel with fuse enabled
 * python-fuse installed
+
 
 ---------------------------------------------------------------------
 Installation
@@ -39,6 +42,7 @@ to your environment configuration script. For example to your ~/.bashrc:
 
 export PYTHONPATH=~/.local/lib/python:$PYTHONPATH
 
+
 ---------------------------------------------------------------------
 Usage
 
@@ -49,6 +53,7 @@ $ tagfs -i /path/to/my/items/directory /path/to/my/mount/point
 
 Unmount a tagged directory: 
 $ fusermount -u /path/to/my/mount/point
+
 
 ---------------------------------------------------------------------
 Configuration
@@ -62,6 +67,7 @@ Locations with higher priority come first:
 
 Right now the following configuration options are supported.
 
+
 ---------------------------------------------------------------------
 Configuration - Options - tagFileName
 
@@ -72,6 +78,7 @@ Example:
 
 [global]
 tagFileName = ABOUT
+
 
 ---------------------------------------------------------------------
 Configuration - Options - enableValueFilters
@@ -85,6 +92,7 @@ Example:
 [global]
 enableValueFilters = true
 
+
 ---------------------------------------------------------------------
 Configuration - Options - enableRootItemLinks
 
@@ -96,11 +104,13 @@ Example:
 [global]
 enableRootItemLinks = true
 
+
 ---------------------------------------------------------------------
 Further Reading
 
 Using a file system for my bank account (Markus Pielmeier)
 http://pielmeier.blogspot.com/2010/08/using-file-system-for-my-bank-account.html
+
 
 ---------------------------------------------------------------------
 Contact
