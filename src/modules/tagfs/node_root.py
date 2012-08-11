@@ -21,12 +21,11 @@ from tagfs.cache import cache
 from tagfs.node import Stat, ItemLinkNode
 from tagfs.node_filter import FilterDirectoryNode
 from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
-from tagfs.node_filter_context import ContextValueListDirectoryNode
 
 class RootDirectoryNode(FilterDirectoryNode):
-    
-    def __init__(self, itemAccess):
-        super(RootDirectoryNode, self).__init__(itemAccess)
+
+    def __init__(self, itemAccess, config):
+        super(RootDirectoryNode, self).__init__(itemAccess, config)
 
     @property
     def items(self):

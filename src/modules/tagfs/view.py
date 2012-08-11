@@ -50,8 +50,7 @@ class View(object):
     @property
     @cache
     def rootNode(self):
-        # TODO return node.RootNode(self.itemAccess, self.config)
-        return RootDirectoryNode(self.itemAccess)
+        return RootDirectoryNode(self.itemAccess, self.config)
 
     def getNode(self, path):
         if path in self._entryCache:

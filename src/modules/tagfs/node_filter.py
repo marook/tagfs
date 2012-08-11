@@ -23,8 +23,9 @@ from tagfs.node_export import ExportDirectoryNode
 
 class FilterDirectoryNode(DirectoryNode):
     
-    def __init__(self, itemAccess):
+    def __init__(self, itemAccess, config):
         self.itemAccess = itemAccess
+        self.config = config
 
     @property
     def attr(self):
@@ -59,12 +60,16 @@ class FilterDirectoryNode(DirectoryNode):
     def _entries(self):
         # the import is not global because we want to prevent a cyclic
         # dependency
-        from tagfs.node_filter_context import ContextValueListDirectoryNode
+        from tagfs.node_filter_context import ContextValueFilterDirectoryNode, ContextValueListDirectoryNode
 
         yield ExportDirectoryNode(self.itemAccess, self)
 
+        if(self.config.enableValueFilters):
+            for value in self.itemAccess.values:
+                yield ContextValueFilterDirectoryNode(self.itemAccess, self.config, self, None, value)
+
         for context in self.contexts:
-            yield ContextValueListDirectoryNode(self.itemAccess, self, context)
+            yield ContextValueListDirectoryNode(self.itemAccess, self.config, self, context)
 
         for item in self.items:
             yield ItemLinkNode(item)

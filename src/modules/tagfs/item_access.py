@@ -271,5 +271,15 @@ class ItemAccess(object):
         
         return contexts
 
+    @property
+    @cache
+    def values(self):
+        values = set()
+
+        for tag in self.tags:
+            values.add(tag.value)
+
+        return values
+
     def __str__(self):
         return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in ['dataDirectory', 'tagFileName']]) + ']'

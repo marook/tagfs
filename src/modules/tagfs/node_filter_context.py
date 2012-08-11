@@ -24,8 +24,8 @@ from tagfs.node_untagged_items import UntaggedItemsDirectoryNode
 
 class ContextValueFilterDirectoryNode(FilterDirectoryNode):
 
-    def __init__(self, itemAccess, parentNode, context, value):
-        super(ContextValueFilterDirectoryNode, self).__init__(itemAccess)
+    def __init__(self, itemAccess, config, parentNode, context, value):
+        super(ContextValueFilterDirectoryNode, self).__init__(itemAccess, config)
         self.parentNode = parentNode
         self.context = context
         self.value = value
@@ -44,8 +44,9 @@ class ContextValueFilterDirectoryNode(FilterDirectoryNode):
     
 class ContextValueListDirectoryNode(DirectoryNode):
     
-    def __init__(self, itemAccess, parentNode, context):
+    def __init__(self, itemAccess, config, parentNode, context):
         self.itemAccess = itemAccess
+        self.config = config
         self.parentNode = parentNode
         self.context = context
 
@@ -88,4 +89,4 @@ class ContextValueListDirectoryNode(DirectoryNode):
     @property
     def _entries(self):
         for value in self.contextValues:
-            yield ContextValueFilterDirectoryNode(self.itemAccess, self, self.context, value)
+            yield ContextValueFilterDirectoryNode(self.itemAccess, self.config, self, self.context, value)
