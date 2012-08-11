@@ -169,6 +169,13 @@ class Item(object):
     def isTaggedWithContext(self, context):
         # TODO don't create whole list... just check wheather list is empty
         return (len([c for c in self.getTagsByContext(context)]) > 0)
+
+    def isTaggedWithValue(self, value):
+        for t in self.tags:
+            if value == t.value:
+                return True
+
+        return False
     
     @property
     @cache

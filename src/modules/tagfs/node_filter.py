@@ -59,14 +59,15 @@ class FilterDirectoryNode(DirectoryNode):
     @property
     def _entries(self):
         # the import is not global because we want to prevent a cyclic
-        # dependency
-        from tagfs.node_filter_context import ContextValueFilterDirectoryNode, ContextValueListDirectoryNode
+        # dependency (ugly but works)
+        from tagfs.node_filter_context import ContextValueListDirectoryNode
+        from tagfs.node_filter_value import ValueFilterDirectoryNode
 
         yield ExportDirectoryNode(self.itemAccess, self)
 
         if(self.config.enableValueFilters):
             for value in self.itemAccess.values:
-                yield ContextValueFilterDirectoryNode(self.itemAccess, self.config, self, None, value)
+                yield ValueFilterDirectoryNode(self.itemAccess, self.config, self, value)
 
         for context in self.contexts:
             yield ContextValueListDirectoryNode(self.itemAccess, self.config, self, context)
