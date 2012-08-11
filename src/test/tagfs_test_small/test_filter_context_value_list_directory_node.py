@@ -37,7 +37,7 @@ class TestContextValueListDirectoryNode(TestCase):
 
         self.parentNode = ParentNodeMock()
         self.context = 'c1'
-        self.node = ContextValueListDirectoryNode(self.itemAccess, self.parentNode, self.context)
+        self.node = ContextValueListDirectoryNode(self.itemAccess, None, self.parentNode, self.context)
 
     def testNodeAttrMTimeIsItemAccessParseTime(self):
         attr = self.node.attr

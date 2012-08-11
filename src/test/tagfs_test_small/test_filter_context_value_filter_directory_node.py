@@ -47,6 +47,12 @@ class ParentNodeMock(object):
     def __init__(self, items):
         self.items = items
 
+class ConfigMock(object):
+
+    @property
+    def enableValueFilters(self):
+        return False
+
 class TestContextValueFilterDirectoryNode(TestCase):
 
     def setUp(self):
@@ -56,8 +62,10 @@ class TestContextValueFilterDirectoryNode(TestCase):
         self.itemAccess = ItemAccessMock()
         self.itemAccess.taggedItems = [TaggedItemMock('item1', self.context, self.value), ]
 
+        self.config = ConfigMock()
+
         self.parentNode = ParentNodeMock(self.itemAccess.taggedItems)
-        self.node = ContextValueFilterDirectoryNode(self.itemAccess, self.parentNode, self.context, self.value)
+        self.node = ContextValueFilterDirectoryNode(self.itemAccess, self.config, self.parentNode, self.context, self.value)
 
     def testNodeAttrMTimeIsItemAccessParseTime(self):
         attr = self.node.attr

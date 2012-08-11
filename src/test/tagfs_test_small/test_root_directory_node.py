@@ -25,6 +25,16 @@ from tagfs_test.node_asserter import validateDirectoryInterface, validateLinkInt
 from tagfs_test.item_access_mock import ItemAccessMock
 from tagfs_test.item_mock import createItemMocks
 
+class ConfigMock(object):
+
+    @property
+    def enableValueFilters(self):
+        return False
+
+    @property
+    def enableRootItemLinks(self):
+        return True
+
 class AbstractRootDirectoryNodeTest(TestCase):
 
     @property
@@ -37,7 +47,9 @@ class AbstractRootDirectoryNodeTest(TestCase):
         self.itemAccess = ItemAccessMock()
         self.itemAccess.taggedItems = createItemMocks(self._itemNames)
 
-        self.node = RootDirectoryNode(self.itemAccess)
+        self.config = ConfigMock()
+
+        self.node = RootDirectoryNode(self.itemAccess, self.config)
 
 class TestRootDirectoryNode(AbstractRootDirectoryNodeTest):
 
