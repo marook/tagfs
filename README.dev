@@ -8,6 +8,7 @@ developer readme
 4.1) tar Distribution
 5) Code Coverage
 
+
 ---------------------------------------------------------------------
 Logging
 
@@ -16,6 +17,7 @@ launch tagfs:
 $ export DEBUG=1
 
 tagfs will log to the console and the file /tmp/tagfs.log
+
 
 ---------------------------------------------------------------------
 Profiling
@@ -28,6 +30,7 @@ After unmounting your tagfs file system a profile file will be written. The
 profile file will be written to the current directory. The profile file will
 be named 'tagfs.profile'.
 
+
 ---------------------------------------------------------------------
 Tracing
 
@@ -37,6 +40,7 @@ log files. To analyze a log file execute the following
 $ util/trace_logfiles.py /tmp/tagfs.log
 
 The tracing script will output some statistics.
+
 
 ---------------------------------------------------------------------
 tar Distribution
@@ -48,6 +52,7 @@ $ make distsnapshot
 
 The make call will create an archive within the target directory. The created
 tar file is used for tagfs source distribution.
+
 
 ---------------------------------------------------------------------
 Code Coverage
