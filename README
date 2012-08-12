@@ -35,7 +35,7 @@ Installation
 
 To install tagfs into your home directory type the following:
 
-$ python setup.py test install --home ~/.local
+$ python setup.py test e2e_test install --home ~/.local
 
 If you haven't already extended your local python path then add the following
 to your environment configuration script. For example to your ~/.bashrc:
