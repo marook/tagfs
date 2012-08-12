@@ -114,6 +114,12 @@ def printFile(fileName):
         for line in f:
             sys.stdout.write(line)
 
+class TestFailException(Exception):
+    '''Indicates that at lease one of the unit tests has failed
+    '''
+
+    pass
+
 class test(Command):
     description = 'run tests'
     user_options = []
@@ -160,36 +166,40 @@ class test(Command):
 
         suite = TestLoader().loadTestsFromNames(tests)
 
-        with open(report.unitTestReportFileName, 'w') as testResultsFile:
-            r = TextTestRunner(stream = testResultsFile, verbosity = self._verbosity)
+        try:
+            with open(report.unitTestReportFileName, 'w') as testResultsFile:
+                r = TextTestRunner(stream = testResultsFile, verbosity = self._verbosity)
 
-            def runTests():
-                r.run(suite)
+                def runTests():
+                    result = r.run(suite)
 
-            try:
-                import coverage
+                    if(not result.wasSuccessful()):
+                        raise TestFailException()
 
-                c = coverage.coverage()
-                c.start()
-                runTests()
-                c.stop()
+                try:
+                    import coverage
+
+                    c = coverage.coverage()
+                    c.start()
+                    runTests()
+                    c.stop()
     
-                with open(report.coverageReportFileName, 'w') as reportFile:
-                    c.report([f for f in sourceFiles()], file = reportFile)
+                    with open(report.coverageReportFileName, 'w') as reportFile:
+                        c.report([f for f in sourceFiles()], file = reportFile)
 
-            except ImportError:
-                # TODO ImportErrors from runTests() may look like coverage is missing
+                except ImportError:
+                    # TODO ImportErrors from runTests() may look like coverage is missing
 
-                print ''
-                print 'coverage module not found.'
-                print 'To view source coverage stats install http://nedbatchelder.com/code/coverage/'
-                print ''
+                    print ''
+                    print 'coverage module not found.'
+                    print 'To view source coverage stats install http://nedbatchelder.com/code/coverage/'
+                    print ''
 
-                runTests()
-
-        # TODO use two streams instead of printing files after writing
-        printFile(report.unitTestReportFileName)
-        printFile(report.coverageReportFileName)
+                    runTests()
+        finally:
+            # TODO use two streams instead of printing files after writing
+            printFile(report.unitTestReportFileName)
+            printFile(report.coverageReportFileName)
 
 # Overrides default clean (which cleans from build runs)
 # This clean should probably be hooked into that somehow.
