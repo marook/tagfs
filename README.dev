@@ -8,6 +8,7 @@ developer readme
 4.1) tar Distribution
 5) Tests
 6) Code Coverage
+7) End-To-End Tests
 
 
 ---------------------------------------------------------------------
@@ -63,6 +64,7 @@ directory.
 
 $ python setup.py test
 
+
 ---------------------------------------------------------------------
 Code Coverage
 
@@ -77,3 +79,17 @@ $ apt-get install python-coverage
 The code coverage will be written below the reports directory after executing
 the test cases:
 $ python setup.py test
+
+
+---------------------------------------------------------------------
+End-To-End Tests
+
+tagfs contains some end-to-end tests. The end-to-end tests first mount an
+items directory and afterwards execute a shell script which can assert certain
+conditions in the mounted tagfs.
+
+The end-to-end tests can be run via the setup.py:
+
+$ python setup.py e2e_test
+
+The end-to-end tests are located below the test/e2e directory.
