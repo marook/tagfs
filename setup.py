@@ -32,6 +32,7 @@ from glob import glob
 from unittest import TestLoader, TextTestRunner
 import re
 import datetime
+from subprocess import call
 
 projectdir = dirname(abspath(__file__))
 reportdir = pjoin(projectdir, 'reports')
@@ -40,6 +41,7 @@ srcdir = pjoin(projectdir, 'src')
 bindir = pjoin(srcdir, 'bin')
 moddir = pjoin(srcdir, 'modules')
 testdir = pjoin(srcdir, 'test')
+endToEndTestDir = pjoin(projectdir, 'test', 'e2e')
 
 testdatadir = pjoin(projectdir, 'etc', 'test', 'events')
 testmntdir = pjoin(projectdir, 'mnt')
@@ -201,6 +203,29 @@ class test(Command):
             printFile(report.unitTestReportFileName)
             printFile(report.coverageReportFileName)
 
+class EndToEndTestFailure(Exception):
+
+    def __init__(self, testPath):
+        super(EndToEndTestFailure, self).__init__('end-to-end test failed: %s' % testPath)
+
+class EndToEndTests(Command):
+    description = 'execute the end-to-end tests'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def runTest(self, testPath):
+        if(not call(['bin/runEndToEndTest.sh', testPath]) is 0):
+            raise EndToEndTestFailure(testPath)
+
+    def run(self):
+        for endToEndDirName in os.listdir(endToEndTestDir):
+            self.runTest(os.path.join(endToEndTestDir, endToEndDirName))
+
 # Overrides default clean (which cleans from build runs)
 # This clean should probably be hooked into that somehow.
 class clean_pyc(Command):
@@ -232,6 +257,7 @@ setup(
     cmdclass = {
         'test': test,
         'clean_pyc': clean_pyc,
+        'e2e_test': EndToEndTests,
     },
     name = 'tagfs',
     version = '0.1',

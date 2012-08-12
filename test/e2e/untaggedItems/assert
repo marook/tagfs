@@ -1,0 +1,3 @@
+#!/bin/bash
+
+assertLink "$TEST_MOUNT_DIR/.untagged/dir without tags"
