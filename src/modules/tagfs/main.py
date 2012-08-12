@@ -42,7 +42,7 @@ fuse.fuse_python_api = (0, 2)
 from view import View
 from cache import cache
 from item_access import ItemAccess
-from config import Config
+from config import parseConfig
 from log import logException
     
 class TagFS(fuse.Fuse):
@@ -105,7 +105,7 @@ class TagFS(fuse.Fuse):
     def config(self):
         opts, args = self.cmdline
 
-        c = Config(os.path.normpath(os.path.join(self._initwd, opts.itemsDir)))
+        c = parseConfig(os.path.normpath(os.path.join(self._initwd, opts.itemsDir)))
 
         if opts.tagFileName:
             c.tagFileName = opts.tagFileName

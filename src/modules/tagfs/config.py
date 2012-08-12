@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2009, 2010 Markus Pielmeier
+# Copyright 2009, 2010, 2012 Markus Pielmeier
 #
 # This file is part of tagfs.
 #
@@ -22,70 +22,40 @@ import ConfigParser
 import logging
 import os
 
-class ConfigError(Exception):
+def parseConfig(itemsDir):
+    config = ConfigParser.SafeConfigParser({
+            'tagFileName': '.tag',
+            'enableValueFilters': 'False',
+            'enableRootItemLinks': 'False',
+            })
+    config.add_section(Config.GLOBAL_SECTION)
 
-    pass
+    parsedFiles = config.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
+                               os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
+                               os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
+
+    logging.debug('Parsed the following config files: %s' % ', '.join(parsedFiles))
+
+    return Config(config)
 
 class Config(object):
 
     GLOBAL_SECTION = 'global'
 
-    def applyDefaults(self):
-        self.tagFileName = '.tag'
-        self.enableValueFilters = False
-        self.enableRootItemLinks = False
-
-    def __init__(self, itemsDir):
-        self._config = ConfigParser.SafeConfigParser({
-                'tagFileName': '.tag',
-                'enableValueFilters': False,
-                'enableRootItemLinks': False,
-                })
-        self._config.add_section(Config.GLOBAL_SECTION)
-
-        self.itemsDir = itemsDir
-
-        self.applyDefaults()
-
-        parsedFiles = self._config.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
-                                         os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
-                                         os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
-
-        logging.debug('Parsed the following config files: %s' % ', '.join(parsedFiles))
-
-    def _boolToStr(self, b):
-        if b is True:
-            return 'true'
-        elif b is False:
-            return 'false'
-        else:
-            # TODO make error more verbose
-            raise ConfigError()
+    def __init__(self, _config):
+        self._config = _config
 
     @property
     def tagFileName(self):
         return self._config.get(Config.GLOBAL_SECTION, 'tagFileName')
 
-    @tagFileName.setter
-    def tagFileName(self, tagFileName):
-        self._config.set(Config.GLOBAL_SECTION, 'tagFileName', tagFileName)
-
-    # TODO implement generic approach to get/set boolean values
     @property
     def enableValueFilters(self):
         return self._config.getboolean(Config.GLOBAL_SECTION, 'enableValueFilters')
 
-    @enableValueFilters.setter
-    def enableValueFilters(self, enableValueFilters):
-        self._config.set(Config.GLOBAL_SECTION, 'enableValueFilters', self._boolToStr(enableValueFilters))
-
     @property
     def enableRootItemLinks(self):
         return self._config.getboolean(Config.GLOBAL_SECTION, 'enableRootItemLinks')
-
-    @enableRootItemLinks.setter
-    def enableRootItemLinks(self, enableRootItemLinks):
-        self._config.set(Config.GLOBAL_SECTION, 'enableRootItemLinks', self._boolToStr(enableRootItemLinks))
 
     def __str__(self):
         #return '[' + ', '.join([field + ': ' + str(self.__dict__[field]) for field in ['tagFileName', 'enableValueFilters', 'enableRootItemLinks']]) + ']'
