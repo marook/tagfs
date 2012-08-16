@@ -1,0 +1,3 @@
+#!/bin/bash
+
+assertEqualContent "$TEST_MOUNT_DIR/.export/export.csv" "export.csv"

@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -e
+
 ASSERT_BIN=$1
 
 fail() {
-    echo "$1" >&2
+    echo "TEST FAILED: $1" >&2
     exit 1
 }
 
@@ -16,4 +18,9 @@ assertLink(){
     fi
 }
 
+assertEqualContent(){
+    cmp $1 $2 > /dev/null || fail "File content is not equal: $1 and $2 ($DIFF)"
+}
+
+cd `dirname "$ASSERT_BIN"`
 . $ASSERT_BIN
