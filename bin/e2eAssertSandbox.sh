@@ -19,7 +19,7 @@ assertLink(){
 }
 
 assertEqualContent(){
-    cmp $1 $2 > /dev/null || fail "File content is not equal: $1 and $2 ($DIFF)"
+    cmp "$1" "$2" > /dev/null || fail "File content is not equal: $1 and $2 ($DIFF)"
 }
 
 cd `dirname "$ASSERT_BIN"`
