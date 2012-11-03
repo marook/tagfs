@@ -42,6 +42,25 @@ class ContextValueFilterDirectoryNode(FilterDirectoryNode):
 
             yield item
     
+class UnsetContextFilterDirectoryNode(FilterDirectoryNode):
+
+    def __init__(self, itemAccess, config, parentNode, context):
+        super(UnsetContextFilterDirectoryNode, self).__init__(itemAccess, config)
+        self.parentNode = parentNode
+        self.context = context
+
+    @property
+    def name(self):
+        return '.unset'
+
+    @property
+    def items(self):
+        for item in self.parentNode.parentNode.items:
+            if item.isTaggedWithContext(self.context):
+                continue
+
+            yield item
+
 class ContextValueListDirectoryNode(DirectoryNode):
     
     def __init__(self, itemAccess, config, parentNode, context):
@@ -88,6 +107,8 @@ class ContextValueListDirectoryNode(DirectoryNode):
 
     @property
     def _entries(self):
+        yield UnsetContextFilterDirectoryNode(self.itemAccess, self.config, self, self.context)
+
         for value in self.contextValues:
             yield ContextValueFilterDirectoryNode(self.itemAccess, self.config, self, self.context, value)
 
