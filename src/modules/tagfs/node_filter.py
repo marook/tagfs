@@ -66,8 +66,11 @@ class FilterDirectoryNode(DirectoryNode):
         # dependency (ugly but works)
         from node_filter_context import ContextValueListDirectoryNode
         from node_filter_value import ValueFilterDirectoryNode
+        from node_filter_any_context import AnyContextValueListDirectoryNode
 
         yield ExportDirectoryNode(self.itemAccess, self)
+
+        yield AnyContextValueListDirectoryNode(self.itemAccess, self.config, self)
 
         if(self.config.enableValueFilters):
             for value in self.itemAccess.values:

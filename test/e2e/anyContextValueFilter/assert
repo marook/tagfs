@@ -1,0 +1,5 @@
+#!/bin/bash
+
+assertLink "$TEST_MOUNT_DIR/.any_context/fruit/banana"
+
+assertLink "$TEST_MOUNT_DIR/.any_context/vegetable/carrot"

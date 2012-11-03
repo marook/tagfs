@@ -152,6 +152,11 @@ class Item(object):
         
         return self.__parseTags()
 
+    @property
+    def values(self):
+        for t in self.tags:
+            yield t.value
+
     def getTagsByContext(self, context):
         for t in self.tags:
             if context != t.context:
@@ -171,8 +176,8 @@ class Item(object):
         return (len([c for c in self.getTagsByContext(context)]) > 0)
 
     def isTaggedWithValue(self, value):
-        for t in self.tags:
-            if value == t.value:
+        for v in self.values:
+            if value == v:
                 return True
 
         return False
