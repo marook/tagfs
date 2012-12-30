@@ -41,7 +41,11 @@ $ python setup.py test e2e_test install --home ~/.local
 If you haven't already extended your local python path then add the following
 to your environment configuration script. For example to your ~/.bashrc:
 
-export PYTHONPATH=~/.local/lib/python:$PYTHONPATH
+$ export PYTHONPATH=~/.local/lib/python:$PYTHONPATH
+
+You may also need to add ~/.local/bin to your PATH environment variable:
+
+$ export PATH=~/.local/bin:$PATH
 
 
 ---------------------------------------------------------------------
