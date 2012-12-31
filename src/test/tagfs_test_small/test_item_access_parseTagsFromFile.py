@@ -37,3 +37,8 @@ class ParseTagsFromFileTest(unittest.TestCase):
         self.setTagFileContent(['value',])
 
         self.assertParseTags([item_access.Tag('value'),])
+
+    def testParseTagWithContext(self):
+        self.setTagFileContent(['context: value',])
+
+        self.assertParseTags([item_access.Tag('value', 'context'),])
