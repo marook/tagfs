@@ -89,10 +89,11 @@ def parseTagsFromFile(system, tagFileName):
     
 class Item(object):
     
-    def __init__(self, name, system, itemAccess):
+    def __init__(self, name, system, itemAccess, parseTagsFromFile = parseTagsFromFile):
         self.name = name
         self.system = system
         self.itemAccess = itemAccess
+        self.parseTagsFromFile = parseTagsFromFile
         
         # TODO register at file system to receive tag file change events.
         
@@ -117,7 +118,7 @@ class Item(object):
         if not os.path.exists(tagFileName):
             return None
 
-        return parseTagsFromFile(self.system, tagFileName)
+        return self.parseTagsFromFile(self.system, tagFileName)
 
     @property
     @cache
