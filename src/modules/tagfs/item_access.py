@@ -110,11 +110,10 @@ class Item(object):
         """Returns the name of the tag file for this item.
         """
         
-        itemDirectory = self.itemDirectory
-
-        return os.path.join(itemDirectory, self.itemAccess.tagFileName)
+        return os.path.join(self.itemDirectory, self.itemAccess.tagFileName)
 
     @property
+    @cache
     def tagFileExists(self):
         return self.system.pathExists(self._tagFileName)
     
@@ -134,8 +133,6 @@ class Item(object):
     @property
     @cache
     def tagsCreationTime(self):
-        tagFileName = self._tagFileName
-        
         if not self.tagFileExists:
             return None
 
@@ -147,12 +144,10 @@ class Item(object):
         """Returns the last time when the tags have been modified.
         """
         
-        tagFileName = self._tagFileName
-        
         if not self.tagFileExists:
             return None
 
-        return os.path.getmtime(tagFileName)
+        return os.path.getmtime(self._tagFileName)
     
     @property
     @cache
@@ -196,12 +191,11 @@ class Item(object):
         return False
     
     @property
-    @cache
     def tagged(self):
-        return os.path.exists(self._tagFileName)
+        return self.tagFileExists
     
     def __repr__(self):
-        return '<Item %s>' % self.name
+        return '<Item %s, %s>' % (self.name, self.tags)
     
 class ItemAccess(object):
     """This is the access point to the Items.
@@ -245,7 +239,11 @@ class ItemAccess(object):
     @property
     @cache
     def items(self):
-        return self.__parseItems()
+        items = self.__parseItems() 
+
+        logging.info('items: %s', items) # TODO remove me
+
+        return items
 
     @property
     @cache
