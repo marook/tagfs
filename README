@@ -156,6 +156,9 @@ Freebase Integration
 Freebase is an open graph of people, places and things. tagfs allows you to
 extend your own taggings with data directly from the freebase graph.
 
+WARNING! Freebase support is currently experimental. It is very likely that the
+freebase syntax within the .tag files will change in future releases of tagfs.
+
 In order to use freebase you need to install the freebase-python bindings. They
 are available via https://code.google.com/p/freebase-python/
 
