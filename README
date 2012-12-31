@@ -162,7 +162,10 @@ freebase syntax within the .tag files will change in future releases of tagfs.
 In order to use freebase you need to install the freebase-python bindings. They
 are available via https://code.google.com/p/freebase-python/
 
-TODO howto query freebase
+To extend an item's taggings with freebase data you have to add a freebase query
+to the item's .tag file. Here's an example:
+
+_freebase: {'id': '/m/0clpml', 'type': '/fictional_universe/fictional_character', 'name': null, 'occupation': null}
 
 
 ---------------------------------------------------------------------

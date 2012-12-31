@@ -22,7 +22,7 @@ import time
 import traceback
 
 from cache import cache
-import tagfs.sysIO as sysIO
+import sysIO
 
 class Tag(object):
     
@@ -89,10 +89,12 @@ def parseTagsFromFile(system, tagFileName):
     
 class Item(object):
     
-    def __init__(self, name, system, itemAccess, parseTagsFromFile = parseTagsFromFile):
+    def __init__(self, name, system, itemAccess, freebaseQueryParser, freebaseAdapter, parseTagsFromFile = parseTagsFromFile):
         self.name = name
         self.system = system
         self.itemAccess = itemAccess
+        self.freebaseQueryParser = freebaseQueryParser
+        self.freebaseAdapter = freebaseAdapter
         self.parseTagsFromFile = parseTagsFromFile
         
         # TODO register at file system to receive tag file change events.
@@ -111,21 +113,30 @@ class Item(object):
         itemDirectory = self.itemDirectory
 
         return os.path.join(itemDirectory, self.itemAccess.tagFileName)
+
+    @property
+    def tagFileExists(self):
+        return self.system.pathExists(self._tagFileName)
     
     def __parseTags(self):
         tagFileName = self._tagFileName
         
-        if not os.path.exists(tagFileName):
-            return None
-
-        return self.parseTagsFromFile(self.system, tagFileName)
+        for rawTag in self.parseTagsFromFile(self.system, tagFileName):
+            if(rawTag.context == '_freebase'):
+                query = self.freebaseQueryParser.parse(rawTag.value)
+                
+                for context, values in self.freebaseAdapter.execute(query).iteritems():
+                    for value in values:
+                        yield Tag(value, context)
+            else:
+                yield rawTag
 
     @property
     @cache
     def tagsCreationTime(self):
         tagFileName = self._tagFileName
         
-        if not os.path.exists(tagFileName):
+        if not self.tagFileExists:
             return None
 
         return os.path.getctime(self._tagFileName)
@@ -138,7 +149,7 @@ class Item(object):
         
         tagFileName = self._tagFileName
         
-        if not os.path.exists(tagFileName):
+        if not self.tagFileExists:
             return None
 
         return os.path.getmtime(tagFileName)
@@ -149,7 +160,10 @@ class Item(object):
         """Returns the tags as a list for this item.
         """
         
-        return self.__parseTags()
+        if not self.tagFileExists:
+            return None
+
+        return list(self.__parseTags())
 
     @property
     def values(self):
@@ -193,10 +207,12 @@ class ItemAccess(object):
     """This is the access point to the Items.
     """
     
-    def __init__(self, system, dataDirectory, tagFileName):
+    def __init__(self, system, dataDirectory, tagFileName, freebaseQueryParser, freebaseAdapter):
         self.system = system
         self.dataDirectory = dataDirectory
         self.tagFileName = tagFileName
+        self.freebaseQueryParser = freebaseQueryParser
+        self.freebaseAdapter = freebaseAdapter
         
         self.__items = None
         self.__tags = None
@@ -215,7 +231,7 @@ class ItemAccess(object):
                 continue
 
             try:
-                item = Item(itemName, self.system, self)
+                item = Item(itemName, self.system, self, self.freebaseQueryParser, self.freebaseAdapter)
                 
                 items[itemName] = item
                 

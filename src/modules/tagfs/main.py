@@ -45,7 +45,8 @@ from item_access import ItemAccess
 from config import parseConfig
 from log import logException
 
-import tagfs.sysIO as sysIO
+import sysIO
+import freebase_support
     
 class TagFS(fuse.Fuse):
 
@@ -96,7 +97,7 @@ class TagFS(fuse.Fuse):
         
         # try/except here?
         try:
-            return ItemAccess(sysIO.createSystem(), itemsRoot, self.config.tagFileName)
+            return ItemAccess(sysIO.createSystem(), itemsRoot, self.config.tagFileName, freebase_support.QueryParser(), freebase_support.FreebaseAdapter())
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     itemsRoot, str(e.strerror))

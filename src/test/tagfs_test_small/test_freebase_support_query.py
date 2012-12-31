@@ -16,17 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 
-import os.path
+import unittest
+import tagfs.freebase_support as freebase_support
 
-def createSystem():
-    return System(open = open, pathExists = os.path.exists)
+class WhenQueryWithOneFilerAndOneSelector(unittest.TestCase):
 
-class System(object):
-    '''Abstraction layer for system access.
+    def setUp(self):
+        super(WhenQueryWithOneFilerAndOneSelector, self).setUp()
 
-    This class can be used to mock system access in tests.
-    '''
+        self.query = freebase_support.Query({'filter': 'filterValue', 'selector': None, })
 
-    def __init__(self, open = None, pathExists = None):
-        self.open = open
-        self.pathExists = pathExists
+    def testThenSelectedKeysIsSelector(self):
+        self.assertEqual(list(self.query.selectedKeys), ['selector',])
+
+    def testThenQueryStringIs(self):
+        self.assertEqual(self.query.queryString, '{"filter":"filterValue","selector":[]}')

@@ -38,3 +38,6 @@ class SystemMock(object):
             return self.readFiles[fileName]
 
         self.test.fail('Unknown file mode %s' % mode)
+
+    def pathExists(self, path):
+        return path in self.readFiles

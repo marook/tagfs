@@ -19,7 +19,7 @@
 
 from unittest import TestCase
 
-from tagfs import item_access
+import tagfs.item_access as item_access
 
 class TagTest(TestCase):
 
