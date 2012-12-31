@@ -42,3 +42,13 @@ class ParseTagsFromFileTest(unittest.TestCase):
         self.setTagFileContent(['context: value',])
 
         self.assertParseTags([item_access.Tag('value', 'context'),])
+
+    def testIgnoreEmptyLines(self):
+        self.setTagFileContent(['',])
+
+        self.assertParseTags([])
+
+    def testIgnoreLinesWithJustSpaces(self):
+        self.setTagFileContent(['\t ',])
+
+        self.assertParseTags([])
