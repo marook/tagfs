@@ -62,9 +62,8 @@ def parseTagsFromFile(system, tagFileName):
     
     tags = set()
     
-    tagFile = system.open(tagFileName, 'r')
-    try:
-        for rawTag in tagFile.readlines():
+    with system.open(tagFileName, 'r') as tagFile:
+        for rawTag in tagFile:
             rawTag = rawTag.strip()
             
             try:
@@ -85,9 +84,6 @@ def parseTagsFromFile(system, tagFileName):
                 tags.add(tag)
             except:
                 logging.warning('Skipping tagging \'%s\' from file \'%s\' as it can\'t be parsed\n%s.' % (rawTag, tagFileName, traceback.format_exc()))
-
-    finally:
-        tagFile.close()
         
     return tags
     
