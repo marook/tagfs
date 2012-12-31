@@ -214,10 +214,6 @@ class ItemAccess(object):
         self.freebaseQueryParser = freebaseQueryParser
         self.freebaseAdapter = freebaseAdapter
         
-        self.__items = None
-        self.__tags = None
-        self.__taggedItems = None
-        self.__untaggedItems = None
         self.parseTime = 0
         
     def __parseItems(self):
