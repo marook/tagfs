@@ -44,6 +44,8 @@ from cache import cache
 from item_access import ItemAccess
 from config import parseConfig
 from log import logException
+
+import tagfs.sysIO as sysIO
     
 class TagFS(fuse.Fuse):
 
@@ -94,7 +96,7 @@ class TagFS(fuse.Fuse):
         
         # try/except here?
         try:
-            return ItemAccess(itemsRoot, self.config.tagFileName)
+            return ItemAccess(sysIO.createSystem(), itemsRoot, self.config.tagFileName)
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     itemsRoot, str(e.strerror))
