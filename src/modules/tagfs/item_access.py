@@ -22,6 +22,7 @@ import time
 import traceback
 
 from cache import cache
+import tagfs.sysIO as sysIO
 
 class Tag(object):
     
@@ -52,7 +53,7 @@ class Tag(object):
     def __repr__(self):
         return '<Tag %s: %s>' % (self.context, self.value)
 
-def parseTagsFromFile(tagFileName):
+def parseTagsFromFile(system, tagFileName):
     """Parses the tags from the specified file.
     
     @return: The parsed values are returned as a set containing Tag objects.
@@ -61,7 +62,7 @@ def parseTagsFromFile(tagFileName):
     
     tags = set()
     
-    tagFile = open(tagFileName, 'r')
+    tagFile = system.open(tagFileName, 'r')
     try:
         for rawTag in tagFile.readlines():
             rawTag = rawTag.strip()
@@ -92,8 +93,9 @@ def parseTagsFromFile(tagFileName):
     
 class Item(object):
     
-    def __init__(self, name, itemAccess):
+    def __init__(self, name, system, itemAccess):
         self.name = name
+        self.system = system
         self.itemAccess = itemAccess
         
         # TODO register at file system to receive tag file change events.
@@ -119,7 +121,7 @@ class Item(object):
         if not os.path.exists(tagFileName):
             return None
 
-        return parseTagsFromFile(tagFileName)
+        return parseTagsFromFile(self.system, tagFileName)
 
     @property
     @cache
@@ -194,7 +196,8 @@ class ItemAccess(object):
     """This is the access point to the Items.
     """
     
-    def __init__(self, dataDirectory, tagFileName):
+    def __init__(self, system, dataDirectory, tagFileName):
+        self.system = system
         self.dataDirectory = dataDirectory
         self.tagFileName = tagFileName
         
@@ -215,7 +218,7 @@ class ItemAccess(object):
                 continue
 
             try:
-                item = Item(itemName, self)
+                item = Item(itemName, self.system, self)
                 
                 items[itemName] = item
                 
