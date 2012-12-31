@@ -10,8 +10,9 @@ tagfs - tag file system
 6.1.1) tagFileName
 6.1.2) enableValueFilters
 6.1.3) enableRootItemLinks
-7) Further Reading
-8) Contact
+7) Freebase Integration
+8) Further Reading
+9) Contact
 
 
 ---------------------------------------------------------------------
@@ -147,6 +148,18 @@ Example:
 
 [global]
 enableRootItemLinks = true
+
+
+---------------------------------------------------------------------
+Freebase Integration
+
+Freebase is an open graph of people, places and things. tagfs allows you to
+extend your own taggings with data directly from the freebase graph.
+
+In order to use freebase you need to install the freebase-python bindings. They
+are available via https://code.google.com/p/freebase-python/
+
+TODO howto query freebase
 
 
 ---------------------------------------------------------------------
