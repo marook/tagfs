@@ -224,7 +224,12 @@ class EndToEndTests(Command):
 
     def run(self):
         for endToEndDirName in os.listdir(endToEndTestDir):
-            self.runTest(os.path.join(endToEndTestDir, endToEndDirName))
+            testPath = os.path.join(endToEndTestDir, endToEndDirName)
+
+            if(not os.path.isdir(testPath)):
+                continue
+
+            self.runTest(testPath)
 
 # Overrides default clean (which cleans from build runs)
 # This clean should probably be hooked into that somehow.
