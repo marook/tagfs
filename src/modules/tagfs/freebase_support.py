@@ -17,14 +17,27 @@
 # along with tagfs.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-import freebase
+import logging
 
-def createFreebaseAdapter(object):
+def createFreebaseAdapter():
+    # freebase is an optional dependency. tagfs should execute even if it's not
+    # available.
+    try:
+        import freebase
 
-    import freebase
+        logging.info('freebase support enabled')
 
-    return FreebaseAdapter()
+        return FreebaseAdapter()
+    except ImportError:
+        logging.warn('freebase support disabled')
+
+        return FreebaseAdapterStub()
     
+class FreebaseAdapterStub(object):
+
+    def execute(self, *args, **kwargs):
+        return {}
+
 class FreebaseAdapter(object):
 
     def execute(self, query):

@@ -97,7 +97,7 @@ class TagFS(fuse.Fuse):
         
         # try/except here?
         try:
-            return ItemAccess(sysIO.createSystem(), itemsRoot, self.config.tagFileName, freebase_support.QueryParser(), freebase_support.FreebaseAdapter())
+            return ItemAccess(sysIO.createSystem(), itemsRoot, self.config.tagFileName, freebase_support.QueryParser(), freebase_support.createFreebaseAdapter())
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     itemsRoot, str(e.strerror))
