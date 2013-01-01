@@ -239,11 +239,7 @@ class ItemAccess(object):
     @property
     @cache
     def items(self):
-        items = self.__parseItems() 
-
-        logging.info('items: %s', items) # TODO remove me
-
-        return items
+        return self.__parseItems() 
 
     @property
     @cache
