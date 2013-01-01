@@ -9,21 +9,34 @@ fail() {
     exit 1
 }
 
-assertLink(){
-    PATH=$1
+assertExists(){
+    P=$1
 
-    if [ ! -L "$PATH" ]
+    if [ ! -e "$P" ]
     then
-	fail "Expected path to be link: $PATH"
+        fail "Expected path to exist: $P"
+    fi
+}
+
+assertLink(){
+    P=$1
+
+    assertExists "$P"
+
+    if [ ! -L "$P" ]
+    then
+	fail "Expected path to be link: $P"
     fi
 }
 
 assertDir(){
-    PATH=$1
+    P=$1
 
-    if [ ! -d "$PATH" ]
+    assertExists "$P"
+
+    if [ ! -d "$P" ]
     then
-        fail "Expected path to be a directory: $PATH"
+        fail "Expected path to be a directory: $P"
     fi
 }
 
