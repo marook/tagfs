@@ -153,8 +153,9 @@ enableRootItemLinks = true
 ---------------------------------------------------------------------
 Freebase Integration
 
-Freebase is an open graph of people, places and things. tagfs allows you to
-extend your own taggings with data directly from the freebase graph.
+Freebase is an open graph of people, places and things. See
+http://www.freebase.com/ for details. tagfs allows you to extend your own
+taggings with data directly from the freebase graph.
 
 WARNING! Freebase support is currently experimental. It is very likely that the
 freebase syntax within the .tag files will change in future releases of tagfs.
@@ -165,7 +166,13 @@ are available via https://code.google.com/p/freebase-python/
 To extend an item's taggings with freebase data you have to add a freebase query
 to the item's .tag file. Here's an example:
 
-_freebase: {'id': '/m/0clpml', 'type': '/fictional_universe/fictional_character', 'name': null, 'occupation': null}
+_freebase: {"id": "/m/0clpml", "type": "/fictional_universe/fictional_character", "name": null, "occupation": null}
+
+tagfs uses the freebase MQL query format which is described below the following
+link http://wiki.freebase.com/wiki/MQL
+
+The query properties with null values are added as context/tag pairs to the
+.tag file's item.
 
 
 ---------------------------------------------------------------------
