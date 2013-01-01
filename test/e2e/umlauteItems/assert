@@ -1,0 +1,4 @@
+#!/bin/bash
+
+assertDir "$TEST_MOUNT_DIR/.any_context/umlaut"
+assertDir "$TEST_MOUNT_DIR/.any_context/umlaut/äöü"
