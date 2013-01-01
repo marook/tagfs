@@ -284,11 +284,11 @@ class ItemAccess(object):
     @cache
     def contexts(self):
         contexts = set()
-        
+
         for tag in self.tags:
             if tag.context == None:
                 continue
-            
+
             contexts.add(tag.context)
         
         return contexts

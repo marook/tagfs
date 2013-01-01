@@ -52,7 +52,7 @@ class FilterDirectoryNode(DirectoryNode):
                 if context is None:
                     continue
 
-                c.add(t.context)
+                c.add(context)
 
         return c
 
