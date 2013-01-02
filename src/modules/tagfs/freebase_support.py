@@ -41,6 +41,8 @@ class FreebaseAdapterStub(object):
 class FreebaseAdapter(object):
 
     def execute(self, query):
+        import freebase
+
         fbResult = freebase.mqlread(query.freebaseQuery)
 
         result = {}
