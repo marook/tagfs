@@ -84,3 +84,45 @@ class QueryParser(object):
 
     def parse(self, queryString):
         return Query(json.loads(queryString))
+
+class QueryFileParser(object):
+
+    def __init__(self, system, queryParser):
+        self.system = system
+        self.queryParser = queryParser
+
+    def parseFile(self, path):
+        with self.system.open(path, 'r') as f:
+            for line in f:
+                yield self.queryParser.parse(line)
+
+class GenericQueryFactory(object):
+
+    def __init__(self, resolveVar):
+        self.resolveVar = resolveVar
+
+    def evaluate(self, value):
+        if(value is None):
+            return None
+
+        valueLen = len(value)
+
+        if(valueLen < 2):
+            return value
+
+        if(value[0] != '$'):
+            return value
+
+        key = value[1:]
+
+        return self.resolveVar(key)
+
+    def createQuery(self, genericQuery):
+        q = {}
+
+        for key, genericValue in genericQuery.iteritems():
+            value = self.evaluate(genericValue)
+
+            q[key] = value
+
+        return q

@@ -23,6 +23,7 @@ import traceback
 
 from cache import cache
 import sysIO
+import freebase_support
 
 class Tag(object):
     
@@ -87,15 +88,20 @@ def parseTagsFromFile(system, tagFileName):
         
     return tags
     
+class NoSuchTagValue(Exception):
+
+    pass
+
 class Item(object):
     
-    def __init__(self, name, system, itemAccess, freebaseQueryParser, freebaseAdapter, parseTagsFromFile = parseTagsFromFile):
+    def __init__(self, name, system, itemAccess, freebaseQueryParser, freebaseAdapter, genericFreebaseQueries = [], parseTagsFromFile = parseTagsFromFile):
         self.name = name
         self.system = system
         self.itemAccess = itemAccess
         self.freebaseQueryParser = freebaseQueryParser
         self.freebaseAdapter = freebaseAdapter
         self.parseTagsFromFile = parseTagsFromFile
+        self.genericFreebaseQueries = genericFreebaseQueries
         
         # TODO register at file system to receive tag file change events.
         
@@ -116,6 +122,14 @@ class Item(object):
     @cache
     def tagFileExists(self):
         return self.system.pathExists(self._tagFileName)
+
+    def __getFreebaseTags(self, query):
+        try:
+            for context, values in self.freebaseAdapter.execute(query).iteritems():
+                for value in values:
+                    yield Tag(value, context)
+        except Exception as e:
+            logging.error('Failed to execute freebase query %s: %s', query, e)
     
     def __parseTags(self):
         tagFileName = self._tagFileName
@@ -124,9 +138,8 @@ class Item(object):
             if(rawTag.context == '_freebase'):
                 query = self.freebaseQueryParser.parse(rawTag.value)
                 
-                for context, values in self.freebaseAdapter.execute(query).iteritems():
-                    for value in values:
-                        yield Tag(value, context)
+                for tag in self.__getFreebaseTags(query):
+                    yield tag
             else:
                 yield rawTag
 
@@ -158,7 +171,26 @@ class Item(object):
         if not self.tagFileExists:
             return None
 
-        return list(self.__parseTags())
+        tags = list(self.__parseTags())
+
+        def getValue(context):
+            for tag in tags:
+                if(tag.context == context):
+                    return tag.value
+
+            raise NoSuchTagValue()
+
+        queryFactory = freebase_support.GenericQueryFactory(getValue)
+        for genericQuery in self.genericFreebaseQueries:
+            try:
+                query = queryFactory.createQuery(genericQuery.queryObject)
+
+                for tag in self.__getFreebaseTags(freebase_support.Query(query)):
+                    tags.append(tag)
+            except NoSuchTagValue:
+                pass
+
+        return tags
 
     @property
     def values(self):
@@ -171,6 +203,21 @@ class Item(object):
                 continue
 
             yield t
+
+    def getValuesByContext(self, context):
+        return [t.value for t in self.getTagsByContext(context)]
+
+    def getValueByContext(self, context):
+        values = self.getValuesByContext(context)
+        valuesLen = len(values)
+        
+        if(valuesLen == 0):
+            return None
+
+        if(valuesLen == 1):
+            return values[0]
+
+        raise Exception('Too many values found for context %s' % (context,))
 
     def isTaggedWithContextValue(self, context, value):
         for t in self.getTagsByContext(context):
@@ -201,12 +248,13 @@ class ItemAccess(object):
     """This is the access point to the Items.
     """
     
-    def __init__(self, system, dataDirectory, tagFileName, freebaseQueryParser, freebaseAdapter):
+    def __init__(self, system, dataDirectory, tagFileName, freebaseQueryParser, freebaseAdapter, genericFreebaseQueries):
         self.system = system
         self.dataDirectory = dataDirectory
         self.tagFileName = tagFileName
         self.freebaseQueryParser = freebaseQueryParser
         self.freebaseAdapter = freebaseAdapter
+        self.genericFreebaseQueries = genericFreebaseQueries
         
         self.parseTime = 0
         
@@ -221,7 +269,7 @@ class ItemAccess(object):
                 continue
 
             try:
-                item = Item(itemName, self.system, self, self.freebaseQueryParser, self.freebaseAdapter)
+                item = Item(itemName, self.system, self, self.freebaseQueryParser, self.freebaseAdapter, self.genericFreebaseQueries)
                 
                 items[itemName] = item
                 

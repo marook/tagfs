@@ -175,6 +175,9 @@ link http://wiki.freebase.com/wiki/MQL
 The query properties with null values are added as context/tag pairs to the
 .tag file's item.
 
+Generic freebase mappings for all items can be specified in the file
+'<items directory>/.tagfs/freebase'. Every line is one freebase query.
+
 
 ---------------------------------------------------------------------
 Bugs

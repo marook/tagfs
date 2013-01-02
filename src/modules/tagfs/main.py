@@ -56,6 +56,8 @@ class TagFS(fuse.Fuse):
         self._initwd = initwd
         self._itemsRoot = None
 
+        self.system = sysIO.createSystem()
+
         # TODO change command line arguments structure
         # goal: tagfs <items dir> <mount dir>
         self.parser.add_option('-i',
@@ -80,6 +82,18 @@ class TagFS(fuse.Fuse):
                                help = 'Display item links in tagfs root directory.',
                                default = None)
 
+    def parseGenericFreebaseQueries(self, itemsRoot):
+        freebaseQueriesFilePath = os.path.join(itemsRoot, '.tagfs', 'freebase')
+
+        if(not os.path.exists(freebaseQueriesFilePath)):
+            return []
+
+        queries = list(freebase_support.QueryFileParser(self.system, freebase_support.QueryParser()).parseFile(freebaseQueriesFilePath))
+
+        logging.info('Parsed %s generic freebase queries', len(queries))
+
+        return queries
+
     def getItemAccess(self):
         # Maybe we should move the parser run from main here.
         # Or we should at least check if it was run once...
@@ -94,10 +108,10 @@ class TagFS(fuse.Fuse):
         # Ensure that mount-point and items dir are disjoined.
         # Something along
         # assert not os.path.normpath(itemsDir).startswith(itemsRoot)
-        
+
         # try/except here?
         try:
-            return ItemAccess(sysIO.createSystem(), itemsRoot, self.config.tagFileName, freebase_support.QueryParser(), freebase_support.createFreebaseAdapter())
+            return ItemAccess(self.system, itemsRoot, self.config.tagFileName, freebase_support.QueryParser(), freebase_support.createFreebaseAdapter(), self.parseGenericFreebaseQueries(itemsRoot))
         except OSError, e:
             logging.error("Can't create item access from items directory %s. Reason: %s",
                     itemsRoot, str(e.strerror))
