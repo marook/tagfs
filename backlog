@@ -1,1 +1,10 @@
-* add 'howto tag files' to documentation
+* umlaute in taggings are not handled correctly :bug:
+currently tagfs kicks umlaute from tag directory names. but removing umlaute
+is only done when listing directories.
+
+this also applies for anything which is not ascii.
+* modifications in .tag files should be applied live                :feature:
+currently you have to remount tagfs in order to apply modifications in .tag
+files. tagfs should watch the .tag files for modifications and apply the
+changes immediately.
+
