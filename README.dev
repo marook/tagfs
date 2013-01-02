@@ -1,14 +1,22 @@
 tagfs - tag file system
 developer readme
 
-1) Logging
-2) Profiling
-3) Tracing
-4) Distribution
-4.1) tar Distribution
-5) Tests
-6) Code Coverage
-7) End-To-End Tests
+1) Roadmap
+2) Logging
+3) Profiling
+4) Tracing
+5) Distribution
+5.1) tar Distribution
+6) Tests
+7) Code Coverage
+8) End-To-End Tests
+
+
+---------------------------------------------------------------------
+Roadmap
+
+The upcomming tagfs features are listed in the 'backlog' file. The file is
+best viewed using emacs org-mode.
 
 
 ---------------------------------------------------------------------
