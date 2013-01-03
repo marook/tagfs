@@ -176,7 +176,21 @@ The query properties with null values are added as context/tag pairs to the
 .tag file's item.
 
 Generic freebase mappings for all items can be specified in the file
-'<items directory>/.tagfs/freebase'. Every line is one freebase query.
+'<items directory>/.tagfs/freebase'. Every line is one freebase query. You can
+reference tagged values via the '$' operator. Here's an example MQL query with
+some demo .tag files:
+
+<items directory>/.tagfs/freebase:
+{"type": "/film/film", "name": "$name", "genre": null, "directed_by": null}
+
+<items directory>/Ted/.tag:
+name: Ted
+
+<items directory>/Family Guy/.tag:
+name: Family Guy
+
+When mounting this example the genre and director will be fetched from freebase
+and made available as filtering directories.
 
 
 ---------------------------------------------------------------------
