@@ -127,7 +127,9 @@ class Item(object):
         try:
             for context, values in self.freebaseAdapter.execute(query).iteritems():
                 for value in values:
-                    yield Tag(value, context)
+                    # without the decode/encode operations fuse refuses to show
+                    # directory entries which are based on freebase data
+                    yield Tag(value.decode('ascii', 'ignore').encode('ascii'), context)
         except Exception as e:
             logging.error('Failed to execute freebase query %s: %s', query, e)
     

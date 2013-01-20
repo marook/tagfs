@@ -115,9 +115,7 @@ class View(object):
 
         # TODO care about offset parameter
 
-        # without the decode/encode operations fuse refuses to show directory
-        # entries which are based on freebase data
-        return [Direntry(name.decode('ascii', 'ignore').encode('ascii')) for name in e.entries.iterkeys()]
+        return [Direntry(name) for name in e.entries.iterkeys()]
 
     @logCall
     def readlink(self, path):
