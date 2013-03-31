@@ -47,7 +47,7 @@ class ChartImageNode(FileNode):
         xValues = []
         yValues = []
 
-        for x, item in enumerate(self.items):
+        for x, item in enumerate(sorted(self.items, key = lambda item: item.name)):
             for tag in item.tags:
                 c = tag.context
 
@@ -70,6 +70,8 @@ class ChartImageNode(FileNode):
                 yValues.append(self.transform(y))
 
         pylab.plot(xValues, yValues, label = self.context)
+
+        pylab.grid(True)
 
         out = cStringIO.StringIO()
 
