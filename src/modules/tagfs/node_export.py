@@ -21,6 +21,7 @@ from cache import cache
 from node import Stat, ItemLinkNode, DirectoryNode
 from node_untagged_items import UntaggedItemsDirectoryNode
 from node_export_csv import ExportCsvFileNode
+from node_export_chart import ChartImageNode
 
 class ExportDirectoryNode(DirectoryNode):
 
@@ -53,3 +54,4 @@ class ExportDirectoryNode(DirectoryNode):
     @property
     def _entries(self):
         yield ExportCsvFileNode(self.itemAccess, self.parentNode)
+        yield ChartImageNode(self.itemAccess, self.parentNode)
