@@ -23,6 +23,16 @@ from node_untagged_items import UntaggedItemsDirectoryNode
 from node_export_csv import ExportCsvFileNode
 from node_export_chart import ChartImageNode
 
+class SumTransformation(object):
+
+    def __init__(self):
+        self.sum = 0.0
+
+    def transform(self, y):
+        self.sum += y
+
+        return self.sum
+
 class ExportDirectoryNode(DirectoryNode):
 
     def __init__(self, itemAccess, parentNode):
@@ -56,4 +66,5 @@ class ExportDirectoryNode(DirectoryNode):
         yield ExportCsvFileNode(self.itemAccess, self.parentNode)
 
         for context in self.parentNode.contexts:
-            yield ChartImageNode(self.itemAccess, self.parentNode, context)
+            yield ChartImageNode(self.itemAccess, self.parentNode, context, 'value', lambda y: y)
+            yield ChartImageNode(self.itemAccess, self.parentNode, context, 'sum', SumTransformation().transform)

@@ -24,14 +24,16 @@ import cStringIO
 
 class ChartImageNode(FileNode):
 
-    def __init__(self, itemAccess, parentNode, context):
+    def __init__(self, itemAccess, parentNode, context, title, transform):
         self.itemAccess = itemAccess
         self.parentNode = parentNode
         self.context = context
+        self.title = title
+        self.transform = transform
 
     @property
     def name(self):
-        return 'chart-%s.png' % (self.context,)
+        return '%s-%s.png' % (self.title, self.context,)
 
     @property
     def items(self):
@@ -60,12 +62,12 @@ class ChartImageNode(FileNode):
                 if(y is None):
                     try:
                         # some love for our german people
-                        y = float(tag.value.replace(',', '.'))
+                        y = float(tag.value.replace('.', '').replace(',', '.'))
                     except:
                         continue
 
                 xValues.append(x)
-                yValues.append(y)
+                yValues.append(self.transform(y))
 
         pylab.plot(xValues, yValues, label = self.context)
 
