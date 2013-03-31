@@ -54,4 +54,6 @@ class ExportDirectoryNode(DirectoryNode):
     @property
     def _entries(self):
         yield ExportCsvFileNode(self.itemAccess, self.parentNode)
-        yield ChartImageNode(self.itemAccess, self.parentNode)
+
+        for context in self.parentNode.contexts:
+            yield ChartImageNode(self.itemAccess, self.parentNode, context)
