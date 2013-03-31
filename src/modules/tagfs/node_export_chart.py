@@ -18,16 +18,34 @@
 #
 
 from node_file import FileNode
+import pylab
+import cStringIO
 
 class ChartImageNode(FileNode):
 
     def __init__(self, itemAccess, parentNode):
-        pass
+        self.itemAccess = itemAccess
+        self.parentNode = parentNode
 
     @property
     def name(self):
         return 'chart.png'
 
     @property
+    def items(self):
+        return self.parentNode.items
+
+    @property
     def content(self):
-        return ''
+        pylab.clf()
+
+        x = [0.0, 1.0, 2.0]
+        y = [1.0, 2.0, 1.0]
+
+        pylab.plot(x, y)
+
+        out = cStringIO.StringIO()
+
+        pylab.savefig(out, format = 'png')
+
+        return out.getvalue()
