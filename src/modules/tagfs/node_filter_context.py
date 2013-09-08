@@ -113,9 +113,6 @@ class ContextValueListDirectoryNode(DirectoryNode):
             yield ContextValueFilterDirectoryNode(self.itemAccess, self.config, self, self.context, value)
 
     def addsValue(self, parentItems):
-        if(super(ContextValueListDirectoryNode, self).addsValue(parentItems)):
-            return True
-
         for e in self._entries:
             if(e.addsValue(parentItems)):
                 return True

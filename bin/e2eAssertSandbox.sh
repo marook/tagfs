@@ -18,6 +18,15 @@ assertExists(){
     fi
 }
 
+assertNotExists(){
+    local path="$1"
+
+    if [ -e "${path}" ]
+    then
+        fail "Expected path to not exist: ${path}"
+    fi
+}
+
 assertLink(){
     local path="$1"
 

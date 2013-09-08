@@ -39,8 +39,17 @@ class TaggedItemMock(ItemMock):
         self._context = context
         self._value = value
 
+    def isTaggedWithContext(self, context):
+        return self._context == context
+
     def isTaggedWithContextValue(self, context, value):
         return self._context == context and self._value == value
+
+    def getTagsByContext(self, context):
+        if(context == self._context):
+            return self.tags
+        else:
+            return []
 
 class ParentNodeMock(object):
 

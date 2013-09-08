@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# This test makes sure that recursions without extra information are not
+# visible. See issue https://github.com/marook/tagfs/issues/7
+assertNotExists "$TEST_MOUNT_DIR/genre/comedy/genre"
