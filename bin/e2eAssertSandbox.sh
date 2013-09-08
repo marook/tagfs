@@ -10,33 +10,33 @@ fail() {
 }
 
 assertExists(){
-    P=$1
+    local path="$1"
 
-    if [ ! -e "$P" ]
+    if [ ! -e "${path}" ]
     then
-        fail "Expected path to exist: $P"
+        fail "Expected path to exist: ${path}"
     fi
 }
 
 assertLink(){
-    P=$1
+    local path="$1"
 
-    assertExists "$P"
+    assertExists "${path}"
 
-    if [ ! -L "$P" ]
+    if [ ! -L "${path}" ]
     then
-	fail "Expected path to be link: $P"
+	fail "Expected path to be link: ${path}"
     fi
 }
 
 assertDir(){
-    P=$1
+    local path="$1"
 
-    assertExists "$P"
+    assertExists "${path}"
 
-    if [ ! -d "$P" ]
+    if [ ! -d "${path}" ]
     then
-        fail "Expected path to be a directory: $P"
+        fail "Expected path to be a directory: ${path}"
     fi
 }
 
