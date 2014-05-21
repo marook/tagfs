@@ -30,9 +30,10 @@ def parseConfig(itemsDir):
             })
     config.add_section(Config.GLOBAL_SECTION)
 
-    parsedFiles = config.read([os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
+    parsedFiles = config.read([os.path.join('/', 'etc', 'tagfs', 'tagfs.conf'), 
                                os.path.expanduser(os.path.join('~', '.tagfs', 'tagfs.conf')),
-                               os.path.join('/', 'etc', 'tagfs', 'tagfs.conf')])
+                               os.path.join(itemsDir, '.tagfs', 'tagfs.conf'),
+    ])
 
     logging.debug('Parsed the following config files: %s' % ', '.join(parsedFiles))
 

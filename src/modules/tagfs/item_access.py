@@ -299,8 +299,8 @@ class ItemAccess(object):
         for item in self.items.itervalues():
             if not item.tagged:
                 continue
-            
-            tags = tags | item.tags
+          
+            tags = tags | set(item.tags)
             
         return tags
 
